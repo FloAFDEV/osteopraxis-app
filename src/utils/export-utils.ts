@@ -189,7 +189,7 @@ export async function addWatermarkExcel(
       '2. Saisissez vos veritables donnees patients',
       '3. Generez les exports depuis votre compte authentifie',
     '',
-    'PatientHub - Logiciel de gestion pour osteopathes'
+    'OstéoPraxis - Logiciel de gestion pour osteopathes'
   ];
   
   warnings.forEach((text, index) => {

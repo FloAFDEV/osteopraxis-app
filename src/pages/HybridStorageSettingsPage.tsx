@@ -69,8 +69,8 @@ const HybridStorageSettingsPage: React.FC = () => {
         const data = JSON.parse(text);
         
         // Vérifier le format du fichier
-        if (!data.format || !data.format.includes('PatientHub')) {
-          toast.error('Format de fichier invalide - doit être une sauvegarde PatientHub');
+        if (!data.format || !data.format.includes('OstéoPraxis')) {
+          toast.error('Format de fichier invalide - doit être une sauvegarde OstéoPraxis');
           return;
         }
         

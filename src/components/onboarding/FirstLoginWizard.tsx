@@ -45,7 +45,7 @@ export const FirstLoginWizard: React.FC<FirstLoginWizardProps> = ({
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
             <Stethoscope className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Bienvenue dans PatientHub !</CardTitle>
+          <CardTitle className="text-2xl">Bienvenue dans OstéoPraxis !</CardTitle>
           <CardDescription className="text-base">
             Votre cabinet numérique sécurisé et conforme HDS
           </CardDescription>
@@ -160,7 +160,7 @@ export const FirstLoginWizard: React.FC<FirstLoginWizardProps> = ({
                 </div>
                 <h3 className="text-xl font-semibold">Profil professionnel</h3>
                 <p className="text-muted-foreground">
-                  Complétez votre profil pour commencer à utiliser PatientHub
+                  Complétez votre profil pour commencer à utiliser OstéoPraxis
                 </p>
               </div>
 

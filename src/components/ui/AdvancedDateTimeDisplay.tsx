@@ -84,7 +84,7 @@ const useGeolocation = () => {
 	// Gérer l'état de la géolocalisation depuis localStorage
 	const [geolocationEnabled, setGeolocationEnabled] = useState<boolean>(() => {
 		try {
-			const saved = localStorage.getItem('patienthub-geolocation-enabled');
+			const saved = localStorage.getItem('osteopraxis-geolocation-enabled');
 			return saved === 'true';
 		} catch {
 			return false; // Désactivé par défaut
@@ -153,7 +153,7 @@ const useGeolocation = () => {
 		setGeolocationEnabled(newState);
 		
 		try {
-			localStorage.setItem('patienthub-geolocation-enabled', String(newState));
+			localStorage.setItem('osteopraxis-geolocation-enabled', String(newState));
 			console.log('💾 État sauvegardé dans localStorage:', newState);
 		} catch (error) {
 			console.warn('❌ Erreur lors de la sauvegarde de la préférence:', error);
@@ -241,7 +241,7 @@ const useGeolocation = () => {
 				// Désactiver automatiquement en cas d'erreur persistante
 				setGeolocationEnabled(false);
 				try {
-					localStorage.setItem('patienthub-geolocation-enabled', 'false');
+					localStorage.setItem('osteopraxis-geolocation-enabled', 'false');
 				} catch (e) {
 					console.warn('Erreur sauvegarde après échec:', e);
 				}

@@ -21,7 +21,7 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   const [isLoading, setIsLoading] = useState(true);
   
   // Vérifier si c'est un utilisateur démo (même logique que AuthContext)
-  const isDemoUser = user?.email === 'demo@patienthub.com' || 
+  const isDemoUser = user?.email === 'demo@osteopraxis.com' || 
                      user?.email?.startsWith('demo-') ||
                      (user as any)?.is_demo === true ||
                      (user as any)?.is_demo_user === true;

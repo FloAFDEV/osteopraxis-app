@@ -10,7 +10,7 @@ interface PersistedDirectoryInfo {
   name: string;
 }
 
-const DB_NAME = 'PatientHub_DirectoryHandles';
+const DB_NAME = 'OstéoPraxis_DirectoryHandles';
 const DB_VERSION = 1;
 const STORE_NAME = 'directories';
 

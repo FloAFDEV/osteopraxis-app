@@ -265,7 +265,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 					setIsAuthenticated(true);
 				} else {
 					// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
-					const isDemoUser = session.user.email === 'demo@patienthub.com' || 
+					const isDemoUser = session.user.email === 'demo@osteopraxis.com' || 
 									  session.user.email?.startsWith('demo-') ||
 									  session.user.user_metadata?.is_demo === true ||
 									  session.user.user_metadata?.is_demo_user === true;
@@ -473,7 +473,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
 									}
 								} else {
 									// Vérifier si c'est un utilisateur démo (incluant les comptes temporaires)
-									const isDemoUser = session.user.email === 'demo@patienthub.com' || 
+									const isDemoUser = session.user.email === 'demo@osteopraxis.com' || 
 													  session.user.email?.startsWith('demo-') ||
 													  session.user.user_metadata?.is_demo === true ||
 													  session.user.user_metadata?.is_demo_user === true;

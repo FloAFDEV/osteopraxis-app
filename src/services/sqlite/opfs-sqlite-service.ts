@@ -354,7 +354,7 @@ let initPromise: Promise<void> | null = null;
 export async function getOPFSSQLiteService(): Promise<OPFSSQLiteService> {
   if (!opfsSQLiteService) {
     opfsSQLiteService = new OPFSSQLiteService({
-      dbName: 'patienthub',
+      dbName: 'osteopraxis',
       version: 1,
       enableEncryption: false // TODO: Implémenter le chiffrement
     });

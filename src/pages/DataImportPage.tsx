@@ -130,7 +130,7 @@ const DataImportPage = () => {
 									Import de données
 								</h1>
 								<HelpButton 
-									content="Importez vos patients depuis des fichiers Excel ou CSV. Le système détecte automatiquement les colonnes et vous permet de faire correspondre les champs avec votre base de données PatientHub. Compatible avec la plupart des logiciels médicaux."
+									content="Importez vos patients depuis des fichiers Excel ou CSV. Le système détecte automatiquement les colonnes et vous permet de faire correspondre les champs avec votre base de données OstéoPraxis. Compatible avec la plupart des logiciels médicaux."
 								/>
 							</div>
 							<p className="text-muted-foreground mt-1">
@@ -186,7 +186,7 @@ const DataImportPage = () => {
 								<div className="flex items-center gap-3">
 									<Badge variant="secondary">Excel .xlsx</Badge>
 									<span className="text-sm text-muted-foreground">
-										Colonnes pré-configurées pour PatientHub
+										Colonnes pré-configurées pour OstéoPraxis
 									</span>
 								</div>
 								<Button onClick={downloadTemplate} variant="outline" size="sm">

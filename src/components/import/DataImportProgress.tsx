@@ -94,7 +94,7 @@ export const DataImportProgress = ({ data, mapping, onCompleted }: DataImportPro
 						Import en cours
 					</CardTitle>
 					<CardDescription>
-						Importation de vos patients dans PatientHub
+						Importation de vos patients dans OstéoPraxis
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-6">

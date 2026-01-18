@@ -9,7 +9,7 @@ interface StorageRecord {
 }
 
 class PersistentLocalStorage {
-  private dbName = 'PatientHubDemo';
+  private dbName = 'OstéoPraxis_Demo';
   private version = 1;
   private db: IDBDatabase | null = null;
 

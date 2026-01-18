@@ -53,7 +53,7 @@ const ConfigurationPage = () => {
 
   const handleFirstBackupComplete = () => {
     setShowFirstBackup(false);
-    toast.success('Configuration terminée ! Bienvenue sur PatientHub.');
+    toast.success('Configuration terminée ! Bienvenue sur OstéoPraxis.');
     navigate('/dashboard', { replace: true });
   };
 

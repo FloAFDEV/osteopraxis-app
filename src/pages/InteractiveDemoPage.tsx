@@ -19,7 +19,7 @@ export default function InteractiveDemoPage() {
     setIsLoading(true);
     try {
       // Directement se connecter avec les identifiants démo (pas besoin de créer)
-      await login("demo@patienthub.com", "demo123456");
+      await login("demo@osteopraxis.com", "demo123456");
       
       toast.success("Connexion en mode démo réussie !");
     } catch (error) {
@@ -43,10 +43,10 @@ export default function InteractiveDemoPage() {
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold">
-              Démo Interactive PatientHub
+              Démo Interactive OstéoPraxis
             </CardTitle>
             <p className="text-muted-foreground mt-4">
-              Découvrez toutes les fonctionnalités de PatientHub avec des données de démonstration.
+              Découvrez toutes les fonctionnalités de OstéoPraxis avec des données de démonstration.
               L'application sera identique à la version réelle, mais avec des données fictives.
             </p>
           </CardHeader>

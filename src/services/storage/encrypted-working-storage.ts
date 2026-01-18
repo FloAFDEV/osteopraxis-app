@@ -188,7 +188,7 @@ export class EncryptedWorkingStorage extends IndexedDBSecureStorage {
         const backup = await this.exportBackup();
         
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `patienthub-backup-${timestamp}.hdsbackup`;
+        const filename = `osteopraxis-backup-${timestamp}.hdsbackup`;
         
         // Télécharger automatiquement
         const url = URL.createObjectURL(backup);

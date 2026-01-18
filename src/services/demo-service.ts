@@ -15,7 +15,7 @@ export class DemoService {
   // Générer un email démo unique pour la session
   private static generateDemoEmail(): string {
     const sessionId = crypto.randomUUID().substring(0, 8);
-    return `demo-${sessionId}@patienthub.com`;
+    return `demo-${sessionId}@osteopraxis.com`;
   }
 
   // Créer une session démo locale éphémère
@@ -33,7 +33,7 @@ export class DemoService {
       demoLocalStorage.seedDemoData();
       
       // Générer des identifiants factices (pour compatibilité avec l'interface)
-      const demoEmail = `demo-${session.sessionId}@patienthub.com`;
+      const demoEmail = `demo-${session.sessionId}@osteopraxis.com`;
       const demoPassword = `demo${session.sessionId}`;
       
       console.log(`✅ Session démo éphémère prête: ${session.sessionId}`);
@@ -99,7 +99,7 @@ export class DemoService {
       }
       
       return {
-        email: `demo-${session.sessionId}@patienthub.com`,
+        email: `demo-${session.sessionId}@osteopraxis.com`,
         sessionId: session.sessionId,
         expiresAt: session.expiresAt.toISOString(),
         remainingTime
@@ -147,7 +147,7 @@ export class DemoService {
           auth_id: userId,
           first_name: 'Dr. Demo',
           last_name: `Session-${sessionId}`,
-          email: `demo-${sessionId}@patienthub.com`,
+          email: `demo-${sessionId}@osteopraxis.com`,
           role: 'OSTEOPATH',
           osteopathId: osteopath.id,
           is_active: true,
@@ -328,7 +328,7 @@ export class DemoService {
             auth_id: userId,
             first_name: 'Dr. Marie',
             last_name: 'Dubois',
-            email: `demo-old@patienthub.com`, // Old demo email for compatibility
+            email: `demo-old@osteopraxis.com`, // Old demo email for compatibility
             role: 'OSTEOPATH',
             osteopathId: osteopath.id,
             is_active: true,
@@ -416,7 +416,7 @@ export class DemoService {
   // Vérifier si l'utilisateur actuel est en mode démo
   static isDemoUser(userEmail?: string): boolean {
     if (!userEmail) return false;
-    return userEmail.startsWith('demo-') && userEmail.includes('@patienthub.com');
+    return userEmail.startsWith('demo-') && userEmail.includes('@osteopraxis.com');
   }
 
   // Obtenir les informations de connexion démo de la session actuelle

@@ -243,7 +243,7 @@ const LoginPage = () => {
             <br />
             Gérez vos rendez-vous et suivez efficacement vos patients
           </p>
-          <p className="mt-4">© 2024 PatientHub. Tous droits réservés.</p>
+          <p className="mt-4">© 2024 OstéoPraxis. Tous droits réservés.</p>
         </div>
       </div>
 

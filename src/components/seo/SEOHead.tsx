@@ -16,7 +16,7 @@ interface SEOHeadProps {
 }
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
-  title = "PatientHub - Logiciel de gestion pour ostéopathes",
+  title = "OstéoPraxis - Logiciel de gestion pour ostéopathes",
   description = "Solution complète pour ostéopathes avec gestion des patients, rendez-vous, facturation et optimisation automatique. Essai gratuit 14 jours.",
   keywords = "logiciel ostéopathe, gestion cabinet ostéopathie, patients, rendez-vous, facturation, RGPD",
   canonicalUrl,
@@ -28,7 +28,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   noFollow = false,
   structuredData
 }) => {
-  const fullTitle = title.includes("PatientHub") ? title : `${title} | PatientHub`;
+  const fullTitle = title.includes("OstéoPraxis") ? title : `${title} | OstéoPraxis`;
   const robots = `${noIndex ? 'noindex' : 'index'},${noFollow ? 'nofollow' : 'follow'}`;
 
   return (
@@ -48,7 +48,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <meta property="og:type" content={ogType} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:locale" content="fr_FR" />
-      <meta property="og:site_name" content="PatientHub" />
+      <meta property="og:site_name" content="OstéoPraxis" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       
       {/* Twitter Card */}

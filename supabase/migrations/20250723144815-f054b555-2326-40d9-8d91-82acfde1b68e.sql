@@ -16,7 +16,7 @@ INSERT INTO public."User" (
     '45507f32-8613-4a0a-abd6-600b73e0369d',
     'Dr. Marie',
     'Dubois',
-    'demo@patienthub.com',
+    'demo@osteopraxis.com',
     'OSTEOPATH',
     534,
     true,

@@ -350,7 +350,7 @@ export class HDSSecureManager {
       
       // Créer le fichier consolidé
       const consolidatedExport = {
-        format: 'PatientHub_Full_Backup_v2',
+        format: 'OstéoPraxis_Full_Backup_v2',
         exportedAt: new Date().toISOString(),
         totalRecords,
         entities: Object.keys(allData),
@@ -362,7 +362,7 @@ export class HDSSecureManager {
             return acc;
           }, {} as Record<string, number>)
         },
-        instructions: 'Sauvegarde complète PatientHub chiffrée. Import possible uniquement avec le mot de passe correct.'
+        instructions: 'Sauvegarde complète OstéoPraxis chiffrée. Import possible uniquement avec le mot de passe correct.'
       };
 
       const jsonString = JSON.stringify(consolidatedExport, null, 2);
@@ -374,9 +374,9 @@ export class HDSSecureManager {
       // Export avec File System Access API si disponible
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `patienthub_backup_${new Date().toISOString().split('T')[0]}.phds`,
+          suggestedName: `osteopraxis_backup_${new Date().toISOString().split('T')[0]}.phds`,
           types: [{
-            description: 'Sauvegarde PatientHub HDS Complète',
+            description: 'Sauvegarde OstéoPraxis HDS Complète',
             accept: { 'application/json': ['.phds'] }
           }]
         });
@@ -391,7 +391,7 @@ export class HDSSecureManager {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `patienthub_backup_${new Date().toISOString().split('T')[0]}.phds`;
+        a.download = `osteopraxis_backup_${new Date().toISOString().split('T')[0]}.phds`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -430,8 +430,8 @@ export class HDSSecureManager {
       const backupData = JSON.parse(text);
       
       // Vérifier le format
-      if (!backupData.format || !backupData.format.includes('PatientHub')) {
-        throw new Error('Format de fichier invalide - doit être une sauvegarde PatientHub .phds');
+      if (!backupData.format || !backupData.format.includes('OstéoPraxis')) {
+        throw new Error('Format de fichier invalide - doit être une sauvegarde OstéoPraxis .phds');
       }
       
       // Déchiffrer toutes les données
@@ -452,7 +452,7 @@ export class HDSSecureManager {
           
           // Créer un fichier temporaire virtuel pour utiliser la méthode importSecure
           const entityData = {
-            format: 'PatientHub_HDS_Secure_Export_v2',
+            format: 'OstéoPraxis_HDS_Secure_Export_v2',
             entity: entityName,
             exportedAt: backupData.exportedAt,
             recordCount: (records as any[]).length,
@@ -543,7 +543,7 @@ export class HDSSecureManager {
       const backupData = JSON.parse(text);
       
       // Vérifier le format
-      if (!backupData.format || !backupData.format.includes('PatientHub')) {
+      if (!backupData.format || !backupData.format.includes('OstéoPraxis')) {
         console.error('❌ Format de fichier invalide');
         return false;
       }

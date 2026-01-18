@@ -313,7 +313,7 @@ export class SecureFileStorage {
       const encryptedData = await SecureCrypto.encrypt(secureFile, this.encryptionPassword!);
       
       const exportData = {
-        format: 'PatientHub_HDS_Secure_Export',
+        format: 'OstéoPraxis_HDS_Secure_Export',
         version: '2.0',
         entity: this.entityName,
         exportedAt: new Date().toISOString(),
@@ -329,7 +329,7 @@ export class SecureFileStorage {
         const fileHandle = await (window as any).showSaveFilePicker({
           suggestedName: `${this.entityName}_secure_export_${new Date().toISOString().split('T')[0]}.phds`,
           types: [{
-            description: 'Fichiers PatientHub HDS Sécurisés',
+            description: 'Fichiers OstéoPraxis HDS Sécurisés',
             accept: { 'application/json': ['.phds'] }
           }]
         });

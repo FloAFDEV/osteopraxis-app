@@ -135,7 +135,7 @@ export default function LandingPage() {
 	useEffect(() => {
 		if (!loading && user) {
 			// Vérifier si c'est un utilisateur démo
-			const isDemoUser = user.email === 'demo@patienthub.com' || user.email?.startsWith('demo-');
+			const isDemoUser = user.email === 'demo@osteopraxis.com' || user.email?.startsWith('demo-');
 			if (!isDemoUser) {
 				// Utilisateur réel - rediriger vers le dashboard
 				navigate('/dashboard');

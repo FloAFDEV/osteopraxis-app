@@ -16,7 +16,7 @@ test.describe('Registration Flow', () => {
     // 1. Aller sur la page d'inscription
     await page.goto('/register');
 
-    // Vérifier que la page est bien OstéoPraxis (pas PatientHub)
+    // Vérifier que la page est bien OstéoPraxis (pas OstéoPraxis)
     await expect(page.locator('text=OstéoPraxis')).toBeVisible();
 
     // 2. Remplir le formulaire d'inscription

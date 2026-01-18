@@ -29,7 +29,7 @@ export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode 
               <strong>🎭 Bienvenue en mode démo !</strong>
             </div>
             <p className="text-sm">
-              Explorez toutes les fonctionnalités de PatientHub avec des données fictives. 
+              Explorez toutes les fonctionnalités de OstéoPraxis avec des données fictives. 
               Testez la gestion de patients, les rendez-vous, la facturation et bien plus encore.
             </p>
             <Button asChild size="sm" className="w-fit">
@@ -53,7 +53,7 @@ export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode 
           <div className="space-y-3">
             <div>
               <strong>
-                {userName ? `Bienvenue ${userName} !` : 'Bienvenue dans votre espace PatientHub !'}
+                {userName ? `Bienvenue ${userName} !` : 'Bienvenue dans votre espace OstéoPraxis !'}
               </strong>
             </div>
             

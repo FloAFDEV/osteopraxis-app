@@ -299,12 +299,12 @@ export class EnhancedSecureFileStorage {
       const records = await this.loadRecords();
       
       const exportData = {
-        format: 'PatientHub_HDS_Secure_Export_v2',
+        format: 'OstéoPraxis_HDS_Secure_Export_v2',
         entity: this.entityName,
         exportedAt: new Date().toISOString(),
         recordCount: records.length,
         data: await encryptJSON({ records }, this.password!),
-        instructions: 'Fichier chiffré PatientHub. Import possible uniquement avec le mot de passe correct.'
+        instructions: 'Fichier chiffré OstéoPraxis. Import possible uniquement avec le mot de passe correct.'
       };
 
       const jsonString = JSON.stringify(exportData, null, 2);
@@ -315,7 +315,7 @@ export class EnhancedSecureFileStorage {
         const fileHandle = await (window as any).showSaveFilePicker({
           suggestedName: `${this.entityName}_export_${new Date().toISOString().split('T')[0]}.phds`,
           types: [{
-            description: 'Fichiers PatientHub HDS Sécurisés',
+            description: 'Fichiers OstéoPraxis HDS Sécurisés',
             accept: { 'application/json': ['.phds'] }
           }]
         });
@@ -364,8 +364,8 @@ export class EnhancedSecureFileStorage {
       const exportData = JSON.parse(text);
       
       // Vérifier le format
-      if (!exportData.format || !exportData.format.includes('PatientHub')) {
-        throw new Error('Format de fichier invalide - doit être un fichier PatientHub .phds');
+      if (!exportData.format || !exportData.format.includes('OstéoPraxis')) {
+        throw new Error('Format de fichier invalide - doit être un fichier OstéoPraxis .phds');
       }
       
       // Vérifier que c'est la bonne entité

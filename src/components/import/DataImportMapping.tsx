@@ -116,7 +116,7 @@ export const DataImportMapping = ({ data, onConfirm, onBack }: DataImportMapping
 						Correspondance des colonnes
 					</CardTitle>
 					<CardDescription>
-						Faites correspondre les colonnes de votre fichier avec les champs PatientHub
+						Faites correspondre les colonnes de votre fichier avec les champs OstéoPraxis
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">

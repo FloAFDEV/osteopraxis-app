@@ -97,7 +97,7 @@ const getPaymentStatusLabel = (status?: string) => {
 					{/* Ligne titre + logo */}
 					<div className="flex items-center gap-4 mb-2 mt-6">
 						<h1 className="text-2xl font-extrabold text-indigo-700">
-							{cabinet?.name || "PatientHub"}
+							{cabinet?.name || "OstéoPraxis"}
 						</h1>
 							{cabinet?.logoUrl && (
 								<img

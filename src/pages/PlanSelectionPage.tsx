@@ -109,7 +109,7 @@ export default function PlanSelectionPage() {
   return (
     <>
       <Helmet>
-        <title>Choisissez votre plan - PatientHub</title>
+        <title>Choisissez votre plan - OstéoPraxis</title>
         <meta name="description" content="Sélectionnez le plan qui correspond le mieux à vos besoins professionnels" />
       </Helmet>
 

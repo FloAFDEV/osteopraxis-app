@@ -24,7 +24,7 @@ export const DemoIndicator = ({ className = "", showCTA = true }: DemoIndicatorP
               <Crown className="h-4 w-4 text-teal-600 dark:text-teal-400" />
             </div>
             <p className="text-sm text-teal-700 dark:text-teal-200">
-              Vous explorez PatientHub avec des données fictives.
+              Vous explorez OstéoPraxis avec des données fictives.
             </p>
             <p className="text-xs text-teal-600 dark:text-teal-300 mt-1">
               Les modifications sont limitées et les données sont réinitialisées quotidiennement.

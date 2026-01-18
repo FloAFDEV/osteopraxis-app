@@ -37,7 +37,7 @@ async function addDigitalSignature(
     const fileHash = await generatePdfHash(pdfBytes);
     
     // Générer QR code avec hash + référence
-    const qrData = `https://patienthub.com/verify/${fileHash}?ref=${invoiceReference}`;
+    const qrData = `https://osteopraxis.com/verify/${fileHash}?ref=${invoiceReference}`;
     const qrDataUrl = await QRCode.toDataURL(qrData, {
       width: 80,
       margin: 1,
@@ -73,8 +73,8 @@ async function addDigitalSignature(
     
     // Définir métadonnées de sécurité
     pdfDoc.setTitle(`Note d'honoraire - ${invoiceReference}`);
-    pdfDoc.setProducer('PatientHub Sécurisé v2.0');
-    pdfDoc.setCreator(osteopathName || 'PatientHub');
+    pdfDoc.setProducer('OstéoPraxis Sécurisé v2.0');
+    pdfDoc.setCreator(osteopathName || 'OstéoPraxis');
     pdfDoc.setSubject('Document officiel protégé');
     
     return await pdfDoc.save();

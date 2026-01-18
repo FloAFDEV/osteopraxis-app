@@ -9,7 +9,7 @@ import { SecureStorageBackend, StorageInfo, SecureStorageConfig } from './interf
 import { encryptJSON, decryptJSON, generateSHA256 } from '@/utils/crypto';
 
 export class IndexedDBSecureStorage implements SecureStorageBackend {
-  private dbName = 'PatientHub-HDS-Secure';
+  private dbName = 'OstéoPraxis-HDS-Secure';
   private dbVersion = 1;
   private password: string = '';
   private entities: string[] = [];

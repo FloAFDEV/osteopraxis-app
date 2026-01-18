@@ -1,12 +1,12 @@
-# Système de Stockage Hybride HDS - PatientHub
+# Système de Stockage Hybride HDS - OstéoPraxis
 
 ## Vue d'ensemble
 
-Le système de stockage hybride de PatientHub assure la **conformité HDS** en stockant automatiquement les données sensibles localement et les données non-sensibles dans le cloud.
+Le système de stockage hybride de OstéoPraxis assure la **conformité HDS** en stockant automatiquement les données sensibles localement et les données non-sensibles dans le cloud.
 
 ## ✅ Configuration Automatique
 
-Le système s'initialise automatiquement au démarrage de l'application via `PatientHubInitializer` dans `App.tsx`.
+Le système s'initialise automatiquement au démarrage de l'application via `OstéoPraxisInitializer` dans `App.tsx`.
 
 ### Classification automatique des données :
 
@@ -42,11 +42,11 @@ Le système s'initialise automatiquement dans `App.tsx` :
 
 ```tsx
 // Dans App.tsx - DÉJÀ CONFIGURÉ
-import { PatientHubInitialization } from "@/services/hybrid-data-adapter/app-initialization";
+import { OstéoPraxisInitialization } from "@/services/hybrid-data-adapter/app-initialization";
 
-function PatientHubInitializer() {
+function OstéoPraxisInitializer() {
   useEffect(() => {
-    PatientHubInitialization.initializeApp();
+    OstéoPraxisInitialization.initializeApp();
   }, []);
   return null;
 }
@@ -111,16 +111,16 @@ await hybridDataManager.importData(backupPath, password);
 ### Initialisation
 
 ```typescript
-import { PatientHubInitialization } from '@/services/hybrid-data-adapter/app-initialization';
+import { OstéoPraxisInitialization } from '@/services/hybrid-data-adapter/app-initialization';
 
 // Initialisation complète (déjà dans App.tsx)
-await PatientHubInitialization.initializeApp();
+await OstéoPraxisInitialization.initializeApp();
 
 // Diagnostic
-const isReady = PatientHubInitialization.isReady;
+const isReady = OstéoPraxisInitialization.isReady;
 
 // Réinitialisation (changement de mode)
-await PatientHubInitialization.reinitialize();
+await OstéoPraxisInitialization.reinitialize();
 ```
 
 ## 🔧 Pages d'administration
@@ -190,4 +190,4 @@ Tous les événements sont loggés avec préfixes visuels :
 - **Audit trail** des accès admin
 - **Validation** des permissions
 
-Le système est maintenant **prêt à l'emploi** et entièrement configuré dans PatientHub ! 🚀
+Le système est maintenant **prêt à l'emploi** et entièrement configuré dans OstéoPraxis ! 🚀

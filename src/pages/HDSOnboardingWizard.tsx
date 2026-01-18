@@ -68,7 +68,7 @@ export default function HDSOnboardingWizard() {
   return (
     <>
       <Helmet>
-        <title>Configuration HDS - PatientHub</title>
+        <title>Configuration HDS - OstéoPraxis</title>
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -94,7 +94,7 @@ export default function HDSOnboardingWizard() {
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <Shield className="h-8 w-8 text-primary" />
-                  <CardTitle className="text-2xl">Bienvenue dans PatientHub</CardTitle>
+                  <CardTitle className="text-2xl">Bienvenue dans OstéoPraxis</CardTitle>
                 </div>
                 <CardDescription>
                   Configuration du stockage sécurisé conforme HDS

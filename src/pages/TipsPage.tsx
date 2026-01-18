@@ -142,7 +142,7 @@ const TipsPage = () => {
               Conseils & Bonnes Pratiques
             </h1>
             <p className="text-muted-foreground mt-1">
-              Optimisez votre utilisation de PatientHub avec ces conseils d'experts
+              Optimisez votre utilisation de OstéoPraxis avec ces conseils d'experts
             </p>
           </div>
 
@@ -200,7 +200,7 @@ const TipsPage = () => {
             </CardHeader>
             <CardContent className="text-blue-700 dark:text-blue-300">
               <p>
-                La clé du succès avec PatientHub réside dans la régularité : 
+                La clé du succès avec OstéoPraxis réside dans la régularité : 
                 prenez 5 minutes après chaque consultation pour compléter le dossier patient 
                 et créer la facture. Cette habitude vous fera gagner des heures chaque semaine 
                 et garantira un suivi optimal de vos patients.

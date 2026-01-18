@@ -14,7 +14,7 @@ BEGIN
     -- Récupérer l'auth_id de l'utilisateur démo depuis auth.users
     SELECT id INTO demo_auth_id 
     FROM auth.users 
-    WHERE email = 'demo@patienthub.com';
+    WHERE email = 'demo@osteopraxis.com';
     
     IF demo_auth_id IS NULL THEN
         RAISE NOTICE 'Compte démo non trouvé, il sera créé automatiquement';
@@ -34,7 +34,7 @@ BEGIN
         is_active
     ) VALUES (
         demo_auth_id,
-        'demo@patienthub.com',
+        'demo@osteopraxis.com',
         'Démo',
         'Utilisateur',
         'OSTEOPATH',
@@ -98,7 +98,7 @@ BEGIN
     ) VALUES (
         'Cabinet PatientHub Démo',
         '123 Rue de la Santé, 75013 Paris',
-        'cabinet.demo@patienthub.com',
+        'cabinet.demo@osteopraxis.com',
         '01 23 45 67 89',
         demo_osteopath_id,
         NOW(),

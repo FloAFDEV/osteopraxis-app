@@ -211,7 +211,7 @@ const PricingPage = () => {
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">Calculez votre retour sur investissement</h2>
             <p className="text-muted-foreground">
-              Découvrez combien vous pourriez économiser et gagner avec PatientHub
+              Découvrez combien vous pourriez économiser et gagner avec OstéoPraxis
             </p>
           </div>
           <ROICalculator />

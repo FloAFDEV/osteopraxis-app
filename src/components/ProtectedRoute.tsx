@@ -33,7 +33,7 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   }
 
   // Vérifier si c'est un utilisateur démo
-  const isDemoUser = user.email === 'demo@patienthub.com' || 
+  const isDemoUser = user.email === 'demo@osteopraxis.com' || 
                      user.email?.startsWith('demo-') ||
                      user.osteopathId === DEMO_OSTEOPATH_ID;
 

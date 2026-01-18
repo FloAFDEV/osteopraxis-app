@@ -144,7 +144,7 @@ export async function testCrypto(password: string): Promise<boolean> {
     const testData = { 
       test: true, 
       timestamp: Date.now(), 
-      message: 'Test de chiffrement PatientHub HDS' 
+      message: 'Test de chiffrement OstéoPraxis HDS' 
     };
     
     const encrypted = await encryptJSON(testData, password);

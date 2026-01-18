@@ -28,7 +28,7 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
           </div>
           <div className="space-y-2">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Bienvenue sur PatientHub
+              Bienvenue sur OstéoPraxis
             </CardTitle>
             <CardDescription className="text-lg">
               Configuration de votre <strong>stockage sécurisé</strong>
@@ -58,7 +58,7 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
                 🔒 Protection maximale de vos données médicales
               </p>
               <p className="text-sm">
-                PatientHub respecte la réglementation <strong>HDS (Hébergeur de Données de Santé)</strong>. 
+                OstéoPraxis respecte la réglementation <strong>HDS (Hébergeur de Données de Santé)</strong>. 
                 Vos données sensibles sont stockées <strong>localement sur votre appareil</strong> avec un <strong>chiffrement AES-256-GCM</strong>, 
                 garantissant qu'aucune information médicale n'est transmise vers le cloud.
               </p>

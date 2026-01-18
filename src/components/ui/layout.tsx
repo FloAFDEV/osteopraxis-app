@@ -488,7 +488,7 @@ export function Layout({ children }: LayoutProps) {
 					
 					{/* Liens et copyright */}
 					<div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-						<p>© 2025 PatientHub. Tous droits réservés.</p>
+						<p>© 2025 OstéoPraxis. Tous droits réservés.</p>
 						<div className="flex items-center gap-4">
 							<NavLink
 								to="/terms"
