@@ -198,10 +198,19 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuSeparator />
 								<DropdownMenuItem asChild>
 									<NavLink
+										to="/settings/profile"
+										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
+									>
+										<User className="mr-2 h-4 w-4 text-blue-500" />
+										<span>Mon Profil</span>
+									</NavLink>
+								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<NavLink
 										to="/settings"
 										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 									>
-										<HelpCircle className="mr-2 h-4 w-4 text-blue-500" />
+										<HelpCircle className="mr-2 h-4 w-4 text-orange-500" />
 										<span>Guide</span>
 									</NavLink>
 								</DropdownMenuItem>
@@ -308,7 +317,7 @@ export function Layout({ children }: LayoutProps) {
 							Notes d'honoraires
 						</NavLink>
 						<NavLink
-							to="/settings"
+							to="/settings/profile"
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2",
@@ -319,7 +328,37 @@ export function Layout({ children }: LayoutProps) {
 							}
 							onClick={() => setIsMenuOpen(false)}
 						>
-							<HelpCircle className="h-5 w-5 text-blue-500" />
+							<User className="h-5 w-5 text-blue-500" />
+							Mon Profil
+						</NavLink>
+						<NavLink
+							to="/settings/cabinet"
+							className={({ isActive }) =>
+								cn(
+									"p-2 rounded-md transition-colors flex items-center gap-2",
+									isActive
+										? "bg-green-500/10 text-foreground"
+										: "text-foreground"
+								)
+							}
+							onClick={() => setIsMenuOpen(false)}
+						>
+							<Building className="h-5 w-5 text-green-500" />
+							Paramètres du cabinet
+						</NavLink>
+						<NavLink
+							to="/settings"
+							className={({ isActive }) =>
+								cn(
+									"p-2 rounded-md transition-colors flex items-center gap-2",
+									isActive
+										? "bg-orange-500/10 text-foreground"
+										: "text-foreground"
+								)
+							}
+							onClick={() => setIsMenuOpen(false)}
+						>
+							<HelpCircle className="h-5 w-5 text-orange-500" />
 							Guide
 						</NavLink>
 						<button
