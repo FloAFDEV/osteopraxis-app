@@ -107,7 +107,9 @@ export class DemoLocalStorageService {
   }
 
   getCabinets(): Cabinet[] {
+    console.log('📂 [DemoLocalStorage] getCabinets() appelé pour cabinetId:', this.cabinetId);
     const cabinet = DemoStorage.get<Cabinet>(this.cabinetId, 'cabinet');
+    console.log('📂 [DemoLocalStorage] Cabinet récupéré:', cabinet);
     return cabinet ? [cabinet] : [];
   }
 }

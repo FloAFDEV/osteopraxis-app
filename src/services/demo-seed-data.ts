@@ -122,8 +122,11 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
     }
   ];
 
+  console.log('🌱 [seedDemoData] Création des données démo pour cabinetId:', cabinetId);
+  console.log('🏢 [seedDemoData] Cabinet créé:', cabinet);
   DemoStorage.set(cabinetId, 'cabinet', cabinet);
   DemoStorage.set(cabinetId, 'patients', patients);
   DemoStorage.set(cabinetId, 'appointments', appointments);
   DemoStorage.set(cabinetId, 'invoices', invoices);
+  console.log('✅ [seedDemoData] Données démo créées avec succès');
 }
