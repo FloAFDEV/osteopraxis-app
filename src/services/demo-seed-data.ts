@@ -6,7 +6,7 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
 
   // Données ostéopathe démo (pour affichage lecture seule)
   const demoOsteopath = {
-    id: userId, // UUID en mode démo
+    id: userId,
     userId: userId,
     name: 'Dr. Utilisateur Démo',
     professional_title: 'Ostéopathe D.O.',
@@ -38,6 +38,7 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
     imageUrl: null
   };
 
+  // 10 patients démo avec données variées
   const patients: Patient[] = [
     {
       id: crypto.randomUUID(),
@@ -80,69 +81,204 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       osteopathId: userId,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString()
-    }
-  ];
-
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(10, 0, 0, 0);
-
-  const nextWeek = new Date(now);
-  nextWeek.setDate(nextWeek.getDate() + 7);
-  nextWeek.setHours(14, 30, 0, 0);
-
-  const appointments: Appointment[] = [
+    },
     {
       id: crypto.randomUUID(),
-      patientId: patients[0].id,
+      firstName: 'Sophie',
+      lastName: 'Bernard',
+      email: 'sophie.bernard@example.com',
+      phone: '06 23 45 67 89',
+      birthDate: '1982-03-10',
+      address: '22 Rue Lafayette',
+      city: 'Toulouse',
+      postalCode: '31000',
       osteopathId: userId,
-      cabinetId: cabinetId,
-      date: tomorrow.toISOString(),
-      status: 'SCHEDULED',
-      reason: 'Consultation initiale',
-      notes: 'Douleurs lombaires',
-      notificationSent: false,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString()
     },
     {
       id: crypto.randomUUID(),
-      patientId: patients[1].id,
+      firstName: 'Lucas',
+      lastName: 'Petit',
+      email: 'lucas.petit@example.com',
+      phone: '06 34 56 78 90',
+      birthDate: '1995-07-18',
+      address: '7 Place du Capitole',
+      city: 'Toulouse',
+      postalCode: '31000',
+      osteopathId: userId,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      firstName: 'Emma',
+      lastName: 'Roux',
+      email: 'emma.roux@example.com',
+      phone: '06 56 78 90 12',
+      birthDate: '1988-12-05',
+      address: '33 Allée Jean Jaurès',
+      city: 'Toulouse',
+      postalCode: '31000',
+      osteopathId: userId,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      firstName: 'Thomas',
+      lastName: 'Moreau',
+      email: 'thomas.moreau@example.com',
+      phone: '06 67 89 01 23',
+      birthDate: '1992-09-14',
+      address: '18 Rue Alsace Lorraine',
+      city: 'Toulouse',
+      postalCode: '31000',
+      osteopathId: userId,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      firstName: 'Chloé',
+      lastName: 'Simon',
+      email: 'chloe.simon@example.com',
+      phone: '06 78 90 12 34',
+      birthDate: '1987-04-28',
+      address: '9 Rue de Metz',
+      city: 'Toulouse',
+      postalCode: '31000',
+      osteopathId: userId,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      firstName: 'Alexandre',
+      lastName: 'Laurent',
+      email: 'alexandre.laurent@example.com',
+      phone: '06 89 01 23 45',
+      birthDate: '1980-11-20',
+      address: '44 Avenue de la Gloire',
+      city: 'Toulouse',
+      postalCode: '31000',
+      osteopathId: userId,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      firstName: 'Léa',
+      lastName: 'Lefebvre',
+      email: 'lea.lefebvre@example.com',
+      phone: '06 90 12 34 56',
+      birthDate: '1993-06-12',
+      address: '11 Rue Rémusat',
+      city: 'Toulouse',
+      postalCode: '31000',
+      osteopathId: userId,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    }
+  ];
+
+  const appointments: Appointment[] = [];
+  const invoices: Invoice[] = [];
+
+  // Créer 30 consultations passées (sur les 12 derniers mois)
+  const reasons = [
+    'Douleurs lombaires',
+    'Tensions cervicales',
+    'Migraines',
+    'Sciatique',
+    'Entorse cheville',
+    'Stress et anxiété',
+    'Troubles du sommeil',
+    'Douleurs épaule',
+    'Suivi régulier',
+    'Consultation post-opératoire'
+  ];
+
+  for (let i = 0; i < 30; i++) {
+    const daysAgo = Math.floor(Math.random() * 365); // Derniers 12 mois
+    const appointmentDate = new Date(now);
+    appointmentDate.setDate(appointmentDate.getDate() - daysAgo);
+    appointmentDate.setHours(9 + Math.floor(Math.random() * 9), [0, 15, 30, 45][Math.floor(Math.random() * 4)], 0, 0);
+
+    const randomPatient = patients[Math.floor(Math.random() * patients.length)];
+    const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
+
+    appointments.push({
+      id: crypto.randomUUID(),
+      patientId: randomPatient.id,
       osteopathId: userId,
       cabinetId: cabinetId,
-      date: nextWeek.toISOString(),
+      date: appointmentDate.toISOString(),
+      status: 'COMPLETED',
+      reason: randomReason,
+      notes: `Consultation du ${appointmentDate.toLocaleDateString('fr-FR')}`,
+      notificationSent: true,
+      createdAt: appointmentDate.toISOString(),
+      updatedAt: appointmentDate.toISOString()
+    });
+  }
+
+  // Créer 25 factures payées correspondant à des consultations
+  const amounts = [55, 60, 65, 70];
+  const paymentMethods = ['cash', 'check', 'card', 'transfer'];
+
+  for (let i = 0; i < 25; i++) {
+    const randomAppointment = appointments[i];
+    const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
+    const randomPayment = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+
+    invoices.push({
+      id: crypto.randomUUID(),
+      patientId: randomAppointment.patientId,
+      osteopathId: userId,
+      cabinetId: cabinetId,
+      invoiceNumber: `DEMO-${String(i + 1).padStart(3, '0')}`,
+      date: randomAppointment.date,
+      amount: randomAmount,
+      status: 'paid',
+      description: 'Consultation ostéopathie',
+      paymentMethod: randomPayment as any,
+      createdAt: randomAppointment.createdAt,
+      updatedAt: randomAppointment.updatedAt
+    });
+  }
+
+  // Ajouter 5 rendez-vous futurs
+  const futureDates = [1, 2, 5, 8, 14]; // jours dans le futur
+  futureDates.forEach((daysLater, index) => {
+    const futureDate = new Date(now);
+    futureDate.setDate(futureDate.getDate() + daysLater);
+    futureDate.setHours(9 + (index * 2), 0, 0, 0);
+
+    const randomPatient = patients[index % patients.length];
+
+    appointments.push({
+      id: crypto.randomUUID(),
+      patientId: randomPatient.id,
+      osteopathId: userId,
+      cabinetId: cabinetId,
+      date: futureDate.toISOString(),
       status: 'SCHEDULED',
-      reason: 'Suivi',
-      notes: 'Tensions cervicales',
+      reason: reasons[index % reasons.length],
+      notes: '',
       notificationSent: false,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString()
-    }
-  ];
-
-  const lastWeek = new Date(now);
-  lastWeek.setDate(lastWeek.getDate() - 7);
-
-  const invoices: Invoice[] = [
-    {
-      id: crypto.randomUUID(),
-      patientId: patients[2].id,
-      osteopathId: userId,
-      cabinetId: cabinetId,
-      invoiceNumber: 'DEMO-001',
-      date: lastWeek.toISOString(),
-      amount: 60,
-      status: 'paid',
-      description: 'Consultation ostéopathie',
-      paymentMethod: 'cash',
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString()
-    }
-  ];
+    });
+  });
 
   console.log('🌱 [seedDemoData] Création des données démo pour cabinetId:', cabinetId);
   console.log('🏢 [seedDemoData] Cabinet créé:', cabinet);
   console.log('👤 [seedDemoData] Ostéopathe créé:', demoOsteopath);
+  console.log('👥 [seedDemoData] Patients créés:', patients.length);
+  console.log('📅 [seedDemoData] Rendez-vous créés:', appointments.length);
+  console.log('💰 [seedDemoData] Factures créées:', invoices.length);
+
   DemoStorage.set(cabinetId, 'osteopath', demoOsteopath);
   DemoStorage.set(cabinetId, 'cabinet', cabinet);
   DemoStorage.set(cabinetId, 'patients', patients);
