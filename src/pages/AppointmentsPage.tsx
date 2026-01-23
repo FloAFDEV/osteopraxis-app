@@ -129,7 +129,7 @@ const AppointmentsPage = () => {
 		const future: Appointment[] = [];
 
 		filteredApps.forEach((appointment) => {
-			const appointmentDate = new Date(appointment.date);
+			const appointmentDate = new Date(appointment.dateTime);
 			const appointmentDateStr = format(appointmentDate, "yyyy-MM-dd");
 
 			// Mettre les rendez-vous COMPLETED dans "past" même si leur date est future
