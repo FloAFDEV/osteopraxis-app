@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { seedDemoData } from '@/services/demo-seed-data';
+import { DemoStorage } from '@/services/demo-storage';
 
 const DEMO_DURATION_MS = 60 * 60 * 1000; // 60 minutes
 const DEMO_MAX_ATTEMPTS = 5;
@@ -142,7 +143,6 @@ export function useDemoSession() {
     // Nettoyer toutes les données démo
     const cabinetId = localStorage.getItem(CABINET_ID_KEY);
     if (cabinetId) {
-      const { DemoStorage } = require('@/services/demo-storage');
       DemoStorage.clearCabinet(cabinetId);
     }
 
@@ -171,7 +171,6 @@ export function useDemoSession() {
       setDemoCabinetName(session.cabinetName);
 
       // 🔄 Vérifier si les données démo existent, sinon les re-créer
-      const { DemoStorage } = require('@/services/demo-storage');
       const existingCabinet = DemoStorage.get(session.cabinetId, 'cabinet');
       if (!existingCabinet) {
         console.log('🔄 [useDemoSession] Session active mais données manquantes - Re-création');
