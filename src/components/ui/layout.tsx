@@ -17,10 +17,10 @@ import {
 	Calendar,
 	Clock,
 	FileText,
+	HelpCircle,
 	Home,
 	LogOut,
 	Menu,
-	Settings,
 	User,
 	X,
 } from "lucide-react";
@@ -187,8 +187,8 @@ export function Layout({ children }: LayoutProps) {
 										to="/settings"
 										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 									>
-										<Settings className="mr-2 h-4 w-4 text-blue-500" />
-										<span>Paramètres</span>
+										<HelpCircle className="mr-2 h-4 w-4 text-blue-500" />
+										<span>Guide</span>
 									</NavLink>
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild>
@@ -305,8 +305,8 @@ export function Layout({ children }: LayoutProps) {
 							}
 							onClick={() => setIsMenuOpen(false)}
 						>
-							<Settings className="h-5 w-5 text-blue-500" />
-							Paramètres
+							<HelpCircle className="h-5 w-5 text-blue-500" />
+							Guide
 						</NavLink>
 						<button
 							onClick={() => {
