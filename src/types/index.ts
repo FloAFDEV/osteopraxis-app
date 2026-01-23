@@ -37,7 +37,7 @@ export type Contraception =
 	| "IUD_HORMONAL";
 
 export interface Cabinet {
-	id: number;
+	id: number | string; // number en mode connecté, string UUID en mode démo
 	name: string;
 	address: string;
 	city: string;
@@ -48,7 +48,7 @@ export interface Cabinet {
 	iban: string | null;
 	bic: string | null;
 	country: string;
-	osteopathId: number;
+	osteopathId: number | string; // number en mode connecté, string UUID en mode démo
 	createdAt: string;
 	updatedAt: string;
 	imageUrl?: string | null;

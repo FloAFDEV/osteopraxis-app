@@ -13,8 +13,13 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
     phone: '05 61 00 00 00',
     email: 'demo@osteopraxis.fr',
     siret: '12345678900012',
-    created_at: now.toISOString(),
-    updated_at: now.toISOString()
+    iban: null,
+    bic: null,
+    country: 'France',
+    osteopathId: userId,
+    createdAt: now.toISOString(),
+    updatedAt: now.toISOString(),
+    imageUrl: null
   };
 
   const patients: Patient[] = [
