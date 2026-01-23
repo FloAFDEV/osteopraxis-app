@@ -139,7 +139,18 @@ export function useDemoSession() {
   }, [canStartDemo]);
 
   const endDemo = useCallback(() => {
+    // Nettoyer toutes les données démo
+    const cabinetId = localStorage.getItem(CABINET_ID_KEY);
+    if (cabinetId) {
+      const { DemoStorage } = require('@/services/demo-storage');
+      DemoStorage.clearCabinet(cabinetId);
+    }
+
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(USER_ID_KEY);
+    localStorage.removeItem(CABINET_ID_KEY);
+    localStorage.removeItem(CABINET_NAME_KEY);
+
     setIsDemoActive(false);
     setRemainingMs(0);
     setDemoUserId(null);

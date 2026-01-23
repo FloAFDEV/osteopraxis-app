@@ -35,8 +35,9 @@ export const appointmentService = {
     }
   },
 
-  async getAppointmentById(id: number): Promise<Appointment | undefined> {
-    if (!id || isNaN(id) || id <= 0) {
+  async getAppointmentById(id: number | string): Promise<Appointment | undefined> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
       console.warn('ID rendez-vous invalide:', id);
       return undefined;
     }
@@ -108,8 +109,9 @@ export const appointmentService = {
     }
   },
 
-  async updateAppointment(id: number, update: Partial<Appointment>): Promise<Appointment> {
-    if (!id || isNaN(id) || id <= 0) {
+  async updateAppointment(id: number | string, update: Partial<Appointment>): Promise<Appointment> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
       throw new Error("ID rendez-vous invalide pour la mise à jour");
     }
 
@@ -128,16 +130,17 @@ export const appointmentService = {
     }
   },
   
-  async updateAppointmentStatus(id: number, status: AppointmentStatus): Promise<Appointment> {
+  async updateAppointmentStatus(id: number | string, status: AppointmentStatus): Promise<Appointment> {
     return this.updateAppointment(id, { status });
   },
-  
-  async cancelAppointment(id: number): Promise<Appointment> {
+
+  async cancelAppointment(id: number | string): Promise<Appointment> {
     return this.updateAppointment(id, { status: "CANCELED" });
   },
 
-  async deleteAppointment(id: number): Promise<boolean> {
-    if (!id || isNaN(id) || id <= 0) {
+  async deleteAppointment(id: number | string): Promise<boolean> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
       console.warn('ID rendez-vous invalide pour suppression:', id);
       return false;
     }
