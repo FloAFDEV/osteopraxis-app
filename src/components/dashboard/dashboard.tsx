@@ -90,8 +90,6 @@ export function Dashboard() {
 	const hasNoData = dashboardData.totalPatients === 0 && allPatients.length === 0;
 	const showContent = !loading || loadingTimeout;
 
-	console.log('📊 Dashboard render state:', { loading, loadingTimeout, pinError, hasNoData, error });
-
 	return (
 		<div className="space-y-8 p-4 sm:p-6 lg:p-8">
 			{/* Header Image Banner */}
