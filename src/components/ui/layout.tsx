@@ -152,6 +152,20 @@ export function Layout({ children }: LayoutProps) {
 							<Clock className="h-4 w-4 text-amber-500" />
 							Planning
 						</NavLink>
+						<NavLink
+							to="/invoices"
+							className={({ isActive }) =>
+								cn(
+									"text-sm font-medium transition-colors flex items-center gap-1",
+									isActive
+										? "text-emerald-500"
+										: "hover:text-emerald-500 text-muted-foreground"
+								)
+							}
+						>
+							<FileText className="h-4 w-4 text-emerald-500" />
+							Notes d'honoraires
+						</NavLink>
 
 						<ThemeToggle />
 
