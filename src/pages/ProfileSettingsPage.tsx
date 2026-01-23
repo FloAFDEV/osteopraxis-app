@@ -38,13 +38,19 @@ export default function ProfileSettingsPage() {
         // Charger les données démo
         const { demoLocalStorage } = await import('@/services/demo-local-storage');
         const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+        console.log('🔍 [ProfileSettings] Demo cabinet ID:', demoCabinetId);
 
         if (demoCabinetId) {
           const osteopath = demoLocalStorage(demoCabinetId).getOsteopath();
           const cabinets = demoLocalStorage(demoCabinetId).getCabinets();
 
+          console.log('👤 [ProfileSettings] Osteopath loaded:', osteopath);
+          console.log('🏢 [ProfileSettings] Cabinets loaded:', cabinets);
+
           setDemoOsteopath(osteopath);
           setDemoCabinet(cabinets[0] || null);
+        } else {
+          console.warn('⚠️ [ProfileSettings] No demo_cabinet_id found in localStorage');
         }
       }
 
