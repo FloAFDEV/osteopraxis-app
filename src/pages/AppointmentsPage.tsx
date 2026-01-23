@@ -173,7 +173,7 @@ const AppointmentsPage = () => {
 	): Record<string, Record<string, Appointment[]>> => {
 		const grouped: Record<string, Record<string, Appointment[]>> = {};
 		apps.forEach((appointment) => {
-			const date = new Date(appointment.date);
+			const date = new Date(appointment.dateTime);
 			const monthYear = format(date, "MMMM yyyy", { locale: fr });
 			const day = format(date, "yyyy-MM-dd");
 
@@ -221,7 +221,7 @@ const AppointmentsPage = () => {
 		(appointment) => {
 			if (!selectedPastYear) return true;
 			return (
-				new Date(appointment.date).getFullYear() === selectedPastYear
+				new Date(appointment.dateTime).getFullYear() === selectedPastYear
 			);
 		}
 	);
