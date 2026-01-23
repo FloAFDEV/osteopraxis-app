@@ -15,7 +15,12 @@ export function useCabinets() {
       if (isDemoMode) {
         console.log('🎭 [useCabinets] Mode démo détecté - Retour cabinet démo uniquement');
         const { demoLocalStorage } = await import('@/services/demo-local-storage');
-        return demoLocalStorage.getCabinets();
+        const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+        if (!demoCabinetId) {
+          console.warn('⚠️ [useCabinets] Pas de cabinetId en mode démo');
+          return [];
+        }
+        return demoLocalStorage(demoCabinetId).getCabinets();
       }
       
       return cabinetCache.getCabinets();
