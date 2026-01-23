@@ -1,12 +1,11 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { 
-  Users, 
-  Calendar, 
-  Building2, 
-  FileText, 
-  Settings, 
+import {
+  Users,
+  Calendar,
+  Building2,
+  FileText,
   User,
   Clock,
   Home,
@@ -65,16 +64,10 @@ export function SidebarNav({ className }: SidebarNavProps) {
       help: "Gérez votre profil professionnel et vos informations"
     },
     {
-      name: "Paramètres",
+      name: "Guide",
       href: "/settings",
-      icon: Settings,
-      help: "Configurez l'application selon vos préférences"
-    },
-    {
-      name: "Aide",
-      href: "/help",
       icon: HelpCircle,
-      help: "Consultez l'aide et la documentation"
+      help: "Consultez le guide d'utilisation et la documentation"
     }
   ];
 
