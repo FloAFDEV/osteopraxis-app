@@ -59,11 +59,11 @@ const SettingsPage = () => {
 			},
 			{
 				id: "profile",
-				title: "Profil & Facturation",
+				title: "Mon Profil",
 				description:
-					"Gérez vos informations professionnelles et de facturation",
+					"Gérez vos informations professionnelles et votre cabinet",
 				icon: UserCog,
-				path: "/settings/osteopath",
+				path: "/settings/profile",
 				color: "text-blue-500",
 			},
 			{

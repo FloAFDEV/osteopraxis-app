@@ -27,6 +27,10 @@ import {
 	TrendingUp,
 	Database,
 	Activity,
+	BookOpen,
+	Calendar,
+	LayoutDashboard,
+	Settings,
 } from "lucide-react";
 
 const HelpPage = () => {
@@ -49,8 +53,12 @@ const HelpPage = () => {
 					</p>
 				</div>
 
-				<Tabs defaultValue="cabinets" className="space-y-6">
-					<TabsList className="grid w-full grid-cols-5">
+				<Tabs defaultValue="overview" className="space-y-6">
+					<TabsList className="grid w-full grid-cols-6">
+						<TabsTrigger value="overview" className="flex items-center gap-2">
+							<BookOpen className="w-4 h-4" />
+							Vue d'ensemble
+						</TabsTrigger>
 						<TabsTrigger value="cabinets" className="flex items-center gap-2">
 							<Building2 className="w-4 h-4" />
 							Cabinets
@@ -72,6 +80,108 @@ const HelpPage = () => {
 							Optimisation
 						</TabsTrigger>
 					</TabsList>
+
+					<TabsContent value="overview" className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<LayoutDashboard className="h-5 w-5 text-blue-500" />
+									Bienvenue dans OstéoPraxis
+								</CardTitle>
+								<CardDescription>
+									Votre application de gestion tout-en-un pour votre pratique d'ostéopathie
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-6">
+								<div className="grid gap-4 md:grid-cols-2">
+									<Card className="border-blue-200 bg-blue-50/50">
+										<CardHeader className="pb-3">
+											<CardTitle className="text-base flex items-center gap-2">
+												<Users className="h-4 w-4 text-blue-600" />
+												Gestion des Patients
+											</CardTitle>
+										</CardHeader>
+										<CardContent className="text-sm text-muted-foreground">
+											Créez et gérez facilement vos dossiers patients, consultez l'historique des séances et partagez les informations entre cabinets.
+										</CardContent>
+									</Card>
+
+									<Card className="border-purple-200 bg-purple-50/50">
+										<CardHeader className="pb-3">
+											<CardTitle className="text-base flex items-center gap-2">
+												<Calendar className="h-4 w-4 text-purple-600" />
+												Planning & Rendez-vous
+											</CardTitle>
+										</CardHeader>
+										<CardContent className="text-sm text-muted-foreground">
+											Visualisez votre planning, créez des rendez-vous et gérez votre emploi du temps en temps réel.
+										</CardContent>
+									</Card>
+
+									<Card className="border-amber-200 bg-amber-50/50">
+										<CardHeader className="pb-3">
+											<CardTitle className="text-base flex items-center gap-2">
+												<CreditCard className="h-4 w-4 text-amber-600" />
+												Facturation
+											</CardTitle>
+										</CardHeader>
+										<CardContent className="text-sm text-muted-foreground">
+											Générez des factures professionnelles avec vos informations (RPPS, SIRET, APE) et exportez-les en PDF.
+										</CardContent>
+									</Card>
+
+									<Card className="border-green-200 bg-green-50/50">
+										<CardHeader className="pb-3">
+											<CardTitle className="text-base flex items-center gap-2">
+												<Building2 className="h-4 w-4 text-green-600" />
+												Multi-cabinets
+											</CardTitle>
+										</CardHeader>
+										<CardContent className="text-sm text-muted-foreground">
+											Gérez plusieurs cabinets, collaborez avec d'autres ostéopathes et organisez vos remplacements.
+										</CardContent>
+									</Card>
+								</div>
+
+								<Alert>
+									<Settings className="h-4 w-4" />
+									<AlertDescription>
+										<strong className="font-semibold">Pour commencer :</strong> Complétez vos informations professionnelles dans{" "}
+										<strong>Paramètres → Mon Profil</strong> (RPPS, SIRET, APE) pour générer vos premières factures.
+									</AlertDescription>
+								</Alert>
+
+								<div>
+									<h3 className="font-semibold mb-3 flex items-center gap-2">
+										<ArrowRight className="h-4 w-4 text-blue-500" />
+										Accès rapide
+									</h3>
+									<div className="space-y-2 pl-6">
+										<p className="text-sm flex items-start gap-2">
+											<CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+											<span><strong>Patients</strong> : Créez et consultez vos dossiers patients</span>
+										</p>
+										<p className="text-sm flex items-start gap-2">
+											<CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+											<span><strong>Séances</strong> : Gérez vos rendez-vous au quotidien</span>
+										</p>
+										<p className="text-sm flex items-start gap-2">
+											<CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+											<span><strong>Planning</strong> : Vue calendrier de votre emploi du temps</span>
+										</p>
+										<p className="text-sm flex items-start gap-2">
+											<CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+											<span><strong>Notes d'honoraires</strong> : Créez et exportez vos factures</span>
+										</p>
+										<p className="text-sm flex items-start gap-2">
+											<CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+											<span><strong>Paramètres</strong> : Configurez votre profil et vos cabinets</span>
+										</p>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					</TabsContent>
 
 					<TabsContent value="cabinets" className="space-y-6">
 						<Card>

@@ -4,6 +4,22 @@ import { Patient, Appointment, Invoice, Cabinet } from '@/types';
 export function seedDemoData(cabinetId: string, userId: string, cabinetName: string): void {
   const now = new Date();
 
+  // Données ostéopathe démo (pour affichage lecture seule)
+  const demoOsteopath = {
+    id: userId, // UUID en mode démo
+    userId: userId,
+    name: 'Dr. Utilisateur Démo',
+    professional_title: 'Ostéopathe D.O.',
+    rpps_number: '10001234567',
+    siret: '12345678900012',
+    ape_code: '8690F',
+    plan: 'demo' as const,
+    status: 'demo' as const,
+    demo_started_at: now.toISOString(),
+    createdAt: now.toISOString(),
+    updatedAt: now.toISOString()
+  };
+
   const cabinet: Cabinet = {
     id: cabinetId,
     name: cabinetName,
@@ -124,6 +140,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
 
   console.log('🌱 [seedDemoData] Création des données démo pour cabinetId:', cabinetId);
   console.log('🏢 [seedDemoData] Cabinet créé:', cabinet);
+  console.log('👤 [seedDemoData] Ostéopathe créé:', demoOsteopath);
+  DemoStorage.set(cabinetId, 'osteopath', demoOsteopath);
   DemoStorage.set(cabinetId, 'cabinet', cabinet);
   DemoStorage.set(cabinetId, 'patients', patients);
   DemoStorage.set(cabinetId, 'appointments', appointments);

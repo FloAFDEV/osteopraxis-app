@@ -24,6 +24,7 @@ import AppointmentsPage from "@/pages/AppointmentsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import DataImportPage from "@/pages/DataImportPage";
 import OsteopathSettingsPage from "@/pages/OsteopathSettingsPage";
+import ProfileSettingsPage from "@/pages/ProfileSettingsPage";
 import CabinetSettingsPage from "@/pages/CabinetSettingsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
 import SchedulePage from "@/pages/SchedulePage";
@@ -199,6 +200,11 @@ function App() {
                         <Route path="/settings/import" element={
                           <ProtectedRoute>
                             <DataImportPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings/profile" element={
+                          <ProtectedRoute>
+                            <ProfileSettingsPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/settings/osteopath" element={

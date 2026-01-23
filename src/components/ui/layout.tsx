@@ -184,16 +184,6 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuSeparator />
 								<DropdownMenuItem asChild>
 									<NavLink
-										to="/invoices"
-										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
-									>
-										<FileText className="mr-2 h-4 w-4 text-amber-500" />
-										<span>Notes d'honoraires</span>
-									</NavLink>
-								</DropdownMenuItem>
-
-								<DropdownMenuItem asChild>
-									<NavLink
 										to="/settings"
 										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
 									>

@@ -112,6 +112,10 @@ export class DemoLocalStorageService {
     console.log('📂 [DemoLocalStorage] Cabinet récupéré:', cabinet);
     return cabinet ? [cabinet] : [];
   }
+
+  getOsteopath(): any | null {
+    return DemoStorage.get(this.cabinetId, 'osteopath');
+  }
 }
 
 export const demoLocalStorage = (cabinetId: string) => new DemoLocalStorageService(cabinetId);
