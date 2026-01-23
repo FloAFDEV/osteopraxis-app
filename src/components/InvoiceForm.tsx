@@ -84,9 +84,14 @@ export function InvoiceForm({
 
   // SUBMIT
   const onSubmit = async (data: any) => {
+    console.log('🚀 [InvoiceForm] ========== DÉBUT SUBMIT ==========');
     console.log('📝 [InvoiceForm] onSubmit appelé avec data:', data);
     console.log('👤 [InvoiceForm] Patient:', patient);
-    console.log('🏥 [InvoiceForm] Osteopath:', data.osteopathId);
+    console.log('🏥 [InvoiceForm] Osteopath ID:', data.osteopathId);
+    console.log('📅 [InvoiceForm] Date:', data.date);
+    console.log('💰 [InvoiceForm] Amount:', data.amount);
+    console.log('💳 [InvoiceForm] Payment method:', data.paymentMethod);
+    console.log('✅ [InvoiceForm] Payment status:', data.paymentStatus);
 
     // Validation avec alertes
     const validationErrors = [];
