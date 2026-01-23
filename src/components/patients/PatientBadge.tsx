@@ -32,30 +32,30 @@ export function PatientBadge({
   // Générer les initiales
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
-  // Couleur du badge selon le genre et l'âge
+  // Couleur du badge selon le genre et l'âge (couleurs du graphique dashboard)
   const getBadgeColor = () => {
     if (isChild) {
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-300';
+      return 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300';
     }
     if (gender === 'M') {
       return 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300';
     }
     if (gender === 'F') {
-      return 'bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-900/30 dark:text-pink-300';
+      return 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300';
     }
     return 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-gray-300';
   };
 
-  // Couleur de l'avatar selon le genre
+  // Couleur de l'avatar selon le genre (couleurs du graphique dashboard)
   const getAvatarColor = () => {
     if (isChild) {
-      return 'bg-yellow-200 text-yellow-800';
+      return 'bg-emerald-200 text-emerald-800';
     }
     if (gender === 'M') {
       return 'bg-blue-200 text-blue-800';
     }
     if (gender === 'F') {
-      return 'bg-pink-200 text-pink-800';
+      return 'bg-purple-200 text-purple-800';
     }
     return 'bg-gray-200 text-gray-800';
   };
