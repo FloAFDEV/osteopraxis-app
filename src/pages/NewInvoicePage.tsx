@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 // import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { PatientCombobox } from "@/components/patients/PatientCombobox";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NewInvoicePage = () => {
+  const { isDemoMode } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -23,7 +25,7 @@ const NewInvoicePage = () => {
 
   // Pour la sélection patient
   const [patientsList, setPatientsList] = useState<Patient[]>([]);
-  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | string | null>(null);
 
   // Cabinet & ostéopathe sélectionnés
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
@@ -47,9 +49,10 @@ const NewInvoicePage = () => {
           setPatientsList(allPatients || []);
         }
 
-        // 2. Si patientId direct dans l’url
+        // 2. Si patientId direct dans l'url
         if (patientId && !appointmentId) {
-          const patient = await api.getPatientById(Number(patientId));
+          const patientIdValue = isDemoMode ? patientId : Number(patientId);
+          const patient = await api.getPatientById(patientIdValue);
           if (patient) {
             setPatientData(patient);
             setSelectedPatientId(patient.id);
@@ -98,11 +101,11 @@ const NewInvoicePage = () => {
   }, [searchParams]);
 
   // Gestion du choix de patient (global)
-  const handlePatientSelect = async (patientId: number) => {
-    setSelectedPatientId(Number(patientId));
+  const handlePatientSelect = async (patientId: number | string) => {
+    setSelectedPatientId(patientId);
     setIsLoading(true);
     try {
-      const patient = await api.getPatientById(Number(patientId));
+      const patient = await api.getPatientById(patientId);
       if (patient) {
         setPatientData(patient);
       }

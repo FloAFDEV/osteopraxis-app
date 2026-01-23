@@ -1,11 +1,11 @@
 /**
  * 🎯 Hook pour détecter le mode de stockage (démo/connecté)
- * Wrapper autour de DemoContext pour compatibilité
+ * Source unique de vérité : AuthContext.isDemoMode
  */
 
-import { useDemo } from '@/contexts/DemoContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useStorageMode() {
-  const { isDemoMode, isLoading } = useDemo();
-  return { isDemoMode, isLoading };
+  const { isDemoMode, loading } = useAuth();
+  return { isDemoMode, isLoading: loading };
 }

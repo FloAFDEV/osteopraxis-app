@@ -16,7 +16,12 @@ export const cabinetService = {
     if (isDemoMode) {
       console.log('🎭 [CabinetService] Mode démo → Retour cabinet démo uniquement');
       const { demoLocalStorage } = await import('@/services/demo-local-storage');
-      const demoCabinets = demoLocalStorage.getCabinets();
+      const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+      if (!demoCabinetId) {
+        console.warn('⚠️ [CabinetService] Pas de cabinetId en mode démo');
+        return [];
+      }
+      const demoCabinets = demoLocalStorage(demoCabinetId).getCabinets();
       console.log(`🎭 [CabinetService] Nombre de cabinets démo: ${demoCabinets.length}`, demoCabinets);
       return demoCabinets;
     }

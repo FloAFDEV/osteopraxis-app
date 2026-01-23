@@ -21,8 +21,9 @@ export const patientService = {
     }
   },
 
-  async getPatientById(id: number): Promise<Patient | undefined> {
-    if (!id || isNaN(id) || id <= 0) {
+  async getPatientById(id: number | string): Promise<Patient | undefined> {
+    // Validation: accept UUID strings (demo mode) or positive numbers (real mode)
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
       console.warn('ID patient invalide:', id);
       return undefined;
     }

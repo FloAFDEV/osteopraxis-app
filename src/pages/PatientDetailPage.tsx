@@ -36,13 +36,10 @@ import { toast } from "sonner";
 
 const PatientDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
+	const { isDemoMode } = useAuth();
 
 	// Guard: Vérifier si l'ID est "new" ou invalide
 	if (!id || id === "new") {
-		console.warn(
-			"PatientDetailPage: ID de patient invalide ou route 'new':",
-			id
-		);
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
@@ -59,13 +56,12 @@ const PatientDetailPage = () => {
 		);
 	}
 
-	const patientId = parseInt(id, 10);
+	// En mode démo, accepter les UUID (string)
+	// En mode réel, convertir en number
+	const patientId = isDemoMode ? id : parseInt(id, 10);
 
-	if (isNaN(patientId) || patientId <= 0) {
-		console.warn(
-			"PatientDetailPage: ID de patient non numérique ou invalide:",
-			id
-		);
+	// Validation : en mode réel, vérifier que c'est un number valide
+	if (!isDemoMode && (isNaN(patientId as number) || (patientId as number) <= 0)) {
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">

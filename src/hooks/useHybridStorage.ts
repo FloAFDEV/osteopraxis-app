@@ -20,9 +20,11 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   const [status, setStatus] = useState<HDSSecureStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Vérifier si c'est un utilisateur démo (même logique que AuthContext)
-  const isDemoUser = user?.email === 'demo@osteopraxis.com' || 
+  // Vérifier si c'est un utilisateur démo (même logique que ProtectedRoute)
+  const isDemoUser = user?.email === 'demo@osteopraxis.app' ||
+                     user?.email === 'demo@osteopraxis.com' ||
                      user?.email?.startsWith('demo-') ||
+                     user?.id === 'demo-user' ||
                      (user as any)?.is_demo === true ||
                      (user as any)?.is_demo_user === true;
 
@@ -43,9 +45,23 @@ export const useHybridStorage = (): UseHybridStorageReturn => {
   const initialize = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
+      // 🎭 Vérifier d'abord si session démo active (détection directe localStorage)
+      const demoSessionStr = localStorage.getItem('demo_session');
+      let isDemoActive = false;
+      if (demoSessionStr) {
+        try {
+          const demoSession = JSON.parse(demoSessionStr);
+          const now = Date.now();
+          // Structure useDemoSession: { started_at, expires_at, ... }
+          isDemoActive = demoSession.expires_at && now < demoSession.expires_at;
+        } catch (e) {
+          console.error('Erreur parsing demo_session:', e);
+        }
+      }
+
       // En mode démo uniquement, bypass complet du stockage sécurisé
-      if (isDemoUser) {
+      if (isDemoUser || isDemoActive) {
         console.log('🎭 Utilisateur démo détecté - Aucun stockage sécurisé requis');
         setStatus({
           isConfigured: true,

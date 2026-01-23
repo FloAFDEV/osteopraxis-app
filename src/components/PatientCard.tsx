@@ -8,6 +8,8 @@ import { Activity, Baby, Calendar, Mail, MapPin, Phone, Ruler, User, Users, Weig
 import { Link, useNavigate } from "react-router-dom";
 import { PatientQuickActions } from "@/components/patients/PatientQuickActions";
 import { usePatientDisplayInfo } from "@/hooks/usePatientDisplayInfo";
+import { DemoWatermark } from "@/components/ui/demo-watermark";
+import { useAuth } from "@/contexts/AuthContext";
 interface PatientCardProps {
   patient: Patient;
   compact?: boolean;
@@ -17,6 +19,7 @@ export function PatientCard({
   compact = false
 }: PatientCardProps) {
   const navigate = useNavigate();
+  const { isDemoMode } = useAuth();
   const { displayName, displayEmail, isDemoPatient } = usePatientDisplayInfo(patient);
 
   // Calcul exact de l'âge en années
@@ -54,7 +57,8 @@ export function PatientCard({
     navigate(`/patients/${patient.id}`);
   };
   if (compact) {
-    return <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-blue-500" onClick={handleCardClick}>
+    return <Card className="relative hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-blue-500" onClick={handleCardClick}>
+				{isDemoMode && <DemoWatermark position="top-right" size="sm" />}
 				<CardHeader className="pb-3">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
@@ -83,7 +87,8 @@ export function PatientCard({
 				</CardHeader>
 			</Card>;
   }
-  return <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={handleCardClick}>
+  return <Card className="relative hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={handleCardClick}>
+			{isDemoMode && <DemoWatermark position="top-right" size="sm" />}
 			<CardHeader className="pb-4">
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">

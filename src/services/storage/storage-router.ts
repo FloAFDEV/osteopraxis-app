@@ -72,82 +72,59 @@ export class StorageRouter {
   }
 
   /**
-   * Adapter pour le mode démo (sessionStorage éphémère)
+   * Adapter pour le mode démo (localStorage multi-tenant)
    */
   private async getDemoAdapter<T>(dataType: DataType): Promise<StorageAdapter<T>> {
-    const { demoLocalStorage } = await import('@/services/demo-local-storage');
-    
+    // Récupérer le cabinetId démo depuis la session
+    const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+    if (!demoCabinetId) {
+      throw new Error('🚨 Pas de session démo active (demo_cabinet_id manquant)');
+    }
+
+    const { DemoStorage } = await import('@/services/demo-storage');
+
     return {
       async create(data: any): Promise<T> {
-        switch (dataType) {
-          case 'patients':
-            return demoLocalStorage.addPatient(data) as T;
-          case 'appointments':
-            return demoLocalStorage.addAppointment(data) as T;
-          case 'invoices':
-            return demoLocalStorage.addInvoice(data) as T;
-          case 'cabinets':
-            return demoLocalStorage.addCabinet(data) as T;
-          default:
-            throw new Error(`Type ${dataType} non supporté en mode démo`);
-        }
+        const now = new Date().toISOString();
+        const newItem = {
+          ...data,
+          id: crypto.randomUUID(),
+          createdAt: now,
+          updatedAt: now
+        };
+        DemoStorage.add(demoCabinetId, dataType, newItem);
+        return newItem as T;
       },
-      
+
       async getById(id: string | number): Promise<T | null> {
-        switch (dataType) {
-          case 'patients':
-            return demoLocalStorage.getPatientById(Number(id)) as T;
-          case 'cabinets':
-            return demoLocalStorage.getCabinetById(Number(id)) as T;
-          default:
-            const all = await this.getAll();
-            return all.find((item: any) => item.id === id) || null;
-        }
+        const all = DemoStorage.getAll<any>(demoCabinetId, dataType);
+        return all.find((item: any) => item.id === id || item.id === String(id)) || null;
       },
-      
+
       async getAll(): Promise<T[]> {
-        switch (dataType) {
-          case 'patients':
-            return demoLocalStorage.getPatients() as T[];
-          case 'appointments':
-            return demoLocalStorage.getAppointments() as T[];
-          case 'invoices':
-            return demoLocalStorage.getInvoices() as T[];
-          case 'cabinets':
-            return demoLocalStorage.getCabinets() as T[];
-          default:
-            return [];
-        }
+        return DemoStorage.getAll<T>(demoCabinetId, dataType);
       },
-      
+
       async update(id: string | number, updates: Partial<T>): Promise<T> {
-        switch (dataType) {
-          case 'patients':
-            return demoLocalStorage.updatePatient(Number(id), updates as any) as T;
-          case 'appointments':
-            return demoLocalStorage.updateAppointment(Number(id), updates as any) as T;
-          case 'invoices':
-            return demoLocalStorage.updateInvoice(Number(id), updates as any) as T;
-          case 'cabinets':
-            return demoLocalStorage.updateCabinet(Number(id), updates as any) as T;
-          default:
-            throw new Error(`Mise à jour ${dataType} non supportée en mode démo`);
+        const all = DemoStorage.getAll<any>(demoCabinetId, dataType);
+        const existing = all.find((item: any) => item.id === id || item.id === String(id));
+        if (!existing) {
+          throw new Error(`${dataType}/${id} introuvable en mode démo`);
         }
+
+        const updated = {
+          ...existing,
+          ...updates,
+          id: existing.id, // Garder l'ID original
+          updatedAt: new Date().toISOString()
+        };
+        DemoStorage.update(demoCabinetId, dataType, existing.id, updated);
+        return updated as T;
       },
-      
+
       async delete(id: string | number): Promise<boolean> {
-        switch (dataType) {
-          case 'patients':
-            return demoLocalStorage.deletePatient(Number(id));
-          case 'appointments':
-            return demoLocalStorage.deleteAppointment(Number(id));
-          case 'invoices':
-            return demoLocalStorage.deleteInvoice(Number(id));
-          case 'cabinets':
-            return demoLocalStorage.deleteCabinet(Number(id));
-          default:
-            return true; // Simulation
-        }
+        DemoStorage.delete(demoCabinetId, dataType, String(id));
+        return true;
       }
     };
   }

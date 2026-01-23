@@ -61,8 +61,8 @@ export function Dashboard() {
 		return <LoadingState />;
 	}
 
-	// Si pas authentifié, afficher un message approprié
-	if (!isAuthenticated || !user) {
+	// Si pas authentifié ET pas en mode démo, afficher un message approprié
+	if (!isDemoMode && (!isAuthenticated || !user)) {
 		return (
 			<div className="flex flex-col items-center justify-center p-8 text-center">
 				<h2 className="text-xl font-semibold mb-2">Authentification requise</h2>
@@ -71,8 +71,8 @@ export function Dashboard() {
 		);
 	}
 
-	// Rediriger les administrateurs vers l'interface d'administration
-	if (user.role === "ADMIN") {
+	// Rediriger les administrateurs vers l'interface d'administration (uniquement en mode connecté)
+	if (user && user.role === "ADMIN") {
 		window.location.href = "/admin/dashboard";
 		return <LoadingState />;
 	}

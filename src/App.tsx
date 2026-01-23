@@ -36,11 +36,8 @@ import HelpPage from "@/pages/HelpPage";
 import TipsPage from "@/pages/TipsPage";
 import NotFound from "@/pages/NotFound";
 import NewPatientPage from "@/pages/NewPatientPage";
-import PricingPage from "@/pages/PricingPage";
-import PaymentPage from "@/pages/PaymentPage";
 import RegisterPostPaymentPage from "@/pages/RegisterPostPaymentPage";
 import ContactPage from "@/pages/ContactPage";
-import PlanSelectionPage from "@/pages/PlanSelectionPage";
 import NewInvoicePage from "@/pages/NewInvoicePage";
 import InvoiceDetailPage from "@/pages/InvoiceDetailPage";
 import NewAppointmentPage from "@/pages/NewAppointmentPage";
@@ -95,10 +92,10 @@ function App() {
           <ThemeProvider>
             <OptimizationProvider>
               <PrivacyProvider>
-                <DemoProvider>
-                  <DemoDataProvider>
-                    <Router>
-                      <AuthProvider>
+                <Router>
+                  <AuthProvider>
+                    <DemoProvider>
+                      <DemoDataProvider>
                         <HybridStorageProvider>
                           <AppWithStorageLockCheck>
                             <SecurityHeaders />
@@ -108,8 +105,6 @@ function App() {
                       <Routes>
                         {/* Routes publiques */}
                         <Route path="/" element={<Home />} />
-                        <Route path="/pricing" element={<PricingPage />} />
-                        <Route path="/payment" element={<PaymentPage />} />
                         <Route path="/register-post-payment" element={<RegisterPostPaymentPage />} />
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
@@ -194,11 +189,6 @@ function App() {
                         <Route path="/invoices/:id/edit" element={
                           <ProtectedRoute>
                             <EditInvoicePage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/plan-selection" element={
-                          <ProtectedRoute>
-                            <PlanSelectionPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/settings" element={
@@ -318,10 +308,10 @@ function App() {
                      </div>
                           </AppWithStorageLockCheck>
                        </HybridStorageProvider>
+                      </DemoDataProvider>
+                    </DemoProvider>
                    </AuthProvider>
                   </Router>
-                  </DemoDataProvider>
-                </DemoProvider>
               </PrivacyProvider>
             </OptimizationProvider>
           </ThemeProvider>

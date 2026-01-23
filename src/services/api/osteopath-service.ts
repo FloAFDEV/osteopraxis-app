@@ -10,13 +10,35 @@ import { storageRouter } from '@/services/storage/storage-router';
 import { supabaseOsteopathService } from "../supabase-api/osteopath-service";
 import { supabase } from '@/integrations/supabase/client';
 import { osteopathReplacementService } from "../supabase-api/osteopath-replacement-service";
+import { isDemoSession } from '@/utils/demo-detection';
 
 export const osteopathService = {
   async getOsteopaths(): Promise<Osteopath[]> {
+    // 🎭 Mode démo : retourner un ostéopathe fictif
+    const demoMode = await isDemoSession();
+    if (demoMode) {
+      const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+      const demoCabinetName = localStorage.getItem('demo_cabinet_name') || 'Cabinet Démo';
+      return [{
+        id: parseInt(demoCabinetId || '1'),
+        name: demoCabinetName,
+        professional_title: 'Ostéopathe D.O.',
+        rpps_number: '12345678901',
+        siret: '12345678900012',
+        ape_code: '8690F',
+        userId: '',
+        authId: '',
+        plan: 'pro', // Accès complet en démo
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        stampUrl: null
+      }];
+    }
+
     try {
       // Utiliser le service de remplacement pour obtenir les ostéopathes autorisés
       const authorizedOsteopaths = await osteopathReplacementService.getAuthorizedOsteopaths();
-      
+
       // Convertir AuthorizedOsteopath en Osteopath pour maintenir la compatibilité
       return authorizedOsteopaths.map(authOsteo => ({
         id: authOsteo.id,
@@ -39,6 +61,27 @@ export const osteopathService = {
   },
 
   async getOsteopathById(id: number): Promise<Osteopath | undefined> {
+    // 🎭 Mode démo : retourner un ostéopathe fictif
+    const demoMode = await isDemoSession();
+    if (demoMode) {
+      const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+      const demoCabinetName = localStorage.getItem('demo_cabinet_name') || 'Cabinet Démo';
+      return {
+        id: parseInt(demoCabinetId || '1'),
+        name: demoCabinetName,
+        professional_title: 'Ostéopathe D.O.',
+        rpps_number: '12345678901',
+        siret: '12345678900012',
+        ape_code: '8690F',
+        userId: '',
+        authId: '',
+        plan: 'pro', // Accès complet en démo
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        stampUrl: null
+      };
+    }
+
     try {
       return await supabaseOsteopathService.getOsteopathById(id);
     } catch (error) {

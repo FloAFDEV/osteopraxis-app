@@ -14,10 +14,9 @@ import { useCabinets } from "@/hooks/useCabinets";
 import { useHybridStorageContext } from "@/contexts/HybridStorageContext";
 
 const DashboardPage = () => {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const navigate = useNavigate();
   const { isConfigured, isLoading: storageLoading } = useHybridStorageContext();
-  const { session } = useDemoSession();
   const { patients, appointments } = useDemoData();
 
   // Log diagnostic
@@ -27,17 +26,17 @@ const DashboardPage = () => {
         email: user.email,
         osteopathId: user.osteopathId,
         hasFirstName: !!user.firstName,
-        isDemoMode: session?.isActive
+        isDemoMode
       });
     }
-  }, [user, session?.isActive]);
+  }, [user, isDemoMode]);
 
   // Charger les cabinets (sauf en mode démo)
   const { data: cabinets, isLoading: cabinetsLoading } = useCabinets();
 
-  const isDemoMode = session?.isActive;
-  const hasCabinets = !!(cabinets && cabinets.length > 0);
-  const hasPatients = isDemoMode ? patients.length > 0 : false;
+  // En mode démo : toujours considérer qu'il y a un cabinet et des patients
+  const hasCabinets = isDemoMode ? true : !!(cabinets && cabinets.length > 0);
+  const hasPatients = isDemoMode ? true : false;
 
   return (
     <Layout>

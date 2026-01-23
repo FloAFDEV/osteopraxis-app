@@ -45,7 +45,11 @@ import { CalendarAppointment } from "@/types/calendar";
 import { PatientCombobox } from "@/components/patients/PatientCombobox";
 
 const appointmentFormSchema = z.object({
-	patientId: z.number().min(1, {
+	patientId: z.union([z.number(), z.string()]).refine((val) => {
+		if (typeof val === 'number') return val > 0;
+		if (typeof val === 'string') return val.length > 0;
+		return false;
+	}, {
 		message: "L'ID du patient est requis",
 	}),
 	date: z.date({
@@ -81,7 +85,7 @@ export function AppointmentForm({
 	isEditing,
 	onSuccess,
 }: AppointmentFormProps) {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, isDemoMode } = useAuth();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [patients, setPatients] = useState<Patient[]>(propPatients || []);
 	const [customTime, setCustomTime] = useState<string | null>(null);
@@ -161,7 +165,7 @@ export function AppointmentForm({
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),
 		defaultValues: {
-			patientId: defaultValues?.patientId || Number(patientIdParam) || 1,
+			patientId: defaultValues?.patientId || (patientIdParam ? (isDemoMode ? patientIdParam : Number(patientIdParam)) : 1),
 			date: defaultValues?.date
 				? new Date(defaultValues.date)
 				: new Date(),

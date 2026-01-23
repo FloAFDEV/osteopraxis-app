@@ -8,8 +8,8 @@ import type { Patient } from "@/types";
 
 interface PatientComboboxProps {
   patients: Patient[];
-  value: number | null;
-  onChange: (id: number) => void;
+  value: number | string | null;
+  onChange: (id: number | string) => void;
   placeholder?: string;
   className?: string;
 }

@@ -9,10 +9,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { PerformanceMonitor } from "@/components/ui/performance-monitor";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDemo } from "@/contexts/DemoContext";
-import { DemoBanner } from "@/components/ui/demo-banner";
 import { cn } from "@/lib/utils";
 import {
 	Activity,
@@ -24,15 +21,11 @@ import {
 	LogOut,
 	Menu,
 	Settings,
-	Shield,
 	User,
-	UserPlus,
 	X,
 } from "lucide-react";
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { CurrentDateTimeDisplay } from "./CurrentDateTimeDisplay";
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -40,21 +33,14 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-	const { user, logout, isAdmin } = useAuth();
-	const { isDemoMode } = useDemo();
-	const queryClient = useQueryClient();
-
-	const handleClearDemo = () => {
-		// Nettoyer le cache des queries pour éviter les données résiduelles
-		queryClient.clear();
-	};
+	const { user, signOut, isDemoMode, demoCabinetName, remainingDemoTime } = useAuth();
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
 	};
 
 	const handleLogout = async () => {
-		await logout();
+		await signOut();
 	};
 
 	const getInitials = () => {
@@ -67,22 +53,21 @@ export function Layout({ children }: LayoutProps) {
 		);
 	};
 
+	const formatRemainingTime = (ms: number): string => {
+		const minutes = Math.floor(ms / 60000);
+		const seconds = Math.floor((ms % 60000) / 1000);
+		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	};
+
 	return (
 		<div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
-			{/* Bannières en haut - fixed pour éviter les conflits */}
-		{isDemoMode && (
-			<div className="fixed top-0 left-0 right-0 z-50 bg-background border-b">
-				<div className="container px-4">
-					<DemoBanner onClearDemo={handleClearDemo} />
+			{isDemoMode && (
+				<div className="bg-amber-500 text-white px-4 py-2 text-center text-sm font-medium">
+					MODE DÉMO • {demoCabinetName} • Temps restant: {formatRemainingTime(remainingDemoTime)}
 				</div>
-			</div>
-		)}
-			
-		<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden"
-		        style={{ 
-					marginTop: isDemoMode ? '60px' : '0',
-					top: '0' 
-				}}>
+			)}
+
+			<header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b print:hidden">
 				<div className="container flex h-16 items-center justify-between">
 					<div className="flex items-center gap-2">
 						<NavLink
@@ -91,16 +76,12 @@ export function Layout({ children }: LayoutProps) {
 						>
 							<Activity className="h-5 w-5 text-blue-500" />
 							<h1 className="text-2xl font-extrabold tracking-tight">
-								<span className="text-foreground">Patient</span>
-								<span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-									Hub
-								</span>
+								<span className="text-foreground">OstéoPraxis</span>
 							</h1>
 						</NavLink>
 					</div>
 
 					<div className="flex items-center gap-3">
-						<CurrentDateTimeDisplay />
 						<button
 							className="md:hidden p-2 rounded-md"
 							onClick={toggleMenu}
@@ -175,27 +156,21 @@ export function Layout({ children }: LayoutProps) {
 						<ThemeToggle />
 
 						<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-  <Button
-    variant="ghost"
-    size="sm"
-    className="ml-2 p-0 group hover:bg-transparent focus-visible:ring-0 focus-visible:outline-none"
-  >
-    <Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
-      <AvatarFallback 
-        className="
-    bg-gradient-to-r from-indigo-600 to-indigo-800
-    text-white font-semibold
-    transition-colors duration-150
-    group-hover:text-amber-300
-    group-hover:bg-transparent
-  "
->
-        {getInitials()}
-      </AvatarFallback>
-    </Avatar>
-  </Button>
-</DropdownMenuTrigger>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="ml-2 p-0 group hover:bg-transparent focus-visible:ring-0 focus-visible:outline-none"
+								>
+									<Avatar className="h-8 w-8 transition-transform duration-150 group-hover:scale-110">
+										<AvatarFallback
+											className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-semibold transition-colors duration-150 group-hover:text-amber-300 group-hover:bg-transparent"
+										>
+											{getInitials()}
+										</AvatarFallback>
+									</Avatar>
+								</Button>
+							</DropdownMenuTrigger>
 
 							<DropdownMenuContent align="end" className="w-56">
 								<DropdownMenuLabel>
@@ -235,44 +210,15 @@ export function Layout({ children }: LayoutProps) {
 										<span>Paramètres du cabinet</span>
 									</NavLink>
 								</DropdownMenuItem>
-								
-								{/* Liens admin - uniquement pour les administrateurs */}
-								{isAdmin && (
-									<>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem asChild>
-											<NavLink
-												to="/admin"
-												className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
-											>
-												<Shield className="mr-2 h-4 w-4 text-red-500" />
-												<span>Administration</span>
-											</NavLink>
-										</DropdownMenuItem>
-										<DropdownMenuItem asChild>
-											<NavLink
-												to="/admin/dashboard"
-												className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
-											>
-												<Shield className="mr-2 h-4 w-4 text-red-500" />
-												<span>Dashboard Admin</span>
-											</NavLink>
-										</DropdownMenuItem>
-									</>
-								)}
-								
-								<DropdownMenuItem asChild>
-									{/* Placeholder for future menu item */}
-								</DropdownMenuItem>
+
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
-  onClick={handleLogout}
-  className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white hover:font-bold hover:border hover:border-white/20 hover:shadow-sm rounded-sm focus:text-destructive"
->
-  <LogOut className="mr-2 h-4 w-4" />
-  <span>Déconnexion</span>
-</DropdownMenuItem>
-
+									onClick={handleLogout}
+									className="text-destructive cursor-pointer hover:bg-red-600 hover:text-white hover:font-bold hover:border hover:border-white/20 hover:shadow-sm rounded-sm focus:text-destructive"
+								>
+									<LogOut className="mr-2 h-4 w-4" />
+									<span>Déconnexion</span>
+								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</nav>
@@ -313,21 +259,6 @@ export function Layout({ children }: LayoutProps) {
 							Patients
 						</NavLink>
 						<NavLink
-							to="/patients/new"
-							className={({ isActive }) =>
-								cn(
-									"p-2 rounded-md transition-colors flex items-center gap-2",
-									isActive
-										? "bg-blue-500/10 text-foreground"
-										: "text-foreground"
-								)
-							}
-							onClick={() => setIsMenuOpen(false)}
-						>
-							<UserPlus className="h-5 w-5 text-blue-500" />
-							Ajouter un patient
-						</NavLink>
-						<NavLink
 							to="/appointments"
 							className={({ isActive }) =>
 								cn(
@@ -358,21 +289,6 @@ export function Layout({ children }: LayoutProps) {
 							Planning
 						</NavLink>
 						<NavLink
-							to="/settings"
-							className={({ isActive }) =>
-								cn(
-									"p-2 rounded-md transition-colors flex items-center gap-2",
-									isActive
-										? "bg-blue-500/10 text-foreground"
-										: "text-foreground"
-								)
-							}
-							onClick={() => setIsMenuOpen(false)}
-						>
-							<Settings className="h-5 w-5 text-blue-500" />
-							Paramètres
-						</NavLink>
-						<NavLink
 							to="/invoices"
 							className={({ isActive }) =>
 								cn(
@@ -388,127 +304,37 @@ export function Layout({ children }: LayoutProps) {
 							Notes d'honoraires
 						</NavLink>
 						<NavLink
-							to="/settings/cabinet"
+							to="/settings"
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2",
 									isActive
-										? "bg-purple-500/10 text-foreground"
+										? "bg-blue-500/10 text-foreground"
 										: "text-foreground"
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
 						>
-							<Building className="h-5 w-5 text-purple-500" />
-							Paramètres du cabinet
+							<Settings className="h-5 w-5 text-blue-500" />
+							Paramètres
 						</NavLink>
-
-						{/* Liens admin - uniquement pour les administrateurs */}
-						{isAdmin && (
-							<>
-								<NavLink
-									to="/admin"
-									className={({ isActive }) =>
-										cn(
-											"p-2 rounded-md transition-colors flex items-center gap-2",
-											isActive
-												? "bg-red-500/10 text-foreground"
-												: "text-foreground"
-										)
-									}
-									onClick={() => setIsMenuOpen(false)}
-								>
-									<Shield className="h-5 w-5 text-red-500" />
-									Administration
-								</NavLink>
-								<NavLink
-									to="/admin/dashboard"
-									className={({ isActive }) =>
-										cn(
-											"p-2 rounded-md transition-colors flex items-center gap-2",
-											isActive
-												? "bg-red-500/10 text-foreground"
-												: "text-foreground"
-										)
-									}
-									onClick={() => setIsMenuOpen(false)}
-								>
-									<Shield className="h-5 w-5 text-red-500" />
-									Dashboard Admin
-								</NavLink>
-							</>
-						)}
-
-						<div className="p-2 flex items-center justify-between">
-							<span className="font-light">Thème</span>
-							<ThemeToggle />
-						</div>
-
-						<div
+						<button
 							onClick={() => {
 								handleLogout();
 								setIsMenuOpen(false);
 							}}
-							className="p-2 rounded-md transition-colors flex items-center gap-2 text-destructive mt-4 cursor-pointer font-thin"
+							className="p-2 rounded-md text-destructive flex items-center gap-2 hover:bg-red-500/10"
 						>
 							<LogOut className="h-5 w-5" />
 							Déconnexion
-						</div>
+						</button>
 					</nav>
 				</div>
 			)}
 
-			<main className="flex-1 container px-4 md:px-6 py-6 print:p-0 print:m-0">
+			<main className="flex-1 container py-6 print:py-0">
 				{children}
 			</main>
-
-			<footer className="border-t py-6 bg-muted/30 print:hidden">
-				<div className="container space-y-4">
-					{/* Badges de conformité */}
-					<div className="flex flex-wrap items-center justify-center gap-3 pb-3 border-b border-border/50">
-						<div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
-							<Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
-							<span className="text-xs font-medium text-green-700 dark:text-green-300">
-								🔒 Conformité HDS
-							</span>
-						</div>
-						<div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
-							<Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-							<span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-								🛡️ RGPD - Chiffrement AES-256
-							</span>
-						</div>
-						<div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md">
-							<Shield className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-							<span className="text-xs font-medium text-purple-700 dark:text-purple-300">
-								📍 Données hébergées localement
-							</span>
-						</div>
-					</div>
-					
-					{/* Liens et copyright */}
-					<div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-						<p>© 2025 OstéoPraxis. Tous droits réservés.</p>
-						<div className="flex items-center gap-4">
-							<NavLink
-								to="/terms"
-								className="hover:text-blue-500 transition-colors"
-							>
-								Conditions d&apos;utilisation
-							</NavLink>
-							<NavLink
-								to="/privacy"
-								className="hover:text-purple-500 transition-colors"
-							>
-								Politique de confidentialité
-							</NavLink>
-						</div>
-					</div>
-				</div>
-			</footer>
-
-			{/* Performance Monitor - visible uniquement en développement */}
-			<PerformanceMonitor />
 		</div>
 	);
 }

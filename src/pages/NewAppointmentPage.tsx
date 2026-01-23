@@ -7,8 +7,10 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NewAppointmentPage = () => {
+	const { isDemoMode } = useAuth();
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -16,8 +18,9 @@ const NewAppointmentPage = () => {
 	const navigate = useNavigate();
 	const queryParams = new URLSearchParams(location.search);
 
-	const patientId = queryParams.get("patientId")
-		? parseInt(queryParams.get("patientId")!)
+	const patientIdParam = queryParams.get("patientId");
+	const patientId = patientIdParam
+		? (isDemoMode ? patientIdParam : parseInt(patientIdParam))
 		: undefined;
 
 	const dateParam = queryParams.get("date");

@@ -60,7 +60,7 @@ export interface Cabinet {
 }
 
 export interface Patient {
-	id: number;
+	id: number | string;
 	firstName: string;
 	lastName: string;
 	email: string | null;
@@ -173,8 +173,8 @@ export interface Patient {
 }
 
 export interface Appointment {
-	id: number;
-	patientId: number;
+	id: number | string;
+	patientId: number | string;
 	cabinetId: number;
 	osteopathId: number;
 	date: string; // Timestamp de début de la séance - seule colonne réelle en DB
@@ -195,7 +195,7 @@ export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELED" | "RESCHE
 
 // Type d'entrée pour créer un rendez-vous - aligné avec la structure DB
 export interface CreateAppointmentPayload {
-	patientId: number;
+	patientId: number | string;
 	cabinetId: number;
 	osteopathId: number;
 	date: string; // Timestamp de début de la séance - seule colonne réelle en DB

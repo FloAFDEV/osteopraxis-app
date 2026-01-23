@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { osteopathCabinetService } from "@/services/supabase-api/osteopath-cabinet-service";
 import { api } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface PatientOwnershipInfo {
   isOwnPatient: boolean;
@@ -9,7 +10,8 @@ export interface PatientOwnershipInfo {
   loading: boolean;
 }
 
-export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
+export function usePatientOwnership(patientId: number | string): PatientOwnershipInfo {
+  const { isDemoMode } = useAuth();
   const [ownershipInfo, setOwnershipInfo] = useState<PatientOwnershipInfo>({
     isOwnPatient: false,
     isCabinetPatient: false,
@@ -18,8 +20,18 @@ export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
 
   useEffect(() => {
     const checkOwnership = async () => {
-      // Vérification de l'ID patient avant toute opération
-      if (!patientId || isNaN(patientId) || patientId <= 0) {
+      // En mode démo : tous les patients appartiennent à l'utilisateur démo
+      if (isDemoMode) {
+        setOwnershipInfo({
+          isOwnPatient: true,
+          isCabinetPatient: false,
+          loading: false
+        });
+        return;
+      }
+
+      // Vérification de l'ID patient avant toute opération (mode réel uniquement)
+      if (!patientId || (typeof patientId === 'number' && (isNaN(patientId) || patientId <= 0))) {
         console.warn("usePatientOwnership appelé avec un ID patient invalide:", patientId);
         setOwnershipInfo({
           isOwnPatient: false,
@@ -65,7 +77,7 @@ export function usePatientOwnership(patientId: number): PatientOwnershipInfo {
     if (patientId) {
       checkOwnership();
     }
-  }, [patientId]);
+  }, [patientId, isDemoMode]);
 
   return ownershipInfo;
 }

@@ -71,7 +71,16 @@ class OsteopathStatusService {
   /**
    * Récupérer un ostéopathe par ID avec son statut
    */
-  async getOsteopathById(osteopathId: number): Promise<OsteopathWithStatus | null> {
+  async getOsteopathById(osteopathId: number | string): Promise<OsteopathWithStatus | null> {
+    // 🎭 En mode démo, skip l'appel Supabase
+    // Détecter le mode démo : soit 'demo-osteopath', soit un UUID (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+    const isUUID = typeof osteopathId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(osteopathId);
+
+    if (osteopathId === 'demo-osteopath' || isUUID) {
+      console.log('🎭 [OsteopathStatusService] Mode démo détecté (UUID ou demo-osteopath), skip Supabase');
+      return null;
+    }
+
     const { data, error } = await supabase
       .from('Osteopath')
       .select('*')
