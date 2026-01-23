@@ -84,9 +84,13 @@ export function InvoiceForm({
 
   // SUBMIT
   const onSubmit = async (data: any) => {
+    console.log('📝 [InvoiceForm] onSubmit appelé avec data:', data);
+    console.log('👤 [InvoiceForm] Patient:', patient);
+    console.log('🏥 [InvoiceForm] Osteopath:', data.osteopathId);
+
     // Validation avec alertes
     const validationErrors = [];
-    
+
     if (!patient) {
       validationErrors.push("• Patient requis");
     }
