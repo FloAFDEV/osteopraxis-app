@@ -169,6 +169,14 @@ export function useDemoSession() {
       setDemoUserId(session.userId);
       setDemoCabinetId(session.cabinetId);
       setDemoCabinetName(session.cabinetName);
+
+      // 🔄 Vérifier si les données démo existent, sinon les re-créer
+      const { DemoStorage } = require('@/services/demo-storage');
+      const existingCabinet = DemoStorage.get(session.cabinetId, 'cabinet');
+      if (!existingCabinet) {
+        console.log('🔄 [useDemoSession] Session active mais données manquantes - Re-création');
+        seedDemoData(session.cabinetId, session.userId, session.cabinetName);
+      }
     }
   }, [loadSession]);
 
