@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isDemoSession } from "@/utils/demo-detection";
+import { DemoStorage } from "@/services/demo-storage";
 
 export interface AuthorizedOsteopath {
   id: number;
@@ -24,18 +26,45 @@ export function useAuthorizedOsteopaths() {
     try {
       setLoading(true);
       setError(null);
-      
-      // Récupérer l'utilisateur connecté
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        // No authenticated user
+
+      // Vérifier si on est en mode démo
+      const isDemo = await isDemoSession();
+
+      if (isDemo) {
+        // Mode démo : charger depuis localStorage
+        const demoCabinetId = localStorage.getItem('demo_cabinet_id');
+        console.log('🔍 [useAuthorizedOsteopaths] Mode démo, cabinetId:', demoCabinetId);
+
+        if (demoCabinetId) {
+          const demoOsteopath = DemoStorage.get<any>(demoCabinetId, 'osteopath');
+          console.log('👤 [useAuthorizedOsteopaths] Ostéopathe démo chargé:', demoOsteopath);
+
+          if (demoOsteopath) {
+            const transformedData: AuthorizedOsteopath[] = [{
+              id: demoOsteopath.id || demoOsteopath.userId,
+              name: demoOsteopath.name,
+              professional_title: demoOsteopath.professional_title || '',
+              rpps_number: demoOsteopath.rpps_number || '',
+              siret: demoOsteopath.siret || '',
+              access_type: 'self' as const
+            }];
+            setOsteopaths(transformedData);
+            return;
+          }
+        }
+
+        console.warn('⚠️ [useAuthorizedOsteopaths] Aucune donnée démo trouvée');
         setOsteopaths([]);
         return;
       }
 
-      // ✅ Chargement ostéopathes autorisés
+      // Mode connecté : utiliser Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setOsteopaths([]);
+        return;
+      }
 
-      // Utiliser la fonction de base de données pour récupérer les ostéopathes autorisés
       const { data, error } = await supabase.rpc('get_authorized_osteopaths', {
         current_osteopath_auth_id: user.id
       });
@@ -45,9 +74,6 @@ export function useAuthorizedOsteopaths() {
         throw error;
       }
 
-      // ✅ Ostéopathes autorisés chargés
-      
-      // Transformer les données pour s'assurer que le type access_type est correct
       const transformedData: AuthorizedOsteopath[] = (data || []).map((item: any) => ({
         id: item.id,
         name: item.name,
@@ -56,7 +82,7 @@ export function useAuthorizedOsteopaths() {
         siret: item.siret || '',
         access_type: item.access_type as 'self' | 'replacement' | 'cabinet_colleague'
       }));
-      
+
       setOsteopaths(transformedData);
     } catch (err) {
       console.error("Erreur lors du chargement des ostéopathes autorisés:", err);
