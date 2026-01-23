@@ -239,7 +239,10 @@ export function Layout({ children }: LayoutProps) {
 			</header>
 
 			{isMenuOpen && (
-				<div className="md:hidden fixed inset-0 z-30 bg-background/95 pt-16 print:hidden">
+				<div className={cn(
+					"md:hidden fixed inset-0 z-30 bg-background/95 print:hidden",
+					isDemoMode ? "pt-[104px]" : "pt-16"
+				)}>
 					<nav className="container py-4 flex flex-col gap-4">
 						<NavLink
 							to="/"
