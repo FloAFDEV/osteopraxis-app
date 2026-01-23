@@ -59,7 +59,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
     },
     {
       name: "Profil",
-      href: "/osteopath-profile",
+      href: "/settings/profile",
       icon: User,
       help: "Gérez votre profil professionnel et vos informations"
     },
