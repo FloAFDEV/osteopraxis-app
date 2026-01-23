@@ -52,7 +52,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
       help: "Gérez les cabinets où vous exercez et leurs informations"
     },
     {
-      name: "Factures",
+      name: "Notes d'honoraires",
       href: "/invoices",
       icon: FileText,
       help: "Créez et suivez vos notes d'honoraires et factures"
