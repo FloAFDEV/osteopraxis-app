@@ -60,7 +60,7 @@ const SchedulePage = () => {
     return api.getAppointments();
   }, {
     ttl: 2 * 60 * 1000,
-    enabled: !!user && isAuthenticated
+    enabled: isDemoMode || (!!user && isAuthenticated)
   });
   const {
     data: cachedPatients,
@@ -72,7 +72,7 @@ const SchedulePage = () => {
     return api.getPatients();
   }, {
     ttl: 10 * 60 * 1000,
-    enabled: !!user && isAuthenticated
+    enabled: isDemoMode || (!!user && isAuthenticated)
   });
 
   // États locaux mis à jour depuis le cache

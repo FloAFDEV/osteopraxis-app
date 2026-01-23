@@ -26,8 +26,14 @@ const SettingsPage = () => {
 
 	// Déterminer le mode (démo ou connecté)
 	useEffect(() => {
-		isDemoSession().then(setIsDemoMode);
-	}, []);
+		isDemoSession().then((isDemo) => {
+			setIsDemoMode(isDemo);
+			// En mode démo, rediriger automatiquement vers le guide d'utilisation
+			if (isDemo) {
+				navigate('/help', { replace: true });
+			}
+		});
+	}, [navigate]);
 
 	// En mode démo, seul le guide d'utilisation est accessible
 	const settingsOptions = isDemoMode 
