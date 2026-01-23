@@ -58,7 +58,8 @@ export const patientService = {
   },
 
   async updatePatient(patient: Patient): Promise<Patient> {
-    if (!patient.id || isNaN(patient.id) || patient.id <= 0) {
+    // Support UUID en mode démo et number en mode connecté
+    if (!patient.id || (typeof patient.id === 'number' && (isNaN(patient.id) || patient.id <= 0))) {
       throw new Error("ID patient invalide pour la mise à jour");
     }
 
@@ -71,8 +72,9 @@ export const patientService = {
     }
   },
 
-  async deletePatient(id: number): Promise<boolean> {
-    if (!id || isNaN(id) || id <= 0) {
+  async deletePatient(id: number | string): Promise<boolean> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
       console.warn('ID patient invalide pour suppression:', id);
       return false;
     }

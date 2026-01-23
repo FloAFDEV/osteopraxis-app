@@ -1,96 +1,99 @@
 /**
  * Invoice API Service
- * Gère les factures avec support mode démo
+ * Gère les factures via StorageRouter (mode démo + mode connecté)
  */
 
 import type { Invoice } from '@/types';
-
-// Helper pour vérifier le mode démo
-const isDemoMode = (): boolean => {
-  try {
-    const demoSessionStr = localStorage.getItem('demo_session');
-    if (!demoSessionStr) return false;
-
-    const session = JSON.parse(demoSessionStr);
-    const now = Date.now();
-    return session.expires_at && now < session.expires_at;
-  } catch {
-    return false;
-  }
-};
-
-// Récupérer les données démo depuis DemoDataContext
-const getDemoInvoices = (): Invoice[] => {
-  // En mode démo, retourner tableau vide pour l'instant
-  // Les données réelles viennent de DemoDataContext dans les composants
-  return [];
-};
+import { storageRouter } from '../storage/storage-router';
 
 export const invoiceService = {
-  getInvoices: async (): Promise<Invoice[]> => {
-    if (isDemoMode()) {
-      return getDemoInvoices();
+  async getInvoices(): Promise<Invoice[]> {
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      return await adapter.getAll();
+    } catch (error) {
+      console.error('❌ Erreur récupération factures:', error);
+      return [];
     }
-
-    // TODO: Implémenter appel Supabase pour mode réel
-    return [];
   },
 
-  getInvoiceById: async (id: string): Promise<Invoice | null> => {
-    if (isDemoMode()) {
-      const invoices = getDemoInvoices();
-      return invoices.find(i => i.id === id) || null;
+  async getInvoiceById(id: number | string): Promise<Invoice | null> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
+      console.warn('ID facture invalide:', id);
+      return null;
     }
 
-    // TODO: Implémenter appel Supabase
-    return null;
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      return await adapter.getById(id);
+    } catch (error) {
+      console.error('❌ Erreur récupération facture:', error);
+      return null;
+    }
   },
 
-  getInvoicesByPatientId: async (patientId: string): Promise<Invoice[]> => {
-    if (isDemoMode()) {
-      const invoices = getDemoInvoices();
-      return invoices.filter(i => i.patientId === patientId);
+  async getInvoicesByPatientId(patientId: number | string): Promise<Invoice[]> {
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      const allInvoices = await adapter.getAll();
+      return allInvoices.filter(i => i.patientId === patientId || i.patientId === String(patientId));
+    } catch (error) {
+      console.error('❌ Erreur récupération factures patient:', error);
+      return [];
     }
-
-    // TODO: Implémenter appel Supabase
-    return [];
   },
 
-  getInvoicesByAppointmentId: async (appointmentId: string): Promise<Invoice[]> => {
-    if (isDemoMode()) {
-      const invoices = getDemoInvoices();
-      return invoices.filter(i => i.appointmentId === appointmentId);
+  async getInvoicesByAppointmentId(appointmentId: number | string): Promise<Invoice[]> {
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      const allInvoices = await adapter.getAll();
+      return allInvoices.filter(i => i.appointmentId === appointmentId || i.appointmentId === String(appointmentId));
+    } catch (error) {
+      console.error('❌ Erreur récupération factures rendez-vous:', error);
+      return [];
     }
-
-    // TODO: Implémenter appel Supabase
-    return [];
   },
 
-  createInvoice: async (invoice: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> => {
-    if (isDemoMode()) {
-      throw new Error('Création de facture non disponible en mode démo');
+  async createInvoice(invoice: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> {
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      return await adapter.create(invoice);
+    } catch (error) {
+      console.error('❌ Erreur création facture:', error);
+      throw new Error('❌ Service facture indisponible');
     }
-
-    // TODO: Implémenter appel Supabase
-    throw new Error('Not implemented');
   },
 
-  updateInvoice: async (id: string, data: Partial<Invoice>): Promise<Invoice> => {
-    if (isDemoMode()) {
-      throw new Error('Modification de facture non disponible en mode démo');
+  async updateInvoice(id: number | string, data: Partial<Invoice>): Promise<Invoice> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
+      throw new Error("ID facture invalide pour la mise à jour");
     }
 
-    // TODO: Implémenter appel Supabase
-    throw new Error('Not implemented');
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      return await adapter.update(id, data);
+    } catch (error) {
+      console.error('❌ Erreur mise à jour facture:', error);
+      throw new Error('❌ Service facture indisponible');
+    }
   },
 
-  deleteInvoice: async (id: string): Promise<void> => {
-    if (isDemoMode()) {
-      throw new Error('Suppression de facture non disponible en mode démo');
+  async deleteInvoice(id: number | string): Promise<boolean> {
+    // Support UUID en mode démo et number en mode connecté
+    if (!id || (typeof id === 'number' && (isNaN(id) || id <= 0))) {
+      console.warn('ID facture invalide pour suppression:', id);
+      return false;
     }
 
-    // TODO: Implémenter appel Supabase
-    throw new Error('Not implemented');
+    try {
+      const adapter = await storageRouter.route<Invoice>('invoices');
+      return await adapter.delete(id);
+    } catch (error) {
+      console.error('❌ Erreur suppression facture:', error);
+      return false;
+    }
   },
 };
 
