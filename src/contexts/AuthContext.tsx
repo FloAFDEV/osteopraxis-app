@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useDemoSession } from '@/hooks/useDemoSession';
 import { DemoStorage } from '@/services/demo-storage';
 import { toast } from 'sonner';
@@ -46,29 +46,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<DemoUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const createDemoUser = (userId: string): DemoUser => {
+  // Mémoiser le user pour éviter les re-renders inutiles
+  const demoUser = useMemo(() => {
+    if (!isDemoActive || !demoUserId) return null;
+
     return {
-      id: userId,
+      id: demoUserId,
       email: 'demo@osteopraxis.fr',
-      role: 'demo',
-      osteopathId: userId,
+      role: 'demo' as const,
+      osteopathId: demoUserId,
       firstName: 'Utilisateur',
       lastName: 'Démo',
       user_metadata: {
         full_name: 'Utilisateur Démo'
       }
     };
-  };
+  }, [isDemoActive, demoUserId]);
 
   useEffect(() => {
-    if (isDemoActive && demoUserId) {
-      setUser(createDemoUser(demoUserId));
-      setLoading(false);
-    } else {
-      setUser(null);
-      setLoading(false);
-    }
-  }, [isDemoActive, demoUserId]);
+    setUser(demoUser);
+    setLoading(false);
+  }, [demoUser]);
 
   const handleSignOut = async () => {
     if (isDemoActive && demoCabinetId) {
