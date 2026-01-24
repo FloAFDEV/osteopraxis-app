@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import type { Patient } from "@/types";
+import { PatientBadge } from "./PatientBadge";
 
 interface PatientComboboxProps {
   patients: Patient[];
@@ -44,16 +45,28 @@ export function PatientCombobox({
           className={`w-full justify-between ${className || ""}`}
           aria-expanded={open}
         >
-          <span className="truncate">
-            {selected
-              ? `${selected.lastName} ${selected.firstName} — ${
-                  selected.birthDate
-                    ? new Date(selected.birthDate).toLocaleDateString('fr-FR')
-                    : ""
-                }`
-              : placeholder}
-          </span>
-          <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+          {selected ? (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <PatientBadge
+                firstName={selected.firstName}
+                lastName={selected.lastName}
+                gender={selected.gender}
+                birthDate={selected.birthDate}
+                photoUrl={selected.photoUrl}
+                size="sm"
+                showGenderBadge={false}
+              />
+              <span className="truncate">
+                {selected.lastName} {selected.firstName}
+                {selected.birthDate && (
+                  <> — {new Date(selected.birthDate).toLocaleDateString('fr-FR')}</>
+                )}
+              </span>
+            </div>
+          ) : (
+            <span className="truncate">{placeholder}</span>
+          )}
+          <ChevronDown className="ml-2 h-4 w-4 opacity-50 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="p-0 w-[320px]" side="bottom">
@@ -69,13 +82,27 @@ export function PatientCombobox({
                   onChange(patient.id);
                   setOpen(false);
                 }}
+                className="flex items-center gap-2 py-3"
               >
-                <span>
-                  {patient.lastName} {patient.firstName}
-                  {patient.birthDate &&
-                    <> — <span className="text-xs text-gray-500">{new Date(patient.birthDate).toLocaleDateString('fr-FR')}</span></>
-                  }
-                </span>
+                <PatientBadge
+                  firstName={patient.firstName}
+                  lastName={patient.lastName}
+                  gender={patient.gender}
+                  birthDate={patient.birthDate}
+                  photoUrl={patient.photoUrl}
+                  size="sm"
+                  showGenderBadge={true}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">
+                    {patient.lastName} {patient.firstName}
+                  </div>
+                  {patient.birthDate && (
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(patient.birthDate).toLocaleDateString('fr-FR')}
+                    </div>
+                  )}
+                </div>
               </CommandItem>
             ))}
           </CommandList>

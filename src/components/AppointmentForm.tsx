@@ -72,7 +72,7 @@ type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
 interface AppointmentFormProps {
 	defaultValues?: Partial<AppointmentFormValues>;
-	appointmentId?: number;
+	appointmentId?: number | string; // Support des IDs numériques et UUID
 	patients?: Patient[]; // Ajouté pour NewAppointmentPage
 	isEditing?: boolean;
 	onSuccess?: (newAppointment?: any) => void; // Callback de succès avec paramètre optionnel

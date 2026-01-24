@@ -129,7 +129,17 @@ const AppointmentsPage = () => {
 		const future: Appointment[] = [];
 
 		filteredApps.forEach((appointment) => {
-			const appointmentDate = new Date(appointment.dateTime);
+			// Utiliser date ou dateTime selon ce qui est disponible
+			const dateString = appointment.date || appointment.dateTime;
+			if (!dateString) {
+				console.warn('⚠️ Appointment sans date:', appointment);
+				return;
+			}
+			const appointmentDate = new Date(dateString);
+			if (isNaN(appointmentDate.getTime())) {
+				console.warn('⚠️ Date invalide pour appointment:', appointment);
+				return;
+			}
 			const appointmentDateStr = format(appointmentDate, "yyyy-MM-dd");
 
 			// Mettre les rendez-vous COMPLETED dans "past" même si leur date est future
@@ -173,7 +183,16 @@ const AppointmentsPage = () => {
 	): Record<string, Record<string, Appointment[]>> => {
 		const grouped: Record<string, Record<string, Appointment[]>> = {};
 		apps.forEach((appointment) => {
-			const date = new Date(appointment.dateTime);
+			const dateString = appointment.date || appointment.dateTime;
+			if (!dateString) {
+				console.warn('⚠️ Appointment sans date dans groupBy:', appointment);
+				return;
+			}
+			const date = new Date(dateString);
+			if (isNaN(date.getTime())) {
+				console.warn('⚠️ Date invalide dans groupBy:', appointment);
+				return;
+			}
 			const monthYear = format(date, "MMMM yyyy", { locale: fr });
 			const day = format(date, "yyyy-MM-dd");
 
@@ -220,9 +239,11 @@ const AppointmentsPage = () => {
 	const filteredPastAppointmentsByYear = pastAppointments.filter(
 		(appointment) => {
 			if (!selectedPastYear) return true;
-			return (
-				new Date(appointment.dateTime).getFullYear() === selectedPastYear
-			);
+			const dateString = appointment.date || appointment.dateTime;
+			if (!dateString) return false;
+			const date = new Date(dateString);
+			if (isNaN(date.getTime())) return false;
+			return date.getFullYear() === selectedPastYear;
 		}
 	);
 

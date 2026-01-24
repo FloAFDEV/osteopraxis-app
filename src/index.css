@@ -169,22 +169,22 @@ textarea:focus-visible {
 		--border: 240 8% 90%;
 		--input: 240 8% 90%;
 
-		/* Primary Colors - Bleu médical professionnel */
-		--primary: 210 100% 50%;
+		/* Primary Colors - Bleu médical professionnel (nuancé, moins Bootstrap) */
+		--primary: 210 70% 55%;
 		--primary-foreground: 240 17% 98%;
-		--primary-variant: 200 95% 45%;
+		--primary-variant: 200 65% 50%;
 
-		/* Interactive Colors - Bleu moderne professionnel */
-		--interactive: 217 91% 60%;
+		/* Interactive Colors - Bleu moderne professionnel (nuancé) */
+		--interactive: 217 75% 58%;
 		--interactive-foreground: 240 17% 98%;
-		--interactive-hover: 217 91% 55%;
+		--interactive-hover: 217 75% 52%;
 
 		/* Secondary Colors - Neutres sobres */
 		--secondary: 240 8% 92%;
 		--secondary-foreground: 240 10% 25%;
 
-		/* Accent Colors - Bleu-cyan médical */
-		--accent: 195 100% 40%;
+		/* Accent Colors - Bleu-cyan médical (nuancé) */
+		--accent: 195 80% 45%;
 		--accent-foreground: 240 17% 98%;
 
 		/* Destructive Colors */
@@ -236,22 +236,22 @@ textarea:focus-visible {
 		--border: 240 8% 20%;
 		--input: 240 8% 20%;
 
-		/* Dark Primary Colors - Bleu médical professionnel */
-		--primary: 210 85% 60%;
+		/* Dark Primary Colors - Bleu médical professionnel (nuancé) */
+		--primary: 210 68% 62%;
 		--primary-foreground: 240 10% 8%;
-		--primary-variant: 200 80% 55%;
+		--primary-variant: 200 63% 57%;
 
-		/* Dark Interactive Colors - Bleu moderne professionnel */
-		--interactive: 217 85% 65%;
+		/* Dark Interactive Colors - Bleu moderne professionnel (nuancé) */
+		--interactive: 217 70% 65%;
 		--interactive-foreground: 240 10% 8%;
-		--interactive-hover: 217 85% 60%;
+		--interactive-hover: 217 70% 58%;
 
 		/* Dark Secondary Colors - Neutres sobres */
 		--secondary: 240 8% 15%;
 		--secondary-foreground: 240 6% 75%;
 
-		/* Dark Accent Colors - Bleu-cyan médical */
-		--accent: 195 85% 50%;
+		/* Dark Accent Colors - Bleu-cyan médical (nuancé) */
+		--accent: 195 70% 52%;
 		--accent-foreground: 240 10% 8%;
 
 		/* Dark Destructive Colors */

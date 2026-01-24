@@ -121,34 +121,50 @@ async function calculateExcelHash(workbook: ExcelJS.Workbook): Promise<string> {
 }
 
 export async function addWatermarkExcel(
-  workbook: ExcelJS.Workbook, 
-  osteopathName?: string, 
+  workbook: ExcelJS.Workbook,
+  osteopathName?: string,
   isDemo: boolean = false
 ): Promise<{ workbook: ExcelJS.Workbook; fileHash: string }> {
   if (isDemo) {
     // Mode démo : ajouter des avertissements visibles
     workbook.eachSheet((worksheet) => {
+      // Vérifier si l'avertissement a déjà été ajouté
+      const firstCell = worksheet.getCell('A1');
+      const alreadyHasWarning = firstCell.value &&
+        typeof firstCell.value === 'string' &&
+        firstCell.value.includes('DEMONSTRATION');
+
+      // Ne pas ajouter l'avertissement si déjà présent
+      if (alreadyHasWarning) {
+        return;
+      }
+
       // Insérer une ligne en haut
       worksheet.insertRow(1, []);
       worksheet.insertRow(1, []);
-      
+
       // Ajouter le message d'avertissement
       const warningCell = worksheet.getCell('A1');
       warningCell.value = '[!] ATTENTION : DONNEES DE DEMONSTRATION - NON VALABLES POUR USAGE REEL [!]';
-      warningCell.font = { 
-        bold: true, 
+      warningCell.font = {
+        bold: true,
         color: { argb: 'FFFF0000' }, // Rouge
-        size: 14 
+        size: 14
       };
       warningCell.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFFFE6E6' } // Fond rouge clair
       };
-      
-      // Fusionner sur plusieurs colonnes pour visibilité
-      worksheet.mergeCells('A1:H1');
-      
+
+      // Fusionner sur plusieurs colonnes pour visibilité (vérifier d'abord si pas déjà fusionné)
+      try {
+        worksheet.mergeCells('A1:H1');
+      } catch (e) {
+        // Cellules déjà fusionnées, ignorer
+        console.log('Cellules déjà fusionnées, skip');
+      }
+
       // Ajuster la hauteur de la ligne
       worksheet.getRow(1).height = 25;
     });

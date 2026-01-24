@@ -28,12 +28,8 @@ const EditAppointmentPage = () => {
           return;
         }
 
-        const appointmentId = parseInt(id, 10);
-        if (isNaN(appointmentId)) {
-          setError("ID de séance invalide");
-          toast.error("ID de séance invalide");
-          return;
-        }
+        // Support à la fois les IDs numériques (mode connecté) et les UUIDs (mode démo)
+        const appointmentId: number | string = !isNaN(parseInt(id, 10)) ? parseInt(id, 10) : id;
 
         console.log(`EditAppointmentPage: Loading appointment ${appointmentId}`);
 
@@ -160,7 +156,7 @@ const EditAppointmentPage = () => {
               status: appointment?.status,
               website: "", // Champ honeypot
             }}
-            appointmentId={Number(id)}
+            appointmentId={!isNaN(parseInt(id!, 10)) ? parseInt(id!, 10) : id!}
           />
         </section>
       </div>

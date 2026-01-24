@@ -25,7 +25,7 @@ export function AppointmentsOverview({
 	data,
 	className,
 }: AppointmentsOverviewProps) {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, isDemoMode } = useAuth();
 	const [upcomingAppointments, setUpcomingAppointments] = useState<
 		Appointment[]
 	>([]);
@@ -70,8 +70,9 @@ export function AppointmentsOverview({
 	};
 
 	useEffect(() => {
-		if (!isAuthenticated) return; // Ne pas charger si pas authentifié
-		
+		// Charger les données si authentifié OU en mode démo
+		if (!isAuthenticated && !isDemoMode) return;
+
 		const fetchData = async () => {
 			try {
 				// Récupérer les rendez-vous et les patients
@@ -79,6 +80,9 @@ export function AppointmentsOverview({
 					api.getAppointments(),
 					api.getPatients(),
 				]);
+
+				console.log('📅 [AppointmentsOverview] Appointments chargés:', appointmentsData.length);
+				console.log('👥 [AppointmentsOverview] Patients chargés:', patientsData.length);
 
 				setAllAppointments(appointmentsData);
 				setPatients(patientsData);
@@ -93,10 +97,10 @@ export function AppointmentsOverview({
 			}
 		};
 		fetchData();
-	}, [isAuthenticated]);
+	}, [isAuthenticated, isDemoMode]);
 
 	// Obtenir les informations sur un patient par ID
-	const getPatientById = (patientId: number) => {
+	const getPatientById = (patientId: number | string) => {
 		return patients.find((p) => p.id === patientId);
 	};
 
@@ -107,10 +111,10 @@ export function AppointmentsOverview({
 		return age < 12;
 	};
 
-	const handleAppointmentClick = (appointmentId: number) => {
+	const handleAppointmentClick = (appointmentId: number | string) => {
 		try {
-			// Fix: Assurons-nous que l'ID est un nombre valide
-			if (!appointmentId || isNaN(appointmentId)) {
+			// Fix: Assurons-nous que l'ID est valide
+			if (!appointmentId) {
 				toast.error("ID de rendez-vous invalide");
 				return;
 			}
@@ -130,9 +134,9 @@ export function AppointmentsOverview({
 		}
 	};
 
-	const handleCreateInvoice = (appointmentId: number) => {
+	const handleCreateInvoice = (appointmentId: number | string) => {
 		try {
-			if (!appointmentId || isNaN(appointmentId)) {
+			if (!appointmentId) {
 				toast.error("ID de rendez-vous invalide");
 				return;
 			}
@@ -182,9 +186,9 @@ export function AppointmentsOverview({
 					<div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
 						<User
 							className={`h-6 w-6 ${
-								patient?.gender === "Femme"
+								patient?.gender === "F" || patient?.gender === "Femme"
 									? "text-pink-500"
-									: patient?.gender === "Homme"
+									: patient?.gender === "M" || patient?.gender === "Homme"
 									? "text-blue-500"
 									: "text-gray-500"
 							}`}
@@ -196,9 +200,9 @@ export function AppointmentsOverview({
 					<Link
 						to={`/patients/${appointment.patientId}`}
 						className={`font-medium hover:underline text-base truncate inline-flex items-center ${
-							patient?.gender === "Femme"
+							patient?.gender === "F" || patient?.gender === "Femme"
 								? "text-pink-700 dark:text-pink-400"
-								: patient?.gender === "Homme"
+								: patient?.gender === "M" || patient?.gender === "Homme"
 								? "text-blue-700 dark:text-blue-400"
 								: "text-slate-800 dark:text-white"
 						}`}
@@ -268,85 +272,75 @@ export function AppointmentsOverview({
 	};
 
 	return (
-		<Card
-			className={`${className} shadow-sm hover:shadow-md transition-shadow`}
-		>
-			<CardHeader className="border-b bg-slate-50 dark:bg-slate-900/50">
-				<CardTitle className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<Calendar className="h-5 w-5 text-blue-600" />
-						<span>Prochaines séances</span>
-					</div>
-					<Badge
-						variant="outline"
-						className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-					>
-						{(nextAppointment &&
-						isToday(parseISO(nextAppointment.date))
-							? 1
-							: 0) +
-							upcomingAppointments.filter((app) =>
-								isToday(parseISO(app.date))
-							).length}{" "}
-						aujourd'hui
-					</Badge>
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="p-0">
-				{loading ? (
-					<div className="flex justify-center py-8">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-					</div>
-				) : nextAppointment === null &&
-				  upcomingAppointments.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">
-						<Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
-						<p>Aucune séance à venir</p>
-					</div>
-				) : (
-					<div>
-						{nextAppointment &&
-							renderAppointmentItem(
-								nextAppointment,
-								true,
-								upcomingAppointments.length === 0
-							)}
+		<div className={className}>
+			<div className="flex items-center justify-between mb-4">
+				<Badge
+					variant="outline"
+					className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+				>
+					{(nextAppointment &&
+					isToday(parseISO(nextAppointment.date))
+						? 1
+						: 0) +
+						upcomingAppointments.filter((app) =>
+							isToday(parseISO(app.date))
+						).length}{" "}
+					aujourd'hui
+				</Badge>
+			</div>
+			{loading ? (
+				<div className="flex justify-center py-8">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+				</div>
+			) : nextAppointment === null &&
+			  upcomingAppointments.length === 0 ? (
+				<div className="text-center py-8 text-muted-foreground">
+					<Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
+					<p>Aucune séance à venir</p>
+				</div>
+			) : (
+				<div className="border rounded-lg overflow-hidden">
+					{nextAppointment &&
+						renderAppointmentItem(
+							nextAppointment,
+							true,
+							upcomingAppointments.length === 0
+						)}
 
-						{upcomingAppointments.map((appointment, index) => {
-							const isLastItem =
-								index === upcomingAppointments.length - 1;
-							return renderAppointmentItem(
-								appointment,
-								false,
-								isLastItem
-							);
-						})}
+					{upcomingAppointments.map((appointment, index) => {
+						const isLastItem =
+							index === upcomingAppointments.length - 1;
+						return renderAppointmentItem(
+							appointment,
+							false,
+							isLastItem
+						);
+					})}
 
-						<div className="p-4 bg-slate-50 dark:bg-slate-900/20 text-center">
-							<Link
-								to="/appointments"
-								className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center"
+					<div className="p-4 bg-slate-50 dark:bg-slate-900/20 text-center border-t">
+						<Link
+							to="/appointments"
+							className="text-blue-600 hover:text-gray-400 text-sm font-medium flex items-center justify-center"
+						>
+							Voir toutes les séances
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="ml-1"
 							>
-								Voir toutes les séances
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									className="ml-1"
-								>
-									<path d="m9 18 6-6-6-6" />
-								</svg>
-							</Link>
-						</div>
+								<path d="m9 18 6-6-6-6" />
+							</svg>
+						</Link>
 					</div>
-				)}
-			</CardContent>
-		</Card>
+				</div>
+			)}
+		</div>
 	);
 }

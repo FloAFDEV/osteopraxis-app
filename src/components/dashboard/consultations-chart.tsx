@@ -45,18 +45,7 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 			: TrendingUp;
 
 	return (
-		<Card className="shadow-sm">
-			<CardHeader className="pb-4">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<Stethoscope className="h-5 w-5 text-indigo-500" />
-						<CardTitle className="font-semibold">
-							Évolution des consultations
-						</CardTitle>
-					</div>
-				</div>
-			</CardHeader>
-			<CardContent className="space-y-6">
+		<div className="space-y-6">
 				{/* Graphique principal - 12 derniers mois */}
 				<div className="flex flex-col gap-2">
 					<div className="flex items-center justify-between w-full">
@@ -187,7 +176,6 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 						</p>
 					</div>
 				</div>
-			</CardContent>
-		</Card>
+		</div>
 	);
 }

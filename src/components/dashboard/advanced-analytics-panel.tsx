@@ -2,15 +2,20 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvancedStatsService, AdvancedStats } from "@/services/stats/advanced-stats-service";
 import { api } from "@/services/api";
-import { AlertCircle, TrendingUp, TrendingDown, Clock, Calendar, Users, Euro, FileX } from "lucide-react";
+import { AlertCircle, TrendingUp, TrendingDown, Clock, Calendar, Users, Euro, FileX, BarChart3 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { RevenueChart } from "./revenue-chart";
 import { BlurredAmount, BlurredNumber } from "@/components/ui/blurred-amount";
 import { PrivacyToggle } from "@/components/ui/privacy-toggle";
+import { CollapsibleSection } from "./CollapsibleSection";
 
-export function AdvancedAnalyticsPanel() {
+interface AdvancedAnalyticsPanelProps {
+  selectedCabinetId?: number | null;
+}
+
+export function AdvancedAnalyticsPanel({ selectedCabinetId }: AdvancedAnalyticsPanelProps) {
   const [stats, setStats] = useState<AdvancedStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +25,7 @@ export function AdvancedAnalyticsPanel() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const currentOsteopath = await api.getCurrentOsteopath();
         if (!currentOsteopath) {
           setError("Impossible de récupérer les informations de l'ostéopathe");
@@ -28,9 +33,12 @@ export function AdvancedAnalyticsPanel() {
         }
 
         const statsService = new AdvancedStatsService();
-        const advancedStats = await statsService.calculateAdvancedStats(currentOsteopath.id);
+        const advancedStats = await statsService.calculateAdvancedStats(
+          currentOsteopath.id,
+          selectedCabinetId
+        );
         setStats(advancedStats);
-        
+
       } catch (err) {
         console.error("Erreur lors du chargement des statistiques avancées:", err);
         setError("Erreur lors du chargement des statistiques");
@@ -40,43 +48,51 @@ export function AdvancedAnalyticsPanel() {
     };
 
     loadAdvancedStats();
-  }, []);
+  }, [selectedCabinetId]);
 
   if (loading) {
     return (
-      <Card className="col-span-full">
-        <CardHeader>
-          <CardTitle>Statistiques Avancées</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <CollapsibleSection
+        title="Statistiques Avancées"
+        icon={<BarChart3 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+        defaultOpen={false}
+        storageKey="dashboard-advanced-stats-section"
+      >
+        <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-20 w-full" />
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
     );
   }
 
   if (error || !stats) {
     return (
-      <Card className="col-span-full">
-        <CardHeader>
-          <CardTitle>Statistiques Avancées</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error || "Impossible de charger les statistiques avancées"}
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+      <CollapsibleSection
+        title="Statistiques Avancées"
+        icon={<BarChart3 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+        defaultOpen={false}
+        storageKey="dashboard-advanced-stats-section"
+      >
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error || "Impossible de charger les statistiques avancées"}
+          </AlertDescription>
+        </Alert>
+      </CollapsibleSection>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <CollapsibleSection
+      title="Statistiques Avancées"
+      icon={<BarChart3 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+      defaultOpen={false}
+      storageKey="dashboard-advanced-stats-section"
+    >
+      <div className="space-y-6">
       {/* Section Revenue */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -262,8 +278,9 @@ export function AdvancedAnalyticsPanel() {
         </CardContent>
       </Card>
 
-      {/* Graphique des revenus */}
-      <RevenueChart data={stats.revenue.monthlyBreakdown} />
-    </div>
+        {/* Graphique des revenus */}
+        <RevenueChart data={stats.revenue.monthlyBreakdown} />
+      </div>
+    </CollapsibleSection>
   );
 }

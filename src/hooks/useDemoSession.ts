@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { seedDemoData } from '@/services/demo-seed-data';
 import { DemoStorage } from '@/services/demo-storage';
 
-const DEMO_DURATION_MS = 60 * 60 * 1000; // 60 minutes
+const DEMO_DURATION_MS = 3 * 60 * 60 * 1000; // 180 minutes (3 heures)
 const DEMO_MAX_ATTEMPTS = 5;
 const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 const STORAGE_KEY = 'demo_session';
@@ -170,12 +170,11 @@ export function useDemoSession() {
       setDemoCabinetId(session.cabinetId);
       setDemoCabinetName(session.cabinetName);
 
-      // 🔄 Vérifier si les données démo existent, sinon les re-créer
-      const existingCabinet = DemoStorage.get(session.cabinetId, 'cabinet');
-      if (!existingCabinet) {
-        console.log('🔄 [useDemoSession] Session active mais données manquantes - Re-création');
-        seedDemoData(session.cabinetId, session.userId, session.cabinetName);
-      }
+      // 🔄 Toujours régénérer les données démo pour avoir des dates dynamiques actualisées
+      // Cela garantit que les rendez-vous, factures et statistiques restent pertinents
+      // même si l'utilisateur revient 6 mois plus tard
+      console.log('🔄 [useDemoSession] Régénération des données démo avec dates actualisées');
+      seedDemoData(session.cabinetId, session.userId, session.cabinetName);
     }
   }, [loadSession]);
 

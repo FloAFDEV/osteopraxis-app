@@ -63,10 +63,10 @@ export const calculateGenderData = (
 	const minorPatients = patients.filter(isMinor);
 	const adultPatients = patients.filter((patient) => !isMinor(patient));
 
-	const adultMales = adultPatients.filter((p) => p.gender === "Homme").length;
-	const adultFemales = adultPatients.filter((p) => p.gender === "Femme").length;
+	const adultMales = adultPatients.filter((p) => p.gender === "M" || p.gender === "Homme").length;
+	const adultFemales = adultPatients.filter((p) => p.gender === "F" || p.gender === "Femme").length;
 	const otherOrUndefined = adultPatients.filter(
-		(p) => p.gender !== "Homme" && p.gender !== "Femme"
+		(p) => p.gender !== "M" && p.gender !== "Homme" && p.gender !== "F" && p.gender !== "Femme"
 	).length;
 
 	const malePercentage = calculatePercentage(adultMales, totalPatients);

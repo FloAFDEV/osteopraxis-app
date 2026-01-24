@@ -77,6 +77,15 @@ export const api = {
   // Utility functions
   getCurrentOsteopath: async () => {
     try {
+      // En mode démo, utiliser getOsteopaths qui retourne déjà l'ostéopathe démo
+      const { isDemoSession } = await import('@/utils/demo-detection');
+      const demoMode = await isDemoSession();
+
+      if (demoMode) {
+        const osteopaths = await osteopathService.getOsteopaths();
+        return osteopaths.length > 0 ? osteopaths[0] : null;
+      }
+
       const user = await authService.getCurrentUser();
       if (user && user.osteopathId) {
         return await osteopathService.getOsteopathById(user.osteopathId);

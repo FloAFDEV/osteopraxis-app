@@ -32,7 +32,9 @@ const schema = z.object({
   paymentStatus: z.string().nonempty("Le statut de paiement est requis"),
   tvaExoneration: z.boolean().default(true),
   tvaMotif: z.string().optional(),
-  osteopathId: z.number({ required_error: "Émetteur requis" }),
+  osteopathId: z.union([z.number(), z.string()]).refine(val => val !== null && val !== undefined && val !== "", {
+    message: "Émetteur requis"
+  }),
 });
 
 interface InvoiceFormProps {
@@ -70,9 +72,9 @@ export function InvoiceForm({
     resolver: zodResolver(schema),
     defaultValues: {
       date: defaultDate,
-      amount: invoice?.amount ?? 0,
+      amount: invoice?.amount ?? 65, // Montant par défaut de 65€
       notes: invoice?.notes ?? "",
-      paymentMethod: invoice?.paymentMethod ?? "",
+      paymentMethod: invoice?.paymentMethod ?? "ESPECES", // Valeur par défaut
       paymentStatus: invoice?.paymentStatus ?? "PENDING",
       tvaExoneration: invoice?.tvaExoneration ?? true,
       tvaMotif: invoice?.tvaMotif ?? "TVA non applicable - Article 261-4-1° du CGI",

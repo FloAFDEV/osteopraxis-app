@@ -10,6 +10,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/ui/layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemo } from "@/contexts/DemoContext";
 import { api } from "@/services/api";
 import { Cabinet, Invoice, Osteopath, Patient } from "@/types";
 
@@ -33,6 +34,7 @@ const InvoicesPage = () => {
   const {
     user
   } = useAuth();
+  const { isDemoMode } = useDemo();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -71,12 +73,17 @@ const InvoicesPage = () => {
     error: invoicesError,
     refetch: refetchInvoices
   } = useQuery({
-    queryKey: ["invoices", user?.osteopathId],
+    queryKey: ["invoices", user?.osteopathId, isDemoMode ? 'demo' : 'connected'],
     queryFn: async () => {
+      // En mode démo, charger directement les factures sans vérifier user.osteopathId
+      if (isDemoMode) {
+        return await api.getInvoices();
+      }
+      // En mode connecté, vérifier user.osteopathId
       if (!user?.osteopathId) return [];
       return await api.getInvoices();
     },
-    enabled: !!user?.osteopathId,
+    enabled: isDemoMode || !!user?.osteopathId,
     refetchOnWindowFocus: false,
   });
 

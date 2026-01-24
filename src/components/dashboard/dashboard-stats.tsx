@@ -175,78 +175,130 @@ export function DashboardStats({
 			</div>
 
 			{/* Vue rapide - Indicateurs prioritaires */}
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-							Vue d'ensemble
-						</h3>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
-							Indicateurs clés de votre activité
-						</p>
+			<Card className="overflow-hidden">
+				<CardHeader className="pb-4">
+					<div className="flex items-center gap-3">
+						<div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+							<TrendingUp className="h-5 w-5 text-white" />
+						</div>
+						<div>
+							<CardTitle className="text-xl font-semibold">
+								Vue d'ensemble
+							</CardTitle>
+							<p className="text-sm text-muted-foreground">
+								Indicateurs clés de votre activité
+							</p>
+						</div>
 					</div>
-				</div>
+				</CardHeader>
 
-				{/* Message positif si tout est à 0 */}
-				{getEmptyStateMessage() && (
-					<div className="p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-lg">
-						<p className="text-sm text-green-700 dark:text-green-400 text-center">
-							{getEmptyStateMessage()}
-						</p>
+				<CardContent className="space-y-6">
+					{/* Message positif si tout est à 0 */}
+					{getEmptyStateMessage() && (
+						<div className="p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-lg">
+							<p className="text-sm text-green-700 dark:text-green-400 text-center">
+								{getEmptyStateMessage()}
+							</p>
+						</div>
+					)}
+
+					{/* Métrique principale - Total Patients */}
+					<div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
+						<div className="flex items-start justify-between flex-col sm:flex-row gap-4">
+							<div className="flex items-start gap-4">
+								<div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+									<Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+								</div>
+								<div>
+									<p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+										Total Patients
+									</p>
+									<p className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+										<BlurredNumber value={data.totalPatients} />
+									</p>
+									<p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+										{data.newPatientsThisMonth} nouveaux patients ce mois-ci
+									</p>
+								</div>
+							</div>
+							<div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+								<TrendingUp className={`h-4 w-4 ${(data.thirtyDayGrowthPercentage || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+								<span className={`text-sm font-medium ${(data.thirtyDayGrowthPercentage || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+									{(data.thirtyDayGrowthPercentage || 0) >= 0 ? '+' : ''}{data.thirtyDayGrowthPercentage || 0}%
+								</span>
+								<span className="text-xs text-gray-500 dark:text-gray-400">vs mois dernier</span>
+							</div>
+						</div>
 					</div>
-				)}
 
-				{/* Hero Stat - Métrique principale XXL */}
-				<HeroStat
-					label="Total Patients"
-					value={data.totalPatients}
-					icon={Users}
-					trend={{
-						value: data.thirtyDayGrowthPercentage || 0,
-						label: "vs mois dernier",
-						isPositive: (data.thirtyDayGrowthPercentage || 0) >= 0,
-					}}
-					description={`${data.newPatientsThisMonth} nouveaux patients ce mois-ci`}
-				/>
+					{/* Métriques secondaires intégrées */}
+					<div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+						{/* Séances aujourd'hui */}
+						<div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
+							<div className="flex items-center gap-3 mb-3">
+								<div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-md">
+									<Calendar className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+								</div>
+								<p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+									Séances aujourd'hui
+								</p>
+							</div>
+							<p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+								<BlurredNumber value={data.appointmentsToday} />
+							</p>
+							<p className="text-xs text-gray-600 dark:text-gray-400">
+								{nextAppointmentText}
+							</p>
+						</div>
 
-				{/* Compact Stats - Métriques secondaires */}
-				<div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-					<CompactStat
-						label="Séances aujourd'hui"
-						value={data.appointmentsToday}
-						icon={Calendar}
-						change={nextAppointmentText}
-					/>
+						{/* Consultations ce mois */}
+						<div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-lg border border-purple-200/50 dark:border-purple-800/50">
+							<div className="flex items-center gap-3 mb-3">
+								<div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-md">
+									<Stethoscope className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+								</div>
+								<p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+									Consultations ce mois
+								</p>
+							</div>
+							<p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+								<BlurredNumber value={data.consultationsThisMonth} />
+							</p>
+							<p className="text-xs text-gray-600 dark:text-gray-400">
+								{data.consultationsTrend > 0
+									? `+${data.consultationsTrend}% vs mois dernier`
+									: data.consultationsTrend < 0
+									? `${data.consultationsTrend}% vs mois dernier`
+									: "Stable vs mois dernier"}
+							</p>
+						</div>
 
-					<CompactStat
-						label="Consultations ce mois"
-						value={data.consultationsThisMonth}
-						icon={Stethoscope}
-						change={
-							data.consultationsTrend > 0
-								? `+${data.consultationsTrend}% vs mois dernier`
-								: data.consultationsTrend < 0
-								? `${data.consultationsTrend}% vs mois dernier`
-								: "Stable vs mois dernier"
-						}
-					/>
-
-					<CompactStat
-						label="Revenus ce mois"
-						value={<BlurredAmount amount={data.revenueThisMonth} />}
-						icon={Euro}
-						change={
-							data.revenueTrend !== undefined
-								? data.revenueTrend > 0
-									? `+${data.revenueTrend}% vs mois dernier`
-									: data.revenueTrend < 0
-									? `${data.revenueTrend}% vs mois dernier`
-									: "Stable vs mois dernier"
-								: `${data.pendingInvoices} factures en attente`
-						}
-					/>
-				</div>
-			</div>
+						{/* Revenus ce mois */}
+						<div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+							<div className="flex items-center gap-3 mb-3">
+								<div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-md">
+									<Euro className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+								</div>
+								<p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+									Revenus ce mois
+								</p>
+							</div>
+							<p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+								<BlurredAmount amount={data.revenueThisMonth} />
+							</p>
+							<p className="text-xs text-gray-600 dark:text-gray-400">
+								{data.revenueTrend !== undefined
+									? data.revenueTrend > 0
+										? `+${data.revenueTrend}% vs mois dernier`
+										: data.revenueTrend < 0
+										? `${data.revenueTrend}% vs mois dernier`
+										: "Stable vs mois dernier"
+									: `${data.pendingInvoices} factures en attente`}
+							</p>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
 
 			{/* Bouton pour afficher/masquer les stats détaillées */}
 			<div className="flex justify-center">

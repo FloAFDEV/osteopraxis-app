@@ -72,35 +72,44 @@ export function InvoiceOsteopathInput({ control, isSubmitting }: InvoiceOsteopat
       <Controller
         control={control}
         name="osteopathId"
-        render={({ field }) => (
-          <Select
-            value={field.value ? String(field.value) : ""}
-            onValueChange={v => field.onChange(Number(v))}
-            disabled={isSubmitting}
-          >
-            <SelectTrigger id="osteopath-select">
-              <SelectValue placeholder="Choisir l'ostéopathe émetteur" />
-            </SelectTrigger>
-            <SelectContent>
-              {selfOnly.map(osteopath => (
-                <SelectItem key={osteopath.id} value={String(osteopath.id)}>
-                  <div className="flex items-center justify-between w-full">
-                    <span className="flex-1">
-                      {osteopath.name ?? `Ostéopathe #${osteopath.id}`}
-                    </span>
-                    <Badge 
-                      className={`ml-2 text-xs ${getAccessTypeBadgeColor(osteopath.access_type)}`}
-                      variant="outline"
-                    >
-                      {getAccessTypeIcon(osteopath.access_type)}
-                      <span className="ml-1">{getAccessTypeLabel(osteopath.access_type)}</span>
-                    </Badge>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        render={({ field }) => {
+          console.log('🔍 [InvoiceOsteopathInput] field.value:', field.value, 'type:', typeof field.value);
+          return (
+            <Select
+              value={field.value ? String(field.value) : ""}
+              onValueChange={v => {
+                console.log('📝 [InvoiceOsteopathInput] Select onChange, valeur:', v);
+                // Si c'est un UUID (string), on garde tel quel, sinon on convertit en nombre
+                const parsedValue = isNaN(Number(v)) ? v : Number(v);
+                console.log('✅ [InvoiceOsteopathInput] Valeur finale:', parsedValue);
+                field.onChange(parsedValue);
+              }}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger id="osteopath-select">
+                <SelectValue placeholder="Choisir l'ostéopathe émetteur" />
+              </SelectTrigger>
+              <SelectContent>
+                {selfOnly.map(osteopath => (
+                  <SelectItem key={osteopath.id} value={String(osteopath.id)}>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="flex-1">
+                        {osteopath.name ?? `Ostéopathe #${osteopath.id}`}
+                      </span>
+                      <Badge
+                        className={`ml-2 text-xs ${getAccessTypeBadgeColor(osteopath.access_type)}`}
+                        variant="outline"
+                      >
+                        {getAccessTypeIcon(osteopath.access_type)}
+                        <span className="ml-1">{getAccessTypeLabel(osteopath.access_type)}</span>
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        }}
       />
       {osteopaths.length === 0 && (
         <p className="text-sm text-muted-foreground mt-1">

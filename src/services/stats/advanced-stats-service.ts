@@ -59,8 +59,11 @@ export interface AdvancedStats {
 }
 
 export class AdvancedStatsService {
-  
-  async calculateAdvancedStats(osteopathId: number): Promise<AdvancedStats> {
+
+  async calculateAdvancedStats(
+    osteopathId: number | string,
+    cabinetId?: number | null
+  ): Promise<AdvancedStats> {
     const now = new Date();
     const thisMonth = { start: startOfMonth(now), end: endOfMonth(now) };
     const lastMonth = { start: startOfMonth(subMonths(now, 1)), end: endOfMonth(subMonths(now, 1)) };
@@ -69,8 +72,8 @@ export class AdvancedStatsService {
 
     // Récupérer toutes les données nécessaires
     const [appointments, invoices, patients] = await Promise.all([
-      this.getAppointments(osteopathId),
-      this.getInvoices(osteopathId),
+      this.getAppointments(osteopathId, cabinetId),
+      this.getInvoices(osteopathId, cabinetId),
       this.getPatients(osteopathId)
     ]);
 
@@ -90,32 +93,56 @@ export class AdvancedStatsService {
     };
   }
 
-  private async getAppointments(osteopathId: number) {
+  private async getAppointments(osteopathId: number | string, cabinetId?: number | null) {
     // Utiliser la couche API (hybride: local -> cloud si nécessaire)
     const all = await import("@/services/api").then(m => m.api.getAppointments());
-    // En mode démo, inclure les données avec osteopathId démo et l'ID réel
-    return all.filter((a: any) => 
-      a.osteopathId === osteopathId || 
-      (a.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID)
-    );
+    console.log('📅 [AdvancedStats] Total appointments:', all.length, 'osteopathId:', osteopathId, 'cabinetId:', cabinetId);
+    // En mode démo, inclure toutes les données (l'osteopathId correspond)
+    const filtered = all.filter((a: any) => {
+      // Filtrer par osteopathId
+      const matchesOsteopath = a.osteopathId === osteopathId ||
+             (typeof osteopathId === 'string' && a.osteopathId === osteopathId) ||
+             (a.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID);
+
+      // Filtrer par cabinetId si spécifié
+      const matchesCabinet = !cabinetId || a.cabinetId === cabinetId;
+
+      return matchesOsteopath && matchesCabinet;
+    });
+    console.log('📅 [AdvancedStats] Filtered appointments:', filtered.length);
+    return filtered;
   }
 
-  private async getInvoices(osteopathId: number) {
+  private async getInvoices(osteopathId: number | string, cabinetId?: number | null) {
     const all = await import("@/services/api").then(m => m.api.getInvoices());
-    // En mode démo, inclure les données avec osteopathId démo et l'ID réel
-    return all.filter((i: any) => 
-      i.osteopathId === osteopathId || 
-      (i.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID)
-    );
+    console.log('💰 [AdvancedStats] Total invoices:', all.length, 'osteopathId:', osteopathId, 'cabinetId:', cabinetId);
+    // En mode démo, inclure toutes les données (l'osteopathId correspond)
+    const filtered = all.filter((i: any) => {
+      // Filtrer par osteopathId
+      const matchesOsteopath = i.osteopathId === osteopathId ||
+             (typeof osteopathId === 'string' && i.osteopathId === osteopathId) ||
+             (i.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID);
+
+      // Filtrer par cabinetId si spécifié
+      const matchesCabinet = !cabinetId || i.cabinetId === cabinetId;
+
+      return matchesOsteopath && matchesCabinet;
+    });
+    console.log('💰 [AdvancedStats] Filtered invoices:', filtered.length);
+    return filtered;
   }
 
-  private async getPatients(osteopathId: number) {
+  private async getPatients(osteopathId: number | string) {
     const all = await import("@/services/api").then(m => m.api.getPatients());
-    // En mode démo, inclure les données avec osteopathId démo et l'ID réel
-    return all.filter((p: any) => 
-      p.osteopathId === osteopathId || 
-      (p.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID)
-    );
+    console.log('👥 [AdvancedStats] Total patients:', all.length, 'osteopathId:', osteopathId);
+    // En mode démo, inclure toutes les données (l'osteopathId correspond)
+    const filtered = all.filter((p: any) => {
+      return p.osteopathId === osteopathId ||
+             (typeof osteopathId === 'string' && p.osteopathId === osteopathId) ||
+             (p.osteopathId === DEMO_OSTEOPATH_ID && osteopathId === DEMO_OSTEOPATH_ID);
+    });
+    console.log('👥 [AdvancedStats] Filtered patients:', filtered.length);
+    return filtered;
   }
 
   private calculateRevenueStats(
@@ -147,20 +174,11 @@ export class AdvancedStatsService {
     const thisYearRevenue = thisYearInvoices.reduce((sum, inv) => sum + inv.amount, 0);
     const lastYearRevenue = lastYearInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
-    // Calculer les RDV facturés et réalisés (COMPLETED)
-    const completedAppointments = appointments.filter(apt => 
-      apt.status === "COMPLETED"
-    );
-    
-    // Trouver les factures correspondant aux RDV réalisés
-    const paidCompletedAppointments = completedAppointments.filter(apt => 
-      paidInvoices.some(inv => inv.appointmentId === apt.id)
-    );
-    
-    // Calcul du revenu moyen par RDV facturé et réalisé
+    // Calcul du revenu moyen par consultation facturée
+    // On utilise toutes les factures payées pour avoir un revenu moyen réaliste
     const totalPaidRevenue = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-    const averagePerAppointment = paidCompletedAppointments.length > 0 
-      ? totalPaidRevenue / paidCompletedAppointments.length 
+    const averagePerAppointment = paidInvoices.length > 0
+      ? totalPaidRevenue / paidInvoices.length
       : 0;
 
     // Calcul mensuel pour les 12 derniers mois (factures payées uniquement)

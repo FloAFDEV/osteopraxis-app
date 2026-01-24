@@ -37,7 +37,18 @@ const EditPatientPage = () => {
 		const loadPatient = async () => {
 			try {
 				setIsLoading(true);
-				const patientId = parseInt(id);
+				// En mode démo, les IDs sont des UUIDs (strings)
+				// En mode connecté, ce sont des numbers
+				// On passe l'ID tel quel, le service gère les deux cas
+				const patientId: number | string = isNaN(Number(id)) ? id : parseInt(id);
+
+				if (typeof patientId === 'number' && isNaN(patientId)) {
+					console.error('ID patient invalide:', id);
+					toast.error("ID patient invalide");
+					navigate("/patients");
+					return;
+				}
+
 				const patient = await patientService.getPatientById(patientId);
 
 				if (!patient) {

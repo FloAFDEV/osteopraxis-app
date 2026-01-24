@@ -9,11 +9,12 @@ import { DemographicsCard } from "./demographics-card";
 import { ErrorState, LoadingState } from "./loading-state";
 import { AdvancedAnalyticsPanel } from "./advanced-analytics-panel";
 import { BackupStatusBanner } from "./BackupStatusBanner";
+import { CollapsibleSection } from "./CollapsibleSection";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useStorageMode } from "@/hooks/useStorageMode";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Shield, AlertTriangle, ExternalLink } from "lucide-react";
+import { Shield, AlertTriangle, ExternalLink, Calendar, TrendingUp, Users, BarChart3 } from "lucide-react";
 import { storageRouter } from "@/services/storage/storage-router";
 
 export function Dashboard() {
@@ -140,34 +141,62 @@ export function Dashboard() {
 			{showContent && (
 				<>
 					<div className="animate-fade-in">
-						<DashboardStats 
-							data={dashboardData} 
+						<DashboardStats
+							data={dashboardData}
 							selectedCabinetName={selectedCabinetName}
 							onCabinetChange={handleCabinetChange}
 							selectedCabinetId={selectedCabinetId}
 						/>
 					</div>
-					<div className="animate-fade-in animate-delay-100 lg:col-span-3">
-						<AppointmentsOverview data={dashboardData} />
+
+					{/* Section Rendez-vous à venir - Refermable */}
+					<div className="animate-fade-in animate-delay-100">
+						<CollapsibleSection
+							title="Rendez-vous à venir"
+							icon={<Calendar className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+							defaultOpen={true}
+							storageKey="dashboard-appointments-section"
+						>
+							<AppointmentsOverview data={dashboardData} />
+						</CollapsibleSection>
 					</div>
+
+					{/* Section Statistiques - Refermable */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 						<div className="animate-fade-in animate-delay-200">
-							<ConsultationsChart data={dashboardData} />
+							<CollapsibleSection
+								title="Consultations"
+								icon={<TrendingUp className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+								defaultOpen={true}
+								storageKey="dashboard-consultations-section"
+							>
+								<ConsultationsChart data={dashboardData} />
+							</CollapsibleSection>
 						</div>
 						<div className="animate-fade-in animate-delay-300">
-							<DemographicsCard
-								patients={allPatients}
-								data={dashboardData}
-							/>
+							<CollapsibleSection
+								title="Démographie"
+								icon={<Users className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+								defaultOpen={true}
+								storageKey="dashboard-demographics-section"
+							>
+								<DemographicsCard
+									patients={allPatients}
+									data={dashboardData}
+								/>
+							</CollapsibleSection>
 						</div>
 					</div>
 
 					{/* Analytics Avancées */}
 					<div className="animate-fade-in animate-delay-400">
-						<AdvancedAnalyticsPanel />
+						<AdvancedAnalyticsPanel selectedCabinetId={selectedCabinetId} />
 					</div>
 
-					<DashboardContent dashboardData={dashboardData} />
+					{/* Section Évolution de l'activité */}
+					<div className="animate-fade-in animate-delay-500">
+						<DashboardContent dashboardData={dashboardData} />
+					</div>
 				</>
 			)}
 		</div>

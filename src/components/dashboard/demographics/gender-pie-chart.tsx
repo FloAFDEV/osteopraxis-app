@@ -164,6 +164,7 @@ export const GenderPieChart: React.FC<GenderPieChartProps> = ({
 						fill="#8884d8"
 						dataKey="value"
 						nameKey="name"
+						isAnimationActive={false}
 					>
 						{chartDataWithColors.map((entry, index) => (
 							<Cell key={`cell-${index}`} fill={entry.color} />

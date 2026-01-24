@@ -54,52 +54,35 @@ export const DemographicsCard: React.FC<DemographicsCardProps> = ({
 
 	if (isLoading) {
 		return (
-			<Card className="overflow-hidden rounded-lg border-t-4 border-t-gray-300 bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg">
-				<CardHeader>
-					<CardTitle>Démographie patients</CardTitle>
-					<CardDescription>
-						Chargement des données démographiques...
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="flex items-center justify-center h-[250px]">
-					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-				</CardContent>
-			</Card>
+			<div className="flex items-center justify-center h-[250px]">
+				<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+			</div>
 		);
 	}
 
 	return (
-		<Card className="overflow-hidden rounded-lg bg-gradient-to-r from-white to-gray-100 dark:bg-neutral-800 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2 text-gray-800 dark:text-white">
-					<ChartPie className="w-5 h-5 text-blue-600" />
-					Démographie patients
-				</CardTitle>
+		<div className="space-y-4">
+			<p className="text-sm text-muted-foreground">
+				Répartition par genre sur un total de {totalPatients} patients
+			</p>
 
-				<CardDescription className="text-gray-600 dark:text-gray-400">
-					Répartition par genre sur un total de {totalPatients}{" "}
-					patients
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				{chartData && chartData.length > 0 ? (
-					<GenderPieChart
-						chartData={chartData}
-						totalPatients={totalPatients}
-					/>
-				) : (
-					<div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
-						<ChartPie className="h-12 w-12 mb-2" />
-						<p>Aucune donnée démographique disponible</p>
-					</div>
-				)}
-
-				{/* Children statistics summary - always displayed with real values */}
-				<ChildrenStats
-					childrenCount={childrenCount}
+			{chartData && chartData.length > 0 ? (
+				<GenderPieChart
+					chartData={chartData}
 					totalPatients={totalPatients}
 				/>
-			</CardContent>
-		</Card>
+			) : (
+				<div className="flex flex-col items-center justify-center h-[200px] text-gray-500">
+					<ChartPie className="h-12 w-12 mb-2" />
+					<p>Aucune donnée démographique disponible</p>
+				</div>
+			)}
+
+			{/* Children statistics summary - always displayed with real values */}
+			<ChildrenStats
+				childrenCount={childrenCount}
+				totalPatients={totalPatients}
+			/>
+		</div>
 	);
 };

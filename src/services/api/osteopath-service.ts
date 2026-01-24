@@ -18,21 +18,30 @@ export const osteopathService = {
     const demoMode = await isDemoSession();
     if (demoMode) {
       const demoCabinetId = localStorage.getItem('demo_cabinet_id');
-      const demoCabinetName = localStorage.getItem('demo_cabinet_name') || 'Cabinet Démo';
-      return [{
-        id: parseInt(demoCabinetId || '1'),
-        name: demoCabinetName,
-        professional_title: 'Ostéopathe D.O.',
-        rpps_number: '12345678901',
-        siret: '12345678900012',
-        ape_code: '8690F',
-        userId: '',
-        authId: '',
-        plan: 'pro', // Accès complet en démo
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        stampUrl: null
-      }];
+      if (!demoCabinetId) return [];
+
+      // Charger l'ostéopathe depuis DemoStorage
+      const { DemoStorage } = await import('@/services/demo-storage');
+      const demoOsteopath = DemoStorage.get<any>(demoCabinetId, 'osteopath');
+
+      if (demoOsteopath) {
+        return [{
+          id: demoOsteopath.id || demoOsteopath.userId,
+          name: demoOsteopath.name || 'Dr. Utilisateur Démo',
+          professional_title: demoOsteopath.professional_title || 'Ostéopathe D.O.',
+          rpps_number: demoOsteopath.rpps_number || '10001234567',
+          siret: demoOsteopath.siret || '12345678900012',
+          ape_code: demoOsteopath.ape_code || '8690F',
+          userId: demoOsteopath.userId || '',
+          authId: demoOsteopath.userId || '',
+          plan: 'pro' as const,
+          createdAt: demoOsteopath.createdAt || new Date().toISOString(),
+          updatedAt: demoOsteopath.updatedAt || new Date().toISOString(),
+          stampUrl: null
+        }];
+      }
+
+      return [];
     }
 
     try {
@@ -60,26 +69,35 @@ export const osteopathService = {
     }
   },
 
-  async getOsteopathById(id: number): Promise<Osteopath | undefined> {
+  async getOsteopathById(id: number | string): Promise<Osteopath | undefined> {
     // 🎭 Mode démo : retourner un ostéopathe fictif
     const demoMode = await isDemoSession();
     if (demoMode) {
       const demoCabinetId = localStorage.getItem('demo_cabinet_id');
-      const demoCabinetName = localStorage.getItem('demo_cabinet_name') || 'Cabinet Démo';
-      return {
-        id: parseInt(demoCabinetId || '1'),
-        name: demoCabinetName,
-        professional_title: 'Ostéopathe D.O.',
-        rpps_number: '12345678901',
-        siret: '12345678900012',
-        ape_code: '8690F',
-        userId: '',
-        authId: '',
-        plan: 'pro', // Accès complet en démo
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        stampUrl: null
-      };
+      if (!demoCabinetId) return undefined;
+
+      // Charger l'ostéopathe depuis DemoStorage
+      const { DemoStorage } = await import('@/services/demo-storage');
+      const demoOsteopath = DemoStorage.get<any>(demoCabinetId, 'osteopath');
+
+      if (demoOsteopath) {
+        return {
+          id: demoOsteopath.id || demoOsteopath.userId,
+          name: demoOsteopath.name || 'Dr. Utilisateur Démo',
+          professional_title: demoOsteopath.professional_title || 'Ostéopathe D.O.',
+          rpps_number: demoOsteopath.rpps_number || '10001234567',
+          siret: demoOsteopath.siret || '12345678900012',
+          ape_code: demoOsteopath.ape_code || '8690F',
+          userId: demoOsteopath.userId || '',
+          authId: demoOsteopath.userId || '',
+          plan: 'pro' as const,
+          createdAt: demoOsteopath.createdAt || new Date().toISOString(),
+          updatedAt: demoOsteopath.updatedAt || new Date().toISOString(),
+          stampUrl: null
+        };
+      }
+
+      return undefined;
     }
 
     try {

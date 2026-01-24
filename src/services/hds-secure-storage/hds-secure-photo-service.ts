@@ -83,9 +83,9 @@ class HDSSecurePhotoService {
   /**
    * Récupérer la photo d'un patient (LOCAL)
    */
-  async getPatientPhoto(patientId: number): Promise<PatientPhoto | null> {
+  async getPatientPhoto(patientId: number | string): Promise<PatientPhoto | null> {
     try {
-      const allPhotos = await this.storage.getAll();
+      const allPhotos = await this.storage.loadRecords<PatientPhoto>();
       const photo = allPhotos.find(p => p.patientId === patientId);
 
       if (photo) {
@@ -249,7 +249,7 @@ class HDSSecurePhotoService {
     averageSize: number;
   }> {
     try {
-      const allPhotos = await this.storage.getAll();
+      const allPhotos = await this.storage.loadRecords<PatientPhoto>();
       const totalSize = allPhotos.reduce((sum, photo) => sum + photo.fileSize, 0);
 
       return {
