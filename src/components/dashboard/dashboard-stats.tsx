@@ -213,7 +213,7 @@ export function DashboardStats({
 									<p className="text-sm lg:text-base xl:text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
 										Total Patients
 									</p>
-									<p className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100">
+									<p className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-gray-100">
 										<BlurredNumber value={data.totalPatients} />
 									</p>
 									<p className="text-sm lg:text-base xl:text-lg text-gray-600 dark:text-gray-400 mt-2">
@@ -243,7 +243,7 @@ export function DashboardStats({
 									Séances aujourd'hui
 								</p>
 							</div>
-							<p className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+							<p className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredNumber value={data.appointmentsToday} />
 							</p>
 							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
@@ -261,7 +261,7 @@ export function DashboardStats({
 									Consultations ce mois
 								</p>
 							</div>
-							<p className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+							<p className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredNumber value={data.consultationsThisMonth} />
 							</p>
 							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
@@ -283,7 +283,7 @@ export function DashboardStats({
 									Revenus ce mois
 								</p>
 							</div>
-							<p className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+							<p className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredAmount amount={data.revenueThisMonth} />
 							</p>
 							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">

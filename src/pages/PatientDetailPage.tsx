@@ -509,11 +509,25 @@ const PatientDetailPage = () => {
 						<div className="hidden xl:block xl:sticky xl:top-20 xl:self-start xl:space-y-4">
 							<PatientInfo patient={patient} />
 							<PersonalInfoCard patient={patient} />
+							<Button
+								className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+								onClick={() => setActiveTab("new-appointment")}
+							>
+								<Plus className="h-4 w-4 mr-2" />
+								Nouvelle séance
+							</Button>
 						</div>
 						{/* Mobile/tablet view - non-sticky */}
 						<div className="xl:hidden space-y-4">
 							<PatientInfo patient={patient} />
 							<PersonalInfoCard patient={patient} />
+							<Button
+								className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+								onClick={() => setActiveTab("new-appointment")}
+							>
+								<Plus className="h-4 w-4 mr-2" />
+								Nouvelle séance
+							</Button>
 						</div>
 					</aside>
 				</section>
