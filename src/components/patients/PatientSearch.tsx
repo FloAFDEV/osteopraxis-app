@@ -36,10 +36,10 @@ const PatientSearch: React.FC<PatientSearchProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 lg:h-6 lg:w-6 text-gray-400" />
             <Input
               placeholder="Rechercher un patient par nom, email, téléphone..."
-              className="pl-10 h-12 text-base"
+              className="pl-12 lg:pl-14 h-12 lg:h-14 text-base lg:text-lg no-responsive"
               value={searchQuery}
               onChange={onSearchChange}
             />

@@ -268,7 +268,7 @@ const EditPatientPage = () => {
 				onDelete={handleDeletePatient}
 				patientName={patient?.firstName + " " + patient?.lastName}
 			/>
-			<div className="max-w-4xl mx-auto">
+			<div className="max-w-7xl mx-auto px-4">
 				<div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-2">
 					<div>
 						<h1 className="text-3xl font-bold flex items-center gap-2">

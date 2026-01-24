@@ -102,21 +102,11 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 								)}
 								{/* Badge de propriété du patient */}
 								<PatientOwnershipBadge patientId={patient.id} />
-								{/* Badge Mineur en priorité, sinon genre */}
+								{/* Badge Mineur uniquement (genre identifié par couleur avatar) */}
 								{isMinor && (
 									<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700">
 										<Baby className="h-3 w-3" />
 										Mineur
-									</span>
-								)}
-								{!isMinor && patient.gender === "M" && (
-									<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700">
-										Homme
-									</span>
-								)}
-								{!isMinor && patient.gender === "F" && (
-									<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-700">
-										Femme
 									</span>
 								)}
 							</div>
