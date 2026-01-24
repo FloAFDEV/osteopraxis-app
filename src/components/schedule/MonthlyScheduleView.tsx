@@ -188,9 +188,11 @@ export function MonthlyScheduleView({
                     <div
                       key={day.toISOString()}
                       className={cn(
-                        "min-h-[100px] p-2 border rounded-lg transition-colors group cursor-pointer",
-                        isCurrentMonth 
-                          ? "bg-background hover:bg-muted/50" 
+                        // Hauteur responsive: plus grande sur grands écrans
+                        "min-h-[100px] lg:min-h-[140px] xl:min-h-[160px] 2xl:min-h-[200px]",
+                        "p-2 lg:p-3 xl:p-4 border rounded-lg transition-colors group cursor-pointer",
+                        isCurrentMonth
+                          ? "bg-background hover:bg-muted/50"
                           : "bg-muted/30 text-muted-foreground",
                         isDayToday && "ring-2 ring-primary"
                       )}
@@ -213,15 +215,18 @@ export function MonthlyScheduleView({
 
                       {/* Rendez-vous du jour */}
                       <div className="space-y-1">
-                        {dayAppointments.slice(0, 3).map((appointment) => {
+                        {/* Affichage responsive: 3 sur petits écrans, 5 sur moyens, tous sur grands */}
+                        {dayAppointments.slice(0, window.innerWidth >= 1536 ? dayAppointments.length : window.innerWidth >= 1280 ? 5 : 3).map((appointment) => {
                           const patient = getPatientById(appointment.patientId);
                           const appointmentTime = format(parseISO(appointment.date), "HH:mm");
-                          
+
                           return (
                             <div
                               key={appointment.id}
                               className={cn(
-                                "p-2 rounded text-sm truncate transition-colors cursor-pointer shadow-sm",
+                                "p-2 rounded transition-colors cursor-pointer shadow-sm",
+                                // Texte plus grand sur grands écrans
+                                "text-sm lg:text-base xl:text-base 2xl:text-lg",
                                 appointment.status === "COMPLETED"
                                   ? "bg-green-100 text-green-800 border-l-4 border-l-green-500 hover:bg-green-200 hover:text-green-900 dark:bg-green-900/20 dark:text-green-100 dark:hover:bg-green-900/30"
                                   : "bg-blue-100 text-blue-800 border-l-4 border-l-blue-500 hover:bg-blue-200 hover:text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 dark:hover:bg-blue-900/30"
@@ -232,7 +237,7 @@ export function MonthlyScheduleView({
                                 // navigate(`/appointments/${appointment.id}/edit`);
                               }}
                             >
-                              <div className="font-semibold text-base">
+                              <div className="font-semibold text-base lg:text-lg xl:text-xl">
                                 {appointmentTime}
                               </div>
                               <div className="truncate font-medium">
@@ -241,14 +246,20 @@ export function MonthlyScheduleView({
                                   : `Patient #${appointment.patientId}`
                                 }
                               </div>
+                              {/* Afficher la raison sur grands écrans */}
+                              {window.innerWidth >= 1536 && appointment.reason && (
+                                <div className="text-xs opacity-75 truncate mt-1">
+                                  {appointment.reason}
+                                </div>
+                              )}
                             </div>
                           );
                         })}
 
-                        {/* Indicateur s'il y a plus de rendez-vous */}
-                        {dayAppointments.length > 3 && (
+                        {/* Indicateur s'il y a plus de rendez-vous (seulement sur petits/moyens écrans) */}
+                        {window.innerWidth < 1536 && dayAppointments.length > (window.innerWidth >= 1280 ? 5 : 3) && (
                           <div className="text-xs text-muted-foreground text-center py-1">
-                            +{dayAppointments.length - 3} autres
+                            +{dayAppointments.length - (window.innerWidth >= 1280 ? 5 : 3)} autres
                           </div>
                         )}
 

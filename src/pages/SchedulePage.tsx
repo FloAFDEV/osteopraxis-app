@@ -440,27 +440,27 @@ const SchedulePage = () => {
                             ? "bg-green-100 text-green-800 border-l-green-500 dark:bg-green-900/20 dark:text-green-100"
                             : "bg-blue-100 text-blue-800 border-l-blue-500 dark:bg-blue-900/20 dark:text-blue-100"
                         )}>
-																	<CardContent className="p-4 flex-grow">
+																	<CardContent className="p-4 lg:p-5 xl:p-6 flex-grow">
 																		{/* Top section: Time Badge */}
-																		<div className="flex items-center justify-between mb-3">
+																		<div className="flex items-center justify-between mb-3 lg:mb-4">
 																			<Badge className={cn(
-                                "text-base px-3 py-1.5",
+                                "text-base lg:text-lg xl:text-xl px-3 py-1.5 lg:px-4 lg:py-2",
                                 appointment.status === "COMPLETED"
                                   ? "bg-green-800 text-white"
                                   : "bg-blue-800 text-white"
                               )}>
 																				{appointmentTime}
 																			</Badge>
-																			{appointment.status === "COMPLETED" && <Badge className="bg-green-700 text-white dark:bg-green-600 text-sm px-2 py-1">
+																			{appointment.status === "COMPLETED" && <Badge className="bg-green-700 text-white dark:bg-green-600 text-sm lg:text-base px-2 py-1 lg:px-3">
 																					Terminé
 																				</Badge>}
 																		</div>
 																		{/* Middle section: Link to patient/reason */}
 																		<Link to={`/appointments/${appointment.id}/edit`} className="block group mb-3">
-																			<h3 className="font-semibold text-lg group-hover:text-primary truncate">
+																			<h3 className="font-semibold text-lg lg:text-xl xl:text-2xl group-hover:text-primary truncate">
 																				{patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
 																			</h3>
-																			<p className="text-base text-muted-foreground truncate font-medium">
+																			<p className="text-base lg:text-lg xl:text-xl text-muted-foreground truncate font-medium">
 																				{appointment.reason}
 																			</p>
 																		</Link>

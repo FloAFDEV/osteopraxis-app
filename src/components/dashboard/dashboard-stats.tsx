@@ -123,10 +123,10 @@ export function DashboardStats({
 						<TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
 					</div>
 					<div>
-						<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+						<h2 className="text-lg lg:text-xl xl:text-2xl font-semibold text-gray-900 dark:text-gray-100">
 							Tableau de bord
 						</h2>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
+						<p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
 							{selectedCabinetName ? `Cabinet : ${selectedCabinetName}` : 'Vue globale - Tous les cabinets'}
 						</p>
 					</div>
@@ -203,20 +203,20 @@ export function DashboardStats({
 					)}
 
 					{/* Métrique principale - Total Patients */}
-					<div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
+					<div className="p-6 lg:p-8 xl:p-10 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
 						<div className="flex items-start justify-between flex-col sm:flex-row gap-4">
-							<div className="flex items-start gap-4">
-								<div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-									<Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+							<div className="flex items-start gap-4 lg:gap-6">
+								<div className="p-3 lg:p-4 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+									<Users className="h-8 w-8 lg:h-10 lg:w-10 xl:h-12 xl:w-12 text-blue-600 dark:text-blue-400" />
 								</div>
 								<div>
-									<p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+									<p className="text-sm lg:text-base xl:text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
 										Total Patients
 									</p>
-									<p className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+									<p className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100">
 										<BlurredNumber value={data.totalPatients} />
 									</p>
-									<p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+									<p className="text-sm lg:text-base xl:text-lg text-gray-600 dark:text-gray-400 mt-2">
 										{data.newPatientsThisMonth} nouveaux patients ce mois-ci
 									</p>
 								</div>
@@ -232,39 +232,39 @@ export function DashboardStats({
 					</div>
 
 					{/* Métriques secondaires intégrées */}
-					<div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+					<div className="grid gap-4 lg:gap-6 grid-cols-1 md:grid-cols-3">
 						{/* Séances aujourd'hui */}
-						<div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
+						<div className="p-4 lg:p-6 xl:p-8 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
 							<div className="flex items-center gap-3 mb-3">
-								<div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-md">
-									<Calendar className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+								<div className="p-2 lg:p-3 bg-emerald-100 dark:bg-emerald-900/50 rounded-md">
+									<Calendar className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-emerald-600 dark:text-emerald-400" />
 								</div>
-								<p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+								<p className="text-sm lg:text-base xl:text-lg font-medium text-gray-600 dark:text-gray-400">
 									Séances aujourd'hui
 								</p>
 							</div>
-							<p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+							<p className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredNumber value={data.appointmentsToday} />
 							</p>
-							<p className="text-xs text-gray-600 dark:text-gray-400">
+							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
 								{nextAppointmentText}
 							</p>
 						</div>
 
 						{/* Consultations ce mois */}
-						<div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-lg border border-purple-200/50 dark:border-purple-800/50">
+						<div className="p-4 lg:p-6 xl:p-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-lg border border-purple-200/50 dark:border-purple-800/50">
 							<div className="flex items-center gap-3 mb-3">
-								<div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-md">
-									<Stethoscope className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+								<div className="p-2 lg:p-3 bg-purple-100 dark:bg-purple-900/50 rounded-md">
+									<Stethoscope className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-purple-600 dark:text-purple-400" />
 								</div>
-								<p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+								<p className="text-sm lg:text-base xl:text-lg font-medium text-gray-600 dark:text-gray-400">
 									Consultations ce mois
 								</p>
 							</div>
-							<p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+							<p className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredNumber value={data.consultationsThisMonth} />
 							</p>
-							<p className="text-xs text-gray-600 dark:text-gray-400">
+							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
 								{data.consultationsTrend > 0
 									? `+${data.consultationsTrend}% vs mois dernier`
 									: data.consultationsTrend < 0
@@ -274,19 +274,19 @@ export function DashboardStats({
 						</div>
 
 						{/* Revenus ce mois */}
-						<div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+						<div className="p-4 lg:p-6 xl:p-8 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
 							<div className="flex items-center gap-3 mb-3">
-								<div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-md">
-									<Euro className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+								<div className="p-2 lg:p-3 bg-amber-100 dark:bg-amber-900/50 rounded-md">
+									<Euro className="h-5 w-5 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-amber-600 dark:text-amber-400" />
 								</div>
-								<p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+								<p className="text-sm lg:text-base xl:text-lg font-medium text-gray-600 dark:text-gray-400">
 									Revenus ce mois
 								</p>
 							</div>
-							<p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+							<p className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredAmount amount={data.revenueThisMonth} />
 							</p>
-							<p className="text-xs text-gray-600 dark:text-gray-400">
+							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
 								{data.revenueTrend !== undefined
 									? data.revenueTrend > 0
 										? `+${data.revenueTrend}% vs mois dernier`
