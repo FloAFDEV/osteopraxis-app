@@ -20,6 +20,7 @@ import {
 import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface MonthlyScheduleViewProps {
   appointments: Appointment[];
@@ -36,6 +37,7 @@ export function MonthlyScheduleView({
   onDateChange,
   onDayClick
 }: MonthlyScheduleViewProps) {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(selectedDate);
 
   // Mémoriser la map des patients pour éviter les recherches répétées
@@ -233,8 +235,7 @@ export function MonthlyScheduleView({
                               )}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Optionnel : naviguer vers l'édition du rendez-vous
-                                // navigate(`/appointments/${appointment.id}/edit`);
+                                navigate(`/appointments/${appointment.id}/edit`);
                               }}
                             >
                               <div className="font-semibold text-base lg:text-lg xl:text-xl">

@@ -621,50 +621,67 @@ const DaySchedule = ({
 
 						{/* Appointment details or Google event or link */}
 						<div className="flex-1 p-3 min-w-0">
-							{googleEvent ? <div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-blue-500 bg-blue-50/50 p-3 rounded">
+							{googleEvent ? <div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-purple-500 bg-purple-100 dark:bg-purple-900/20 p-4 lg:p-5 xl:p-6 rounded">
 									<div className="flex-grow min-w-0">
 										<div className="flex items-center gap-2 mb-1">
-											<Badge className="bg-blue-500 text-white text-xs">
+											<Badge className="bg-purple-800 text-white text-sm lg:text-base">
 												Google
 											</Badge>
-											{googleEvent.is_doctolib && <Badge className="bg-green-500 text-white text-xs">
+											{googleEvent.is_doctolib && <Badge className="bg-teal-600 text-white text-sm lg:text-base">
 													Doctolib
 												</Badge>}
-											<h3 className="font-medium text-blue-900 truncate">
+											<h3 className="font-semibold text-lg lg:text-xl xl:text-2xl text-purple-900 dark:text-purple-100 truncate">
 												{googleEvent.summary}
 											</h3>
 										</div>
-										{googleEvent.location && <p className="text-sm text-blue-700 ml-2 truncate">
+										{googleEvent.location && <p className="text-base lg:text-lg xl:text-xl text-purple-700 dark:text-purple-300 ml-2 truncate font-medium">
 												📍 {googleEvent.location}
 											</p>}
 										{googleEvent.matched_patient_name && <div className="flex items-center gap-1 mt-1 ml-2">
-												<Users className="h-4 w-4 text-green-600" />
-												<span className="text-sm text-green-700 font-medium">
+												<Users className="h-4 w-4 lg:h-5 lg:w-5 text-teal-600 dark:text-teal-400" />
+												<span className="text-sm lg:text-base text-teal-700 dark:text-teal-300 font-medium">
 													{googleEvent.matched_patient_name}
 												</span>
-												{googleEvent.matched_patient_id && <Link to={`/patients/${googleEvent.matched_patient_id}`} className="text-sm text-green-600 hover:text-green-800 flex items-center gap-1 ml-2">
+												{googleEvent.matched_patient_id && <Link to={`/patients/${googleEvent.matched_patient_id}`} className="text-sm lg:text-base text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-1 ml-2">
 														<ExternalLink className="h-4 w-4" />
 														Voir la fiche
 													</Link>}
 											</div>}
-										<p className="text-xs text-blue-600 mt-1">
+										<p className="text-xs lg:text-sm text-purple-600 dark:text-purple-400 mt-1">
 											Événement externe (lecture seule)
 										</p>
 									</div>
-								</div> : appointment ? <div className="flex flex-col lg:flex-row items-start justify-between gap-2">
+								</div> : appointment ? <div className={cn(
+									"flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 p-4 lg:p-5 xl:p-6 rounded",
+									isCompleted
+										? "border-l-green-500 bg-green-100 dark:bg-green-900/20"
+										: "border-l-blue-500 bg-blue-100 dark:bg-blue-900/20"
+								)}>
 									{/* Appointment Info */}
 									<div className="flex-grow min-w-0">
 										<div className="flex items-center gap-2 mb-1">
-											<User className="h-4 w-4 text-primary shrink-0" />
-											<Link to={`/patients/${appointment.patientId}`} className="font-medium hover:text-primary truncate">
+											<User className={cn(
+												"h-5 w-5 lg:h-6 lg:w-6 shrink-0",
+												isCompleted ? "text-green-700 dark:text-green-400" : "text-blue-700 dark:text-blue-400"
+											)} />
+											<Link
+												to={`/patients/${appointment.patientId}`}
+												className={cn(
+													"font-semibold text-lg lg:text-xl xl:text-2xl hover:underline truncate",
+													isCompleted ? "text-green-900 dark:text-green-100" : "text-blue-900 dark:text-blue-100"
+												)}
+											>
 												{getPatientById(appointment.patientId)?.firstName || ""}{" "}
 												{getPatientById(appointment.patientId)?.lastName || `Patient #${appointment.patientId}`}
 											</Link>
-											{isCompleted && <Badge className="bg-amber-500 text-white">
+											{isCompleted && <Badge className="bg-green-700 text-white dark:bg-green-600 text-sm lg:text-base">
 													Terminé
 												</Badge>}
 										</div>
-										<p className="text-sm text-muted-foreground ml-6 truncate">
+										<p className={cn(
+											"text-base lg:text-lg xl:text-xl ml-6 truncate font-medium",
+											isCompleted ? "text-green-700 dark:text-green-300" : "text-blue-700 dark:text-blue-300"
+										)}>
 											{appointment.reason}
 										</p>
 									</div>
