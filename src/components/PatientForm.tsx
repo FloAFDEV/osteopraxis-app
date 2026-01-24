@@ -308,7 +308,7 @@ export function PatientForm({
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="group flex flex-col items-center gap-1 px-3 py-3 text-xs font-medium min-h-[60px] flex-1 max-w-[140px] 
+												className="group flex flex-col items-center gap-1 px-3 py-2.5 text-[11px] font-medium min-h-[55px] flex-1 max-w-[140px] 
 													rounded-md transition-all duration-200 ease-out
 													text-muted-foreground dark:text-muted-foreground
 													hover:text-foreground hover:bg-background/80 hover:shadow-md hover:scale-105 hover:-translate-y-0.5
@@ -316,8 +316,8 @@ export function PatientForm({
 													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<tab.icon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110" />
-												<span className="text-center leading-tight transition-colors duration-200">{tab.shortLabel}</span>
+												<tab.icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110" />
+												<span className="text-center leading-tight text-[10px] transition-colors duration-200">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
 									</div>

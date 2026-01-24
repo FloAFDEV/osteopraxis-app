@@ -19,29 +19,41 @@ import { PatientRelationships } from "./PatientRelationships";
 import { usePatientRelationships } from "@/hooks/usePatientRelationships";
 import { useState, useEffect } from "react";
 import { hdsSecurePhotoService } from "@/services/hds-secure-storage/hds-secure-photo-service";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PatientInfoProps {
 	patient: Patient;
 }
 
 export function PatientInfo({ patient }: PatientInfoProps) {
+	const { isDemoMode } = useAuth();
 	const { relationships, loading: relationshipsLoading } = usePatientRelationships(patient.id);
 	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
-	// Charger la photo patient depuis le stockage HDS sécurisé
+	// Charger la photo patient depuis le stockage HDS sécurisé (sauf en mode démo)
 	useEffect(() => {
 		const loadPhoto = async () => {
 			try {
-				const photo = await hdsSecurePhotoService.getPatientPhoto(patient.id);
-				if (photo) {
-					setPhotoUrl(photo.photoData);
+				if (isDemoMode) {
+					// En mode démo, charger depuis localStorage
+					const demoPhotoKey = `demo_patient_photo_${patient.id}`;
+					const demoPhoto = localStorage.getItem(demoPhotoKey);
+					if (demoPhoto) {
+						setPhotoUrl(demoPhoto);
+					}
+				} else {
+					// En mode connecté, charger depuis HDS
+					const photo = await hdsSecurePhotoService.getPatientPhoto(patient.id as number);
+					if (photo) {
+						setPhotoUrl(photo.photoData);
+					}
 				}
 			} catch (error) {
 				console.error('Erreur chargement photo patient:', error);
 			}
 		};
 		loadPhoto();
-	}, [patient.id]);
+	}, [patient.id, isDemoMode]);
 	const getInitials = (firstName: string, lastName: string) =>
 		`${firstName.charAt(0)}${lastName.charAt(0)}`;
 

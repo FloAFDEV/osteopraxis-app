@@ -38,11 +38,11 @@ const StatCard = ({
 		>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 				<div>
-					<CardTitle className="text-sm font-medium">
+					<CardTitle className="text-xs font-medium">
 						{title}
 					</CardTitle>
 					{subtitle && (
-						<p className="text-xs text-muted-foreground mt-0.5">
+						<p className="text-[10px] text-muted-foreground mt-0.5">
 							{subtitle}
 						</p>
 					)}
@@ -55,8 +55,8 @@ const StatCard = ({
 			</CardHeader>
 
 			<CardContent className="flex flex-col justify-between h-24 pt-0">
-				<div className="text-2xl font-bold">{value}</div>
-				<p className={cn("text-xs text-muted-foreground", color)}>
+				<div className="text-xl font-bold">{value}</div>
+				<p className={cn("text-[10px] text-muted-foreground", color)}>
 					{description}
 				</p>
 			</CardContent>

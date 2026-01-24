@@ -49,7 +49,23 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
     imageUrl: null
   };
 
-  // 10 patients démo avec données variées (incluant 2 enfants)
+  // 12 patients démo avec données variées (incluant 2 enfants)
+  // Distribution des patients sur les 12 derniers mois pour montrer l'évolution de l'activité
+  const patientCreationDates = [
+    new Date(now.getFullYear(), now.getMonth() - 11, 15), // Il y a 11 mois
+    new Date(now.getFullYear(), now.getMonth() - 10, 8),  // Il y a 10 mois
+    new Date(now.getFullYear(), now.getMonth() - 9, 22),  // Il y a 9 mois
+    new Date(now.getFullYear(), now.getMonth() - 7, 12),  // Il y a 7 mois
+    new Date(now.getFullYear(), now.getMonth() - 6, 5),   // Il y a 6 mois
+    new Date(now.getFullYear(), now.getMonth() - 5, 18),  // Il y a 5 mois
+    new Date(now.getFullYear(), now.getMonth() - 3, 25),  // Il y a 3 mois
+    new Date(now.getFullYear(), now.getMonth() - 2, 10),  // Il y a 2 mois
+    new Date(now.getFullYear(), now.getMonth() - 1, 3),   // Il y a 1 mois
+    new Date(now.getFullYear(), now.getMonth(), 7),       // Ce mois-ci
+    new Date(now.getFullYear(), now.getMonth() - 4, 20),  // Il y a 4 mois (enfant 1)
+    new Date(now.getFullYear(), now.getMonth() - 1, 14),  // Il y a 1 mois (enfant 2)
+  ];
+
   const patients: Patient[] = [
     {
       id: crypto.randomUUID(),
@@ -63,8 +79,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[0].toISOString(),
+      updatedAt: patientCreationDates[0].toISOString(),
       // Données médicales adulte
       height: 178,
       weight: 82,
@@ -110,8 +126,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[1].toISOString(),
+      updatedAt: patientCreationDates[1].toISOString(),
       // Données médicales adulte femme
       height: 165,
       weight: 58,
@@ -158,8 +174,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[2].toISOString(),
+      updatedAt: patientCreationDates[2].toISOString(),
       height: 185,
       weight: 95,
       bmi: 27.8,
@@ -201,8 +217,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[3].toISOString(),
+      updatedAt: patientCreationDates[3].toISOString(),
       height: 172,
       weight: 68,
       bmi: 23.0,
@@ -246,8 +262,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[4].toISOString(),
+      updatedAt: patientCreationDates[4].toISOString(),
       height: 175,
       weight: 72,
       bmi: 23.5,
@@ -289,8 +305,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[5].toISOString(),
+      updatedAt: patientCreationDates[5].toISOString(),
       height: 168,
       weight: 64,
       bmi: 22.7,
@@ -335,8 +351,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[6].toISOString(),
+      updatedAt: patientCreationDates[6].toISOString(),
       height: 180,
       weight: 76,
       bmi: 23.5,
@@ -380,8 +396,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[7].toISOString(),
+      updatedAt: patientCreationDates[7].toISOString(),
       height: 160,
       weight: 52,
       bmi: 20.3,
@@ -425,8 +441,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[8].toISOString(),
+      updatedAt: patientCreationDates[8].toISOString(),
       height: 172,
       weight: 78,
       bmi: 26.4,
@@ -470,8 +486,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[9].toISOString(),
+      updatedAt: patientCreationDates[9].toISOString(),
       height: 170,
       weight: 62,
       bmi: 21.5,
@@ -515,8 +531,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[10].toISOString(),
+      updatedAt: patientCreationDates[10].toISOString(),
       height: 135,
       weight: 32,
       bmi: 17.6,
@@ -557,8 +573,8 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
       city: 'Toulouse',
       postalCode: '31000',
       osteopathId: userId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
+      createdAt: patientCreationDates[11].toISOString(),
+      updatedAt: patientCreationDates[11].toISOString(),
       height: 105,
       weight: 18,
       bmi: 16.3,
