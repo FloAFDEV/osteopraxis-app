@@ -64,19 +64,28 @@ const NewInvoicePage = () => {
 
         // 3. Si rendez-vous proposé, priorité : charger le patient lié
         if (appointmentId) {
-          const appointment = await api.getAppointmentById(Number(appointmentId));
-          if (appointment) {
-            setAppointment(appointment);
-            if (appointment.patientId) {
-              const patient = await api.getPatientById(appointment.patientId);
-              if (patient) {
-                setPatientData(patient);
-                setSelectedPatientId(patient.id);
-              }
-            }
+          const appointmentIdValue = isDemoMode ? appointmentId : Number(appointmentId);
+
+          // Validation de l'ID
+          if (!appointmentIdValue || (typeof appointmentIdValue === 'number' && isNaN(appointmentIdValue))) {
+            console.error('[NewInvoicePage] ID rendez-vous invalide:', appointmentId);
+            setError("ID de rendez-vous invalide");
+            toast.error("ID de rendez-vous invalide");
           } else {
-            setError("Rendez-vous non trouvé");
-            toast.error("Rendez-vous non trouvé");
+            const appointment = await api.getAppointmentById(appointmentIdValue);
+            if (appointment) {
+              setAppointment(appointment);
+              if (appointment.patientId) {
+                const patient = await api.getPatientById(appointment.patientId);
+                if (patient) {
+                  setPatientData(patient);
+                  setSelectedPatientId(patient.id);
+                }
+              }
+            } else {
+              setError("Rendez-vous non trouvé");
+              toast.error("Rendez-vous non trouvé");
+            }
           }
         }
 

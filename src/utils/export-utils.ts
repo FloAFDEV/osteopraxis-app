@@ -188,7 +188,7 @@ export async function addWatermarkExcel(
   
   if (isDemo) {
     // Créer une feuille README avec les avertissements
-    const readmeSheet = workbook.addWorksheet('[!] README - MODE DEMO [!]');
+    const readmeSheet = workbook.addWorksheet('README - MODE DEMO');
   
   const warnings = [
     '[!] AVERTISSEMENT IMPORTANT [!]',

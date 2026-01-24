@@ -206,6 +206,21 @@ export function useDemoSession() {
     return () => clearInterval(interval);
   }, [isDemoActive, loadSession, endDemo]);
 
+  // Formater le temps restant (heures + minutes)
+  const formatRemainingTime = (ms: number): string => {
+    const hours = Math.floor(ms / (60 * 60 * 1000));
+    const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+    const seconds = Math.floor((ms % (60 * 1000)) / 1000);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    if (minutes > 0) {
+      return `${minutes}min ${seconds}s`;
+    }
+    return `${seconds}s`;
+  };
+
   return {
     startDemo,
     endDemo,
@@ -213,8 +228,15 @@ export function useDemoSession() {
     getRemainingAttempts,
     isDemoActive,
     remainingMs,
+    remainingFormatted: formatRemainingTime(remainingMs),
     demoUserId,
     demoCabinetId,
-    demoCabinetName
+    demoCabinetName,
+    // Informations sur les essais (5 essais de 3h sur 30 jours)
+    attemptsInfo: {
+      used: isDevMode() ? 0 : (parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10)),
+      max: isDevMode() ? 999 : DEMO_MAX_ATTEMPTS,
+      resetPeriod: '30 jours'
+    }
   };
 }

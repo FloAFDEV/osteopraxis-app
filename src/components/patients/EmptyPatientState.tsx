@@ -39,7 +39,7 @@ const EmptyPatientState: React.FC<EmptyPatientStateProps> = ({
       {/* Logo circulaire avec badge Users */}
       <div className="relative mx-auto mb-8 w-44 h-44">
         <img
-          src="/lovable-uploads/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
+          src="/images/256dca24-4b34-4c54-9acf-3556dfb11b34.png"
           alt="Logo ostéopathe"
           className="w-44 h-44 object-cover rounded-full border-8 border-white shadow-lg bg-[#eaf4ef]"
         />

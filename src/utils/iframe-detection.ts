@@ -16,20 +16,20 @@ export function isInIframe(): boolean {
 }
 
 /**
- * Détecte spécifiquement si on est dans la preview Lovable
+ * Détecte spécifiquement si on est dans une preview iframe
  */
-export function isLovablePreview(): boolean {
+export function isIframePreview(): boolean {
   try {
     const isIframe = isInIframe();
     const url = window.location.href;
-    
-    // Vérifier les patterns Lovable connus
-    const isLovableUrl = 
-      url.includes('lovable.app') || 
-      url.includes('lovable.dev') ||
-      url.includes('gptengineer.app');
-    
-    return isIframe && isLovableUrl;
+
+    // Vérifier les patterns de preview connus
+    const isPreviewUrl =
+      url.includes('.app') ||
+      url.includes('.dev') ||
+      url.includes('preview');
+
+    return isIframe && isPreviewUrl;
   } catch {
     return false;
   }
@@ -40,17 +40,17 @@ export function isLovablePreview(): boolean {
  */
 export function getExecutionContext(): {
   isIframe: boolean;
-  isLovablePreview: boolean;
+  isIframePreview: boolean;
   canUseFSA: boolean;
   recommendedBackend: 'FSA' | 'IndexedDB';
 } {
   const isIframe = isInIframe();
-  const isPreview = isLovablePreview();
+  const isPreview = isIframePreview();
   const canUseFSA = !isIframe && 'showDirectoryPicker' in window;
-  
+
   return {
     isIframe,
-    isLovablePreview: isPreview,
+    isIframePreview: isPreview,
     canUseFSA,
     recommendedBackend: canUseFSA ? 'FSA' : 'IndexedDB'
   };

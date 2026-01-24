@@ -31,21 +31,31 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 	const isMinor = age !== null && age < 18;
 
 	const getAvatarColor = () => {
+		// Mineur d'abord
+		if (isMinor) {
+			return {
+				background: "bg-teal-100 text-teal-700",
+				icon: <Baby className="h-5 w-5 text-teal-700" />,
+			};
+		}
+		// Puis par genre
 		switch (patient.gender) {
 			case "Homme":
+			case "M":
 				return {
-					background: "bg-blue-200 text-blue-600",
-					icon: <User className="h-5 w-5 text-blue-600" />,
+					background: "bg-blue-100 text-blue-700",
+					icon: <User className="h-5 w-5 text-blue-700" />,
 				};
 			case "Femme":
+			case "F":
 				return {
-					background: "bg-pink-200 text-pink-600",
-					icon: <Users className="h-5 w-5 text-pink-600" />,
+					background: "bg-rose-100 text-rose-700",
+					icon: <Users className="h-5 w-5 text-rose-700" />,
 				};
 			default:
 				return {
-					background: "bg-purple-100 text-purple-600",
-					icon: <Users className="h-5 w-5 text-purple-600" />,
+					background: "bg-gray-200 text-gray-800",
+					icon: <Users className="h-5 w-5 text-gray-800" />,
 				};
 		}
 	};
@@ -92,12 +102,22 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 								)}
 								{/* Badge de propriété du patient */}
 								<PatientOwnershipBadge patientId={patient.id} />
-								{/* Si mineur, afficher l'icône et le badge */}
+								{/* Badge Mineur en priorité, sinon genre */}
 								{isMinor && (
-									<div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
-										<Baby className="h-4 w-4 text-emerald-600" />
-										<span>Mineur</span>
-									</div>
+									<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700">
+										<Baby className="h-3 w-3" />
+										Mineur
+									</span>
+								)}
+								{!isMinor && patient.gender === "M" && (
+									<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700">
+										Homme
+									</span>
+								)}
+								{!isMinor && patient.gender === "F" && (
+									<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-700">
+										Femme
+									</span>
 								)}
 							</div>
 

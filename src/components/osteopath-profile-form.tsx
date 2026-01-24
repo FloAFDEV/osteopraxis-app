@@ -15,7 +15,9 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { api } from "@/services/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const osteopathSchema = z.object({
   name: z.string().min(2, {
@@ -45,16 +47,27 @@ interface OsteopathProfileFormProps {
   selectedPlan?: 'light' | 'full' | 'pro'; // Plan sélectionné par l'utilisateur
 }
 
-export function OsteopathProfileForm({ 
-  onProfileCreated, 
-  currentOsteopath, 
+export function OsteopathProfileForm({
+  onProfileCreated,
+  currentOsteopath,
   setCurrentOsteopath,
   osteopathId,
   isEditing = false,
   onSuccess,
   selectedPlan = 'light' // Par défaut, le plan Light
 }: OsteopathProfileFormProps) {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
+  const [stampPreview, setStampPreview] = useState<string | null>(null);
+
+  // Charger le tampon existant depuis localStorage (mode démo)
+  useEffect(() => {
+    if (isDemoMode) {
+      const savedStamp = localStorage.getItem('demo_osteopath_stamp');
+      if (savedStamp) {
+        setStampPreview(savedStamp);
+      }
+    }
+  }, [isDemoMode]);
 
   const form = useForm<z.infer<typeof osteopathSchema>>({
     resolver: zodResolver(osteopathSchema),
@@ -79,6 +92,40 @@ export function OsteopathProfileForm({
       });
     }
   }, [currentOsteopath, form]);
+
+  const handleStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+      toast.error("Format non supporté. Utilisez PNG ou JPG uniquement.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Le fichier est trop volumineux (max 5MB).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setStampPreview(result);
+      if (isDemoMode) {
+        localStorage.setItem('demo_osteopath_stamp', result);
+        toast.success("Tampon enregistré (mode démo)");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveStamp = () => {
+    setStampPreview(null);
+    if (isDemoMode) {
+      localStorage.removeItem('demo_osteopath_stamp');
+      toast.success("Tampon supprimé");
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof osteopathSchema>) => {
     if (currentOsteopath || isEditing) {
@@ -221,7 +268,62 @@ export function OsteopathProfileForm({
             </FormItem>
           )}
         />
-        <Button type="submit">
+
+        {/* Gestion du tampon professionnel en mode démo */}
+        {isDemoMode && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Tampon professionnel
+              </CardTitle>
+              <CardDescription>
+                Ajoutez votre tampon pour qu'il apparaisse sur vos factures (mode démo - stockage local)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!stampPreview ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <label htmlFor="stamp-upload" className="cursor-pointer">
+                    <Upload className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Cliquez pour ajouter votre tampon
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      PNG ou JPG, max 5MB
+                    </p>
+                    <input
+                      id="stamp-upload"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      className="hidden"
+                      onChange={handleStampUpload}
+                    />
+                  </label>
+                </div>
+              ) : (
+                <div className="relative">
+                  <img
+                    src={stampPreview}
+                    alt="Tampon professionnel"
+                    className="max-h-40 mx-auto border rounded"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={handleRemoveStamp}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <Button type="submit" className="mt-6">
           {currentOsteopath || isEditing ? "Mettre à jour" : "Créer"}
         </Button>
       </form>

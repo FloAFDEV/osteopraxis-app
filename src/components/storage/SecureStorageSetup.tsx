@@ -39,7 +39,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
     setContext(getExecutionContext());
   }, []);
   
-  const isPreviewMode = context.isIframe || context.isLovablePreview;
+  const isPreviewMode = context.isIframe || context.isIframePreview;
 
 
   const validatePassword = (pwd: string): { valid: boolean; errors: string[] } => {

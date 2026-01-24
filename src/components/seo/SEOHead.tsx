@@ -20,7 +20,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   description = "Solution complète pour ostéopathes avec gestion des patients, rendez-vous, facturation et optimisation automatique. Essai gratuit 14 jours.",
   keywords = "logiciel ostéopathe, gestion cabinet ostéopathie, patients, rendez-vous, facturation, RGPD",
   canonicalUrl,
-  ogImage = "/lovable-uploads/3b270ea6-782e-4b52-880c-9c999d2379bf.png",
+  ogImage = "/images/3b270ea6-782e-4b52-880c-9c999d2379bf.png",
   ogType = "website",
   articlePublishedTime,
   articleModifiedTime,

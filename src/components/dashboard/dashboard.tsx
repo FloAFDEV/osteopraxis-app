@@ -161,31 +161,34 @@ export function Dashboard() {
 						</CollapsibleSection>
 					</div>
 
-					{/* Section Statistiques - Refermable */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-						<div className="animate-fade-in animate-delay-200">
-							<CollapsibleSection
-								title="Consultations"
-								icon={<TrendingUp className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
-								defaultOpen={true}
-								storageKey="dashboard-consultations-section"
-							>
-								<ConsultationsChart data={dashboardData} />
-							</CollapsibleSection>
-						</div>
-						<div className="animate-fade-in animate-delay-300">
-							<CollapsibleSection
-								title="Démographie"
-								icon={<Users className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
-								defaultOpen={true}
-								storageKey="dashboard-demographics-section"
-							>
-								<DemographicsCard
-									patients={allPatients}
-									data={dashboardData}
-								/>
-							</CollapsibleSection>
-						</div>
+					{/* Section Statistiques - Refermable (Consultations et Démographie côte à côte) */}
+					<div className="animate-fade-in animate-delay-200">
+						<CollapsibleSection
+							title="Statistiques"
+							icon={<BarChart3 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+							defaultOpen={true}
+							storageKey="dashboard-stats-section"
+						>
+							<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+								<div>
+									<h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+										<TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+										Consultations
+									</h3>
+									<ConsultationsChart data={dashboardData} />
+								</div>
+								<div>
+									<h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+										<Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+										Démographie
+									</h3>
+									<DemographicsCard
+										patients={allPatients}
+										data={dashboardData}
+									/>
+								</div>
+							</div>
+						</CollapsibleSection>
 					</div>
 
 					{/* Analytics Avancées */}

@@ -221,10 +221,10 @@ export function MonthlyScheduleView({
                             <div
                               key={appointment.id}
                               className={cn(
-                                "p-1 rounded text-xs truncate transition-colors cursor-pointer",
-                                appointment.status === "COMPLETED" 
-                                  ? "bg-green-100 text-green-800 border-l-2 border-l-green-500 hover:bg-green-200 hover:text-green-900" 
-                                  : "bg-blue-100 text-blue-800 border-l-2 border-l-blue-500 hover:bg-blue-200 hover:text-blue-900"
+                                "p-2 rounded text-sm truncate transition-colors cursor-pointer shadow-sm",
+                                appointment.status === "COMPLETED"
+                                  ? "bg-green-100 text-green-800 border-l-4 border-l-green-500 hover:bg-green-200 hover:text-green-900 dark:bg-green-900/20 dark:text-green-100 dark:hover:bg-green-900/30"
+                                  : "bg-blue-100 text-blue-800 border-l-4 border-l-blue-500 hover:bg-blue-200 hover:text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 dark:hover:bg-blue-900/30"
                               )}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -232,11 +232,11 @@ export function MonthlyScheduleView({
                                 // navigate(`/appointments/${appointment.id}/edit`);
                               }}
                             >
-                              <div className="font-medium">
+                              <div className="font-semibold text-base">
                                 {appointmentTime}
                               </div>
-                              <div className="truncate">
-                                {patient 
+                              <div className="truncate font-medium">
+                                {patient
                                   ? `${patient.firstName} ${patient.lastName}`
                                   : `Patient #${appointment.patientId}`
                                 }

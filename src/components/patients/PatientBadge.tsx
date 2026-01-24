@@ -33,19 +33,19 @@ export function PatientBadge({
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
   // Couleur du badge selon le genre et l'âge
-  // Mineur : Vert | Homme : Bleu médical | Femme : Rose
+  // Mineur : Vert doux | Homme : Bleu médical | Femme : Rose poudré
   const getBadgeColor = () => {
     if (isChild) {
-      // Vert pour les mineurs
-      return 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300';
+      // Vert doux pour les mineurs (moins saturé, plus professionnel)
+      return 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/20 dark:text-teal-400';
     }
     if (gender === 'M') {
-      // Bleu médical professionnel (pas Bootstrap)
-      return 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-900/30 dark:text-sky-300';
+      // Bleu médical professionnel (nuancé)
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400';
     }
     if (gender === 'F') {
-      // Rose pour les femmes
-      return 'bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-900/30 dark:text-pink-300';
+      // Rose poudré pour les femmes (moins saturé, plus élégant)
+      return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-400';
     }
     return 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-gray-300';
   };
@@ -53,15 +53,15 @@ export function PatientBadge({
   // Couleur de l'avatar selon le genre
   const getAvatarColor = () => {
     if (isChild) {
-      return 'bg-emerald-200 text-emerald-800';
+      return 'bg-teal-100 text-teal-700';
     }
     if (gender === 'M') {
       // Bleu médical
-      return 'bg-sky-200 text-sky-800';
+      return 'bg-blue-100 text-blue-700';
     }
     if (gender === 'F') {
-      // Rose
-      return 'bg-pink-200 text-pink-800';
+      // Rose poudré
+      return 'bg-rose-100 text-rose-700';
     }
     return 'bg-gray-200 text-gray-800';
   };

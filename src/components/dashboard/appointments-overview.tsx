@@ -113,11 +113,15 @@ export function AppointmentsOverview({
 
 	const handleAppointmentClick = (appointmentId: number | string) => {
 		try {
-			// Fix: Assurons-nous que l'ID est valide
-			if (!appointmentId) {
+			// Fix: Assurons-nous que l'ID est valide (0 est invalide aussi!)
+			if (!appointmentId || appointmentId === 0 || appointmentId === '0') {
+				console.error('[AppointmentsOverview] ID invalide:', appointmentId);
 				toast.error("ID de rendez-vous invalide");
 				return;
 			}
+
+			// Log pour debug
+			console.log('[AppointmentsOverview] Navigation vers RDV:', appointmentId);
 
 			// ✅ Navigation vers rendez-vous
 
@@ -172,6 +176,12 @@ export function AppointmentsOverview({
 		isHighlighted = false,
 		isLastItem = false
 	) => {
+		// Validation: ignorer les appointments sans ID valide
+		if (!appointment?.id || appointment.id === 0) {
+			console.warn('[AppointmentsOverview] Appointment sans ID valide:', appointment);
+			return null;
+		}
+
 		const patient = getPatientById(appointment.patientId);
 		const appointmentDate = parseISO(appointment.date);
 

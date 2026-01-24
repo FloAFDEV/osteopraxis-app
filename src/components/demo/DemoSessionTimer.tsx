@@ -4,20 +4,14 @@ import { PaywallModal } from '@/components/paywall/PaywallModal';
 import { useEffect, useState } from 'react';
 
 export const DemoSessionTimer = () => {
-  const { session, paywallReason } = useDemoSession();
+  const { isDemoActive, remainingMs, remainingFormatted, attemptsInfo } = useDemoSession();
   const [showPaywall, setShowPaywall] = useState(false);
 
-  useEffect(() => {
-    if (paywallReason === 'timer_expired') {
-      setShowPaywall(true);
-    }
-  }, [paywallReason]);
-
-  if (!session?.isActive) {
+  if (!isDemoActive) {
     return null;
   }
 
-  const isLowTime = session.remainingMs < 5 * 60 * 1000; // Moins de 5 minutes
+  const isLowTime = remainingMs < 5 * 60 * 1000; // Moins de 5 minutes
 
   return (
     <>
@@ -42,7 +36,7 @@ export const DemoSessionTimer = () => {
             <div className="text-sm text-gray-600">
               Temps restant:{' '}
               <span className={`font-mono font-medium ${isLowTime ? 'text-orange-600' : 'text-gray-900'}`}>
-                {session.remainingFormatted}
+                {remainingFormatted}
               </span>
             </div>
 
@@ -50,22 +44,16 @@ export const DemoSessionTimer = () => {
               <div className="text-xs text-orange-600">⚠️ Session bientôt expirée</div>
             )}
 
-            <div className="text-xs text-gray-500">
-              {session.limits.patients.current}/{session.limits.patients.max} patients •{' '}
-              {session.limits.appointments.current}/{session.limits.appointments.max} RDV
-            </div>
+            {attemptsInfo && (
+              <div className="text-xs text-gray-500">
+                Essais: {attemptsInfo.used}/{attemptsInfo.max} (reset: {attemptsInfo.resetPeriod})
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Paywall bloquant si timer expiré */}
-      {showPaywall && paywallReason && (
-        <PaywallModal
-          isOpen={showPaywall}
-          reason={paywallReason}
-          onClose={() => setShowPaywall(false)}
-        />
-      )}
+      {/* Paywall si temps écoulé (géré par le hook) */}
     </>
   );
 };

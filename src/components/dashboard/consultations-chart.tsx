@@ -73,12 +73,12 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 									>
 										<stop
 											offset="5%"
-											stopColor="rgb(99, 102, 241)"
+											stopColor="hsl(210, 70%, 55%)"
 											stopOpacity={0.3}
 										/>
 										<stop
 											offset="95%"
-											stopColor="rgb(99, 102, 241)"
+											stopColor="hsl(210, 70%, 55%)"
 											stopOpacity={0}
 										/>
 									</linearGradient>
@@ -112,7 +112,7 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 								<Area
 									type="monotone"
 									dataKey="consultations"
-									stroke="rgb(99, 102, 241)"
+									stroke="hsl(210, 70%, 55%)"
 									strokeWidth={2}
 									fill="url(#consultationsGradient)"
 								/>
@@ -150,7 +150,7 @@ export function ConsultationsChart({ data }: ConsultationsChartProps) {
 								/>
 								<Bar
 									dataKey="consultations"
-									fill="rgb(99, 102, 241)"
+									fill="hsl(210, 70%, 55%)"
 									radius={[2, 2, 0, 0]}
 								/>
 							</BarChart>

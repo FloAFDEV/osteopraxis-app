@@ -377,7 +377,7 @@ const RegisterPage = () => {
       {/* Right section - Image */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
         <img
-          src="/lovable-uploads/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png"
+          src="/images/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png"
           alt="Colonne vertébrale"
           className="w-full h-full object-cover"
         />

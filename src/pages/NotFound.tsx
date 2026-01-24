@@ -19,7 +19,7 @@ const NotFound = () => {
         <div className="flex flex-col md:flex-row items-center justify-center gap-8">
           <div className="w-48 md:w-64 lg:w-80 mx-auto md:mx-0">
             <img 
-              src="/lovable-uploads/4b186fbd-26a1-4d89-85fc-0ea60ae928e9.png" 
+              src="/images/4b186fbd-26a1-4d89-85fc-0ea60ae928e9.png" 
               alt="Illustration 404"
               className="w-full h-auto"
             />

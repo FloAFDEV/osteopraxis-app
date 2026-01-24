@@ -380,41 +380,41 @@ const SchedulePage = () => {
                         } catch {
                           eventStartTime = "??:??";
                         }
-                        return <Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-50/50">
+                        return <Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-100 dark:bg-blue-900/20">
 																	<CardContent className="p-3 flex-grow">
 																		<div className="flex items-center justify-between mb-2">
-																			<Badge className="bg-blue-500 text-xs">
+																			<Badge className="bg-blue-800 text-white text-xs">
 																				{eventStartTime}
 																			</Badge>
 																			<div className="flex gap-1">
-																				{event.is_doctolib && <Badge variant="outline" className="text-green-700 border-green-300 text-xs">
+																				{event.is_doctolib && <Badge variant="outline" className="text-teal-700 border-teal-300 dark:text-teal-400 dark:border-teal-700 text-xs">
 																						Doctolib
 																					</Badge>}
-																				<Badge variant="outline" className="text-blue-700 border-blue-300 text-xs">
+																				<Badge variant="outline" className="text-blue-700 border-blue-300 dark:text-blue-400 dark:border-blue-700 text-xs">
 																					Google
 																				</Badge>
 																			</div>
 																		</div>
 																		<div className="mb-2">
-																			<h3 className="font-medium text-blue-900 truncate text-sm">
+																			<h3 className="font-medium text-blue-900 dark:text-blue-100 truncate text-sm">
 																				{event.summary}
 																			</h3>
-																			{event.location && <p className="text-xs text-blue-700 truncate">
+																			{event.location && <p className="text-xs text-blue-700 dark:text-blue-300 truncate">
 																					📍 {event.location}
 																				</p>}
 																			{event.matched_patient_name && <div className="flex items-center gap-1 mt-1">
-																					<Users className="h-3 w-3 text-green-600" />
-																					<span className="text-xs text-green-700 font-medium">
+																					<Users className="h-3 w-3 text-teal-600 dark:text-teal-400" />
+																					<span className="text-xs text-teal-700 dark:text-teal-300 font-medium">
 																						{event.matched_patient_name}
 																					</span>
 																				</div>}
 																		</div>
 																	</CardContent>
 																	<div className="px-3 pb-2 flex justify-between items-center">
-																		<p className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+																		<p className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded">
 																			Événement externe (lecture seule)
 																		</p>
-																		{event.matched_patient_id && <Link to={`/patients/${event.matched_patient_id}`} className="text-xs text-green-600 hover:text-green-800 flex items-center gap-1">
+																		{event.matched_patient_id && <Link to={`/patients/${event.matched_patient_id}`} className="text-xs text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-1">
 																				<ExternalLink className="h-3 w-3" />
 																				Fiche patient
 																			</Link>}
@@ -434,23 +434,33 @@ const SchedulePage = () => {
                           appointmentTime = "??:??";
                         }
                         const isProcessingAction = actionInProgress?.id === appointment.id;
-                        return <Card key={appointment.id} className="hover-scale flex flex-col">
-																	<CardContent className="p-3 flex-grow">
+                        return <Card key={appointment.id} className={cn(
+                          "hover-scale flex flex-col border-l-4 transition-colors",
+                          appointment.status === "COMPLETED"
+                            ? "bg-green-100 text-green-800 border-l-green-500 dark:bg-green-900/20 dark:text-green-100"
+                            : "bg-blue-100 text-blue-800 border-l-blue-500 dark:bg-blue-900/20 dark:text-blue-100"
+                        )}>
+																	<CardContent className="p-4 flex-grow">
 																		{/* Top section: Time Badge */}
-																		<div className="flex items-center justify-between mb-2">
-																			<Badge className="bg-blue-500">
+																		<div className="flex items-center justify-between mb-3">
+																			<Badge className={cn(
+                                "text-base px-3 py-1.5",
+                                appointment.status === "COMPLETED"
+                                  ? "bg-green-800 text-white"
+                                  : "bg-blue-800 text-white"
+                              )}>
 																				{appointmentTime}
 																			</Badge>
-																			{appointment.status === "COMPLETED" && <Badge className="bg-amber-500">
+																			{appointment.status === "COMPLETED" && <Badge className="bg-green-700 text-white dark:bg-green-600 text-sm px-2 py-1">
 																					Terminé
 																				</Badge>}
 																		</div>
 																		{/* Middle section: Link to patient/reason */}
 																		<Link to={`/appointments/${appointment.id}/edit`} className="block group mb-3">
-																			<h3 className="font-medium group-hover:text-primary truncate">
+																			<h3 className="font-semibold text-lg group-hover:text-primary truncate">
 																				{patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
 																			</h3>
-																			<p className="text-sm text-muted-foreground truncate">
+																			<p className="text-base text-muted-foreground truncate font-medium">
 																				{appointment.reason}
 																			</p>
 																		</Link>

@@ -280,11 +280,12 @@ const PatientsPage = () => {
 								/>
 						) : (
 							<>
-								<PatientResultsSummary
+								{/* PatientResultsSummary commenté car doublon avec PatientHeader */}
+								{/* <PatientResultsSummary
 									patientCount={filteredPatients.length}
 									currentPage={currentPage}
 									totalPages={totalPages}
-								/>
+								/> */}
 
 								{viewMode === "cards" ? (
 									<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">

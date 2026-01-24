@@ -4,7 +4,7 @@ export const DashboardHeader: React.FC = () => {
 	return (
 		<div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-lg shadow-lg animate-fade-in transition-all duration-500 hover:scale-[1.01]">
 			<img
-				src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600&h=400"
+				src="/images/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png"
 				alt="Cabinet d'ostéopathie"
 				className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
 				loading="lazy"
