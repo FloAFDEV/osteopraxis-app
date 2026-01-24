@@ -380,31 +380,33 @@ const SchedulePage = () => {
                         } catch {
                           eventStartTime = "??:??";
                         }
-                        return <Card key={event.id} className="hover-scale flex flex-col border-l-4 border-l-blue-500 bg-blue-100 dark:bg-blue-900/20">
-																	<CardContent className="p-3 flex-grow">
-																		<div className="flex items-center justify-between mb-2">
-																			<Badge className="bg-blue-800 text-white text-xs">
+                        return <Card key={event.id} className="hover-scale border-l-4 border-l-purple-500 bg-purple-100 dark:bg-purple-900/20">
+																	<CardContent className="p-4 lg:p-5 xl:p-6">
+																		<div className="flex items-center justify-between mb-3 lg:mb-4">
+																			<Badge className={cn(
+                                "text-base lg:text-lg xl:text-xl px-3 py-1.5 lg:px-4 lg:py-2 bg-purple-800 text-white"
+                              )}>
 																				{eventStartTime}
 																			</Badge>
 																			<div className="flex gap-1">
-																				{event.is_doctolib && <Badge variant="outline" className="text-teal-700 border-teal-300 dark:text-teal-400 dark:border-teal-700 text-xs">
+																				{event.is_doctolib && <Badge variant="outline" className="text-teal-700 border-teal-300 dark:text-teal-400 dark:border-teal-700 text-xs lg:text-sm">
 																						Doctolib
 																					</Badge>}
-																				<Badge variant="outline" className="text-blue-700 border-blue-300 dark:text-blue-400 dark:border-blue-700 text-xs">
+																				<Badge variant="outline" className="text-purple-700 border-purple-300 dark:text-purple-400 dark:border-purple-700 text-xs lg:text-sm">
 																					Google
 																				</Badge>
 																			</div>
 																		</div>
 																		<div className="mb-2">
-																			<h3 className="font-medium text-blue-900 dark:text-blue-100 truncate text-sm">
+																			<h3 className="font-semibold text-lg lg:text-xl xl:text-2xl text-purple-900 dark:text-purple-100 truncate">
 																				{event.summary}
 																			</h3>
-																			{event.location && <p className="text-xs text-blue-700 dark:text-blue-300 truncate">
+																			{event.location && <p className="text-base lg:text-lg xl:text-xl text-purple-700 dark:text-purple-300 truncate font-medium">
 																					📍 {event.location}
 																				</p>}
 																			{event.matched_patient_name && <div className="flex items-center gap-1 mt-1">
-																					<Users className="h-3 w-3 text-teal-600 dark:text-teal-400" />
-																					<span className="text-xs text-teal-700 dark:text-teal-300 font-medium">
+																					<Users className="h-4 w-4 lg:h-5 lg:w-5 text-teal-600 dark:text-teal-400" />
+																					<span className="text-sm lg:text-base text-teal-700 dark:text-teal-300 font-medium">
 																						{event.matched_patient_name}
 																					</span>
 																				</div>}
@@ -435,12 +437,12 @@ const SchedulePage = () => {
                         }
                         const isProcessingAction = actionInProgress?.id === appointment.id;
                         return <Card key={appointment.id} className={cn(
-                          "hover-scale flex flex-col border-l-4 transition-colors",
+                          "hover-scale border-l-4 transition-colors",
                           appointment.status === "COMPLETED"
                             ? "bg-green-100 text-green-800 border-l-green-500 dark:bg-green-900/20 dark:text-green-100"
                             : "bg-blue-100 text-blue-800 border-l-blue-500 dark:bg-blue-900/20 dark:text-blue-100"
                         )}>
-																	<CardContent className="p-4 lg:p-5 xl:p-6 flex-grow">
+																	<CardContent className="p-4 lg:p-5 xl:p-6">
 																		{/* Top section: Time Badge */}
 																		<div className="flex items-center justify-between mb-3 lg:mb-4">
 																			<Badge className={cn(

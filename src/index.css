@@ -147,6 +147,51 @@ textarea:focus-visible {
   top: 6px;
 }
 
+/* Optimisation Desktop - Agrandissement global pour meilleure UX */
+@media (min-width: 1024px) {
+  /* Headers et titres plus grands */
+  h1 { @apply text-3xl lg:text-4xl xl:text-5xl; }
+  h2 { @apply text-2xl lg:text-3xl xl:text-4xl; }
+  h3 { @apply text-xl lg:text-2xl xl:text-3xl; }
+  h4 { @apply text-lg lg:text-xl xl:text-2xl; }
+
+  /* Texte de base plus lisible */
+  body {
+    font-size: 16px;
+  }
+
+  /* Boutons plus grands et faciles à cliquer */
+  button:not(.no-responsive) {
+    @apply lg:text-base xl:text-lg;
+    @apply lg:px-5 lg:py-2.5 xl:px-6 xl:py-3;
+  }
+
+  /* Inputs et selects plus grands */
+  input:not([type="checkbox"]):not([type="radio"]):not(.no-responsive),
+  textarea:not(.no-responsive),
+  select:not(.no-responsive) {
+    @apply lg:text-base xl:text-lg;
+    @apply lg:px-4 lg:py-3 xl:px-5 xl:py-3.5;
+  }
+
+  /* Labels plus lisibles */
+  label:not(.no-responsive) {
+    @apply lg:text-base xl:text-lg;
+  }
+
+  /* Cards avec plus d'espace */
+  .card:not(.no-responsive) {
+    @apply lg:p-6 xl:p-8;
+  }
+}
+
+@media (min-width: 1536px) {
+  /* 2XL screens - Encore plus grand */
+  body {
+    font-size: 18px;
+  }
+}
+
 @layer base {
 	:root {
 		/* Background & Surface Colors */
