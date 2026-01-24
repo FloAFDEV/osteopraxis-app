@@ -342,9 +342,9 @@ const SchedulePage = () => {
                   const dayAppointments = getDayAppointments(day);
                   const dayGoogleEvents = getDayGoogleEvents(day);
                   const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
-                  return <div key={day.toString()} className="flex flex-col">
+                  return <div key={day.toString()} className="flex flex-col min-h-[200px]">
 												{/* Day header button remains the same */}
-												<button type="button" className={cn("p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full", isSameDay(day, new Date()) ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900" : "bg-muted dark:bg-muted")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter un Séance le ${format(day, "d MMMM yyyy", {
+												<button type="button" className={cn("p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full flex-shrink-0", isSameDay(day, new Date()) ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900" : "bg-muted dark:bg-muted")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter un Séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
                     })}`} aria-label={`Ajouter un Séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
@@ -365,11 +365,11 @@ const SchedulePage = () => {
 												</button>
 
 												{/* Events list or empty state */}
-												{!hasAnyEvents ? <div className="flex-1 flex items-center justify-center p-4 text-center border border-dashed rounded-md">
+												{!hasAnyEvents ? <div className="flex items-center justify-center p-4 text-center border border-dashed rounded-md min-h-[100px]">
 														<p className="text-sm text-muted-foreground">
 															Aucune séance
 														</p>
-													</div> : <div className="space-y-2">
+													</div> : <div className="space-y-2 flex-shrink-0">
 														{/* Google Calendar Events avec correspondance patient */}
 														{dayGoogleEvents.map(event => {
                         let eventStartTime = "??:??";
