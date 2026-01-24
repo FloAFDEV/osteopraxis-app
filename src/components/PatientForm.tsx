@@ -219,6 +219,7 @@ export function PatientForm({
 			hasOnSave: !!onSave,
 			data: data
 		});
+		console.log("📋 Données brutes reçues:", data);
 		try {
 			// ✅ Données soumises
 
@@ -242,16 +243,19 @@ export function PatientForm({
 
 	
 			if (onSubmit) {
-				console.log("📤 Appel de onSubmit");
+				console.log("📤 Appel de onSubmit avec données:", data);
 				await onSubmit(data);
+				console.log("✅ onSubmit terminé avec succès");
 			} else if (onSave) {
-				console.log("📤 Appel de onSave");
+				console.log("📤 Appel de onSave avec données:", data);
 				await onSave(data);
+				console.log("✅ onSave terminé avec succès");
 			} else {
 				console.error("❌ Aucune fonction onSubmit ou onSave fournie");
 			}
 		} catch (error) {
-			console.error("Error submitting form:", error);
+			console.error("❌ Error submitting form:", error);
+			throw error; // Re-throw pour que l'erreur soit visible
 		}
 	};
 
@@ -289,7 +293,11 @@ export function PatientForm({
 			<CardContent>
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit(handleSubmit)}
+						onSubmit={(e) => {
+							console.log("🎪 Form onSubmit event déclenché");
+							console.log("🔍 Event:", e);
+							form.handleSubmit(handleSubmit)(e);
+						}}
 						className="space-y-6"
 					>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -391,6 +399,20 @@ export function PatientForm({
 								type="submit"
 								disabled={isLoading}
 								className="min-w-[120px]"
+								onClick={async (e) => {
+									console.log("🖱️ Bouton 'Mettre à jour' cliqué");
+									console.log("🔒 isLoading:", isLoading);
+									console.log("📋 Form errors:", form.formState.errors);
+									console.log("✅ Form isValid:", form.formState.isValid);
+									console.log("📊 Form values:", form.getValues());
+
+									// Forcer la validation
+									const isValid = await form.trigger();
+									console.log("🔍 Validation forcée - isValid:", isValid);
+									if (!isValid) {
+										console.error("❌ Validation échouée - Erreurs:", form.formState.errors);
+									}
+								}}
 							>
 								{isLoading
 									? "Enregistrement..."

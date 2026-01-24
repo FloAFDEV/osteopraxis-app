@@ -165,7 +165,7 @@ export const DemoGuide: React.FC = () => {
           <div className="flex items-start gap-2">
             <Lightbulb className="h-4 w-4 text-cyan-600 mt-0.5 flex-shrink-0 dark:text-cyan-400" />
             <div className="text-xs text-cyan-700 dark:text-cyan-200">
-              <strong>Conseil :</strong> Les données créées en mode démo sont temporaires et seront supprimées après 30 minutes. 
+              <strong>Conseil :</strong> Les données créées en mode démo sont temporaires et seront supprimées après 1 heure. 
               Parfait pour tester sans risque !
             </div>
           </div>

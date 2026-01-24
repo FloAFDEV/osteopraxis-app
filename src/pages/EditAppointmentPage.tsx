@@ -29,25 +29,33 @@ const EditAppointmentPage = () => {
         }
 
         // Support à la fois les IDs numériques (mode connecté) et les UUIDs (mode démo)
-        const appointmentId: number | string = !isNaN(parseInt(id, 10)) ? parseInt(id, 10) : id;
+        const parsedInt = parseInt(id, 10);
+        const appointmentId: number | string = !isNaN(parsedInt) && parsedInt > 0 ? parsedInt : id;
 
-        console.log(`EditAppointmentPage: Loading appointment ${appointmentId}`);
+        console.log(`EditAppointmentPage: Loading appointment ${appointmentId} (original: ${id}, type: ${typeof appointmentId})`);
 
-        // Charger les données en parallèle
-        const [appointmentData, patientsData] = await Promise.all([
-          api.getAppointmentById(appointmentId),
-          api.getPatients()
-        ]);
+        // Charger les données en parallèle avec retry
+        let appointmentData, patientsData;
+        try {
+          [appointmentData, patientsData] = await Promise.all([
+            api.getAppointmentById(appointmentId),
+            api.getPatients()
+          ]);
+        } catch (apiError: any) {
+          console.error(`EditAppointmentPage: API Error for ID ${appointmentId}:`, apiError);
+          throw new Error(`Erreur API: ${apiError.message || 'Impossible de charger le rendez-vous'}`);
+        }
 
-        console.log(`EditAppointmentPage: Chargé RDV ID ${appointmentId} et ${patientsData.length} patients`);
+        console.log(`EditAppointmentPage: Chargé RDV ID ${appointmentId}:`, appointmentData ? 'TROUVÉ' : 'NULL', `- ${patientsData.length} patients`);
 
-        if (appointmentData) {
-          setAppointment(appointmentData);
-        } else {
-          setError("Séance non trouvée");
-          toast.error("Séance non trouvée");
+        if (!appointmentData) {
+          console.error(`EditAppointmentPage: Rendez-vous non trouvé pour ID ${appointmentId}`);
+          setError(`Séance non trouvée (ID: ${appointmentId})`);
+          toast.error(`Séance non trouvée (ID: ${appointmentId})`);
           return;
         }
+
+        setAppointment(appointmentData);
 
         setPatients(patientsData);
       } catch (error: any) {

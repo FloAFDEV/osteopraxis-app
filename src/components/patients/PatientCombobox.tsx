@@ -42,7 +42,7 @@ export function PatientCombobox({
         <Button
           type="button"
           variant="outline"
-          className={`w-full justify-between ${className || ""}`}
+          className={`w-full justify-between bg-background hover:bg-muted/50 border-input ${className || ""}`}
           aria-expanded={open}
         >
           {selected ? (
@@ -82,7 +82,7 @@ export function PatientCombobox({
                   onChange(patient.id);
                   setOpen(false);
                 }}
-                className="flex items-center gap-2 py-3"
+                className="flex items-center gap-2 py-2 cursor-pointer hover:bg-accent/50"
               >
                 <PatientBadge
                   firstName={patient.firstName}

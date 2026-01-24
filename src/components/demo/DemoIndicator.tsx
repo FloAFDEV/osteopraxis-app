@@ -31,7 +31,7 @@ export const DemoIndicator = ({ className = "", showCTA = true }: DemoIndicatorP
               </Badge>
             </div>
             <p className="text-sm text-purple-700 dark:text-purple-200 font-medium">
-              Session limitée à 30 minutes • Données non sauvegardées
+              Session limitée à 1 heure • Données non sauvegardées
             </p>
             <p className="text-xs text-purple-600 dark:text-purple-300 mt-1">
               {session.limits.patients.current}/{session.limits.patients.max} patients • {session.limits.appointments.current}/{session.limits.appointments.max} RDV • {session.limits.invoices.current}/{session.limits.invoices.max} facture

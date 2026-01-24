@@ -23,7 +23,6 @@ import { UserDeletionMonitoring } from "./user-deletion-monitoring";
 import { BusinessAnalytics } from "./business-analytics";
 import { ProactiveUserManagement } from "./proactive-user-management";
 import { SecurityCompliance } from "./security-compliance";
-import { SystemOptimization } from "./system-optimization";
 import { QuickActionsPanel } from "./QuickActionsPanel";
 import { SimpleAdminOverview } from "./simple-admin-overview";
 import { LocalStorageConfiguration } from "./local-storage-configuration";
@@ -243,9 +242,8 @@ export function AdminDashboard() {
                 <div className="bg-card rounded-lg border p-2">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Administration</div>
                   <div className="flex gap-1">
-                    <TabsList className="grid grid-cols-5 h-auto p-1 bg-muted/50">
+                    <TabsList className="grid grid-cols-4 h-auto p-1 bg-muted/50">
                       <TabsTrigger value="proactive" className="text-sm px-3 py-2">Gestion Pro.</TabsTrigger>
-                      <TabsTrigger value="optimization" className="text-sm px-3 py-2">Optimisation</TabsTrigger>
                       <TabsTrigger value="storage" className="text-sm px-3 py-2">Stockage</TabsTrigger>
                       <TabsTrigger value="tests" className="text-sm px-3 py-2">Tests</TabsTrigger>
                       <TabsTrigger value="settings" className="text-sm px-3 py-2">Paramètres</TabsTrigger>
@@ -294,11 +292,7 @@ export function AdminDashboard() {
             <TabsContent value="security">
               <SecurityCompliance />
             </TabsContent>
-            
-            <TabsContent value="optimization">
-              <SystemOptimization />
-            </TabsContent>
-            
+
             <TabsContent value="monitoring">
               <UserDeletionMonitoring />
             </TabsContent>

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { seedDemoData } from '@/services/demo-seed-data';
 import { DemoStorage } from '@/services/demo-storage';
 
-const DEMO_DURATION_MS = 3 * 60 * 60 * 1000; // 180 minutes (3 heures)
+const DEMO_DURATION_MS = 1 * 60 * 60 * 1000; // 60 minutes (1 heure)
 const DEMO_MAX_ATTEMPTS = 5;
 const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 const STORAGE_KEY = 'demo_session';
@@ -232,7 +232,7 @@ export function useDemoSession() {
     demoUserId,
     demoCabinetId,
     demoCabinetName,
-    // Informations sur les essais (5 essais de 3h sur 30 jours)
+    // Informations sur les essais (5 essais de 1h sur 30 jours)
     attemptsInfo: {
       used: isDevMode() ? 0 : (parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10)),
       max: isDevMode() ? 999 : DEMO_MAX_ATTEMPTS,

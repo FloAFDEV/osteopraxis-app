@@ -94,10 +94,18 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 						<CardTitle className="text-sm md:text-base lg:text-lg font-bold truncate">
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
-						<p className="text-xs md:text-sm text-muted-foreground">
-							{patient.gender ?? "Genre non spécifié"},{" "}
-							{age !== null ? `${age} ans` : "Âge non spécifié"}
-						</p>
+						<div className="flex items-center gap-2 flex-wrap mt-1">
+							<p className="text-xs md:text-sm text-muted-foreground">
+								{patient.gender ?? "Genre non spécifié"},{" "}
+								{age !== null ? `${age} ans` : "Âge non spécifié"}
+							</p>
+							{age !== null && age < 18 && (
+								<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700">
+									<Baby className="h-3 w-3" />
+									Mineur
+								</span>
+							)}
+						</div>
 						{age !== null && age < 18 && (
 							<div className="text-amber-600 text-xs flex items-center mt-1">
 								<Baby className="h-3 w-3 mr-1" />

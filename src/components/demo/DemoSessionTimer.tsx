@@ -17,7 +17,7 @@ export const DemoSessionTimer = () => {
     <>
       <div
         className={`
-        fixed bottom-4 right-4 p-4 rounded-lg shadow-lg border z-50 min-w-[280px]
+        fixed bottom-4 left-4 p-3 rounded-lg shadow-lg border z-50 max-w-[260px]
         ${isLowTime ? 'bg-orange-50 border-orange-200' : 'bg-white border-gray-200'}
       `}
       >
@@ -44,7 +44,7 @@ export const DemoSessionTimer = () => {
               <div className="text-xs text-orange-600">⚠️ Session bientôt expirée</div>
             )}
 
-            {attemptsInfo && (
+            {attemptsInfo && attemptsInfo.max !== 999 && (
               <div className="text-xs text-gray-500">
                 Essais: {attemptsInfo.used}/{attemptsInfo.max} (reset: {attemptsInfo.resetPeriod})
               </div>

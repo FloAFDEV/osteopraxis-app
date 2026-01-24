@@ -222,20 +222,6 @@ export function SubscriptionManagement() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-              <Star className="h-3 w-3" /> Plan Light
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold text-gray-600">{stats.lightUsers}</div>
-              <Badge variant="secondary">0€/mois</Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
               <Zap className="h-3 w-3" /> Plan Full
             </CardTitle>
           </CardHeader>
@@ -305,7 +291,6 @@ export function SubscriptionManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les plans</SelectItem>
-              <SelectItem value="light">Light (0€)</SelectItem>
               <SelectItem value="full">Full (9€)</SelectItem>
               <SelectItem value="pro">Pro (16€)</SelectItem>
             </SelectContent>
@@ -358,12 +343,6 @@ export function SubscriptionManagement() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="light">
-                          <div className="flex items-center gap-2">
-                            <Star className="h-3 w-3" />
-                            Light (0€)
-                          </div>
-                        </SelectItem>
                         <SelectItem value="full">
                           <div className="flex items-center gap-2">
                             <Zap className="h-3 w-3" />

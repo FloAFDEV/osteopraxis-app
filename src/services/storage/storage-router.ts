@@ -98,7 +98,22 @@ export class StorageRouter {
 
       async getById(id: string | number): Promise<T | null> {
         const all = DemoStorage.getAll<any>(demoCabinetId, dataType);
-        return all.find((item: any) => item.id === id || item.id === String(id)) || null;
+        // Recherche avec plusieurs stratégies de comparaison
+        const found = all.find((item: any) => {
+          // Comparaison stricte
+          if (item.id === id) return true;
+          // Comparaison string-string
+          if (String(item.id) === String(id)) return true;
+          // Comparaison number-number
+          if (typeof item.id === 'number' && typeof id === 'number' && item.id === id) return true;
+          return false;
+        });
+
+        if (!found) {
+          console.warn(`[DemoAdapter] ${dataType}/${id} introuvable. IDs disponibles:`, all.map((item: any) => item.id));
+        }
+
+        return found || null;
       },
 
       async getAll(): Promise<T[]> {
@@ -107,8 +122,16 @@ export class StorageRouter {
 
       async update(id: string | number, updates: Partial<T>): Promise<T> {
         const all = DemoStorage.getAll<any>(demoCabinetId, dataType);
-        const existing = all.find((item: any) => item.id === id || item.id === String(id));
+        // Recherche avec plusieurs stratégies de comparaison
+        const existing = all.find((item: any) => {
+          if (item.id === id) return true;
+          if (String(item.id) === String(id)) return true;
+          if (typeof item.id === 'number' && typeof id === 'number' && item.id === id) return true;
+          return false;
+        });
+
         if (!existing) {
+          console.error(`[DemoAdapter] ${dataType}/${id} introuvable pour mise à jour. IDs disponibles:`, all.map((item: any) => item.id));
           throw new Error(`${dataType}/${id} introuvable en mode démo`);
         }
 

@@ -337,12 +337,12 @@ const SchedulePage = () => {
 								</div>
 
 								{/* Grid for the week */}
-								<div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+								<div className="grid grid-cols-1 md:grid-cols-7 gap-2">
 									{currentWeek.map(day => {
                   const dayAppointments = getDayAppointments(day);
                   const dayGoogleEvents = getDayGoogleEvents(day);
                   const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
-                  return <div key={day.toString()} className="flex flex-col min-h-[200px]">
+                  return <div key={day.toString()} className="flex flex-col">
 												{/* Day header button remains the same */}
 												<button type="button" className={cn("p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full flex-shrink-0", isSameDay(day, new Date()) ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900" : "bg-muted dark:bg-muted")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter un Séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
@@ -365,11 +365,11 @@ const SchedulePage = () => {
 												</button>
 
 												{/* Events list or empty state */}
-												{!hasAnyEvents ? <div className="flex items-center justify-center p-4 text-center border border-dashed rounded-md min-h-[100px]">
-														<p className="text-sm text-muted-foreground">
+												{!hasAnyEvents ? <div className="flex items-center justify-center p-2 text-center border border-dashed rounded-md min-h-[60px]">
+														<p className="text-xs text-muted-foreground">
 															Aucune séance
 														</p>
-													</div> : <div className="space-y-2 flex-shrink-0">
+													</div> : <div className="space-y-1 flex-shrink-0">
 														{/* Google Calendar Events avec correspondance patient */}
 														{dayGoogleEvents.map(event => {
                         let eventStartTime = "??:??";
@@ -381,44 +381,42 @@ const SchedulePage = () => {
                           eventStartTime = "??:??";
                         }
                         return <Card key={event.id} className="hover-scale border-l-4 border-l-purple-500 bg-purple-100 dark:bg-purple-900/20">
-																	<CardContent className="p-4 lg:p-5 xl:p-6">
-																		<div className="flex items-center justify-between mb-3 lg:mb-4">
-																			<Badge className={cn(
-                                "text-base lg:text-lg xl:text-xl px-3 py-1.5 lg:px-4 lg:py-2 bg-purple-800 text-white"
-                              )}>
+																	<CardContent className="p-2">
+																		<div className="flex items-center justify-between mb-1">
+																			<Badge className="text-xs px-2 py-0.5 bg-purple-800 text-white">
 																				{eventStartTime}
 																			</Badge>
 																			<div className="flex gap-1">
-																				{event.is_doctolib && <Badge variant="outline" className="text-teal-700 border-teal-300 dark:text-teal-400 dark:border-teal-700 text-xs lg:text-sm">
+																				{event.is_doctolib && <Badge variant="outline" className="text-teal-700 border-teal-300 dark:text-teal-400 dark:border-teal-700 text-[10px]">
 																						Doctolib
 																					</Badge>}
-																				<Badge variant="outline" className="text-purple-700 border-purple-300 dark:text-purple-400 dark:border-purple-700 text-xs lg:text-sm">
+																				<Badge variant="outline" className="text-purple-700 border-purple-300 dark:text-purple-400 dark:border-purple-700 text-[10px]">
 																					Google
 																				</Badge>
 																			</div>
 																		</div>
-																		<div className="mb-2">
-																			<h3 className="font-semibold text-lg lg:text-xl xl:text-2xl text-purple-900 dark:text-purple-100 truncate">
+																		<div className="mb-1">
+																			<h3 className="font-semibold text-sm text-purple-900 dark:text-purple-100 truncate">
 																				{event.summary}
 																			</h3>
-																			{event.location && <p className="text-base lg:text-lg xl:text-xl text-purple-700 dark:text-purple-300 truncate font-medium">
+																			{event.location && <p className="text-xs text-purple-700 dark:text-purple-300 truncate">
 																					📍 {event.location}
 																				</p>}
-																			{event.matched_patient_name && <div className="flex items-center gap-1 mt-1">
-																					<Users className="h-4 w-4 lg:h-5 lg:w-5 text-teal-600 dark:text-teal-400" />
-																					<span className="text-sm lg:text-base text-teal-700 dark:text-teal-300 font-medium">
+																			{event.matched_patient_name && <div className="flex items-center gap-1 mt-0.5">
+																					<Users className="h-3 w-3 text-teal-600 dark:text-teal-400" />
+																					<span className="text-xs text-teal-700 dark:text-teal-300">
 																						{event.matched_patient_name}
 																					</span>
 																				</div>}
 																		</div>
 																	</CardContent>
-																	<div className="px-3 pb-2 flex justify-between items-center">
-																		<p className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded">
-																			Événement externe (lecture seule)
+																	<div className="px-2 pb-1 flex justify-between items-center">
+																		<p className="text-[10px] text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-1.5 py-0.5 rounded">
+																			Externe
 																		</p>
-																		{event.matched_patient_id && <Link to={`/patients/${event.matched_patient_id}`} className="text-xs text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-1">
-																				<ExternalLink className="h-3 w-3" />
-																				Fiche patient
+																		{event.matched_patient_id && <Link to={`/patients/${event.matched_patient_id}`} className="text-[10px] text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-0.5">
+																				<ExternalLink className="h-2.5 w-2.5" />
+																				Fiche
 																			</Link>}
 																	</div>
 																</Card>;
@@ -442,49 +440,60 @@ const SchedulePage = () => {
                             ? "bg-green-100 text-green-800 border-l-green-500 dark:bg-green-900/20 dark:text-green-100"
                             : "bg-blue-100 text-blue-800 border-l-blue-500 dark:bg-blue-900/20 dark:text-blue-100"
                         )}>
-																	<CardContent className="p-4 lg:p-5 xl:p-6">
+																	<CardContent className="p-2">
 																		{/* Top section: Time Badge */}
-																		<div className="flex items-center justify-between mb-3 lg:mb-4">
+																		<div className="flex items-center justify-between mb-1">
 																			<Badge className={cn(
-                                "text-base lg:text-lg xl:text-xl px-3 py-1.5 lg:px-4 lg:py-2",
+                                "text-xs px-2 py-0.5",
                                 appointment.status === "COMPLETED"
                                   ? "bg-green-800 text-white"
                                   : "bg-blue-800 text-white"
                               )}>
 																				{appointmentTime}
 																			</Badge>
-																			{appointment.status === "COMPLETED" && <Badge className="bg-green-700 text-white dark:bg-green-600 text-sm lg:text-base px-2 py-1 lg:px-3">
+																			{appointment.status === "COMPLETED" && <Badge className="bg-green-700 text-white dark:bg-green-600 text-[10px] px-1.5 py-0.5">
 																					Terminé
 																				</Badge>}
 																		</div>
 																		{/* Middle section: Link to patient/reason */}
-																		<Link to={`/appointments/${appointment.id}/edit`} className="block group mb-3">
-																			<h3 className="font-semibold text-lg lg:text-xl xl:text-2xl group-hover:text-primary truncate">
+																		<Link to={`/appointments/${appointment.id}/edit`} className="block group mb-1">
+																			<h3 className="font-semibold text-sm group-hover:text-primary truncate">
 																				{patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
 																			</h3>
-																			<p className="text-base lg:text-lg xl:text-xl text-muted-foreground truncate font-medium">
+																			<p className="text-xs text-muted-foreground truncate">
 																				{appointment.reason}
 																			</p>
 																		</Link>
 																	</CardContent>
-																	{/* Bottom section: Action Buttons */}
-																	<div className="flex flex-col sm:flex-row items-center justify-end gap-2 p-2 border-t bg-muted/30">
-																		{/* Cancel Button */}
-																		<Button variant="ghost" size="sm" className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center space-x-1" onClick={() => handleCancelAppointment(appointment.id)} disabled={isProcessingAction || appointment.status === "COMPLETED"} title="Annuler cette séance">
-																			{actionInProgress?.id === appointment.id && actionInProgress.action === "cancel" && <span className="animate-spin text-base">
-																						⏳
-																					</span>}
-																			<X className="w-4 h-4" />
-																			<span className="hidden sm:inline">
-																				Annuler
-																			</span>
+																	{/* Bottom section: Action Buttons - Plus compact pour vue semaine */}
+																	<div className="flex flex-row items-center justify-end gap-1 p-1 border-t bg-muted/30 flex-shrink-0">
+																		{/* Cancel Button - Icon only in week view */}
+																		<Button
+																			variant="ghost"
+																			size="sm"
+																			className="text-destructive hover:bg-destructive/10 h-6 w-6 p-0 flex items-center justify-center"
+																			onClick={() => handleCancelAppointment(appointment.id)}
+																			disabled={isProcessingAction || appointment.status === "COMPLETED"}
+																			title="Annuler cette séance"
+																		>
+																			{actionInProgress?.id === appointment.id && actionInProgress.action === "cancel" ? (
+																				<span className="animate-spin text-xs">⏳</span>
+																			) : (
+																				<X className="w-3 h-3" />
+																			)}
 																		</Button>
 
-																		{/* Delete Button Trigger */}
+																		{/* Delete Button Trigger - Icon only */}
 																		<AlertDialog>
 																			<AlertDialogTrigger asChild>
-																				<Button variant="ghost" size="sm" className="w-full sm:w-auto text-destructive hover:bg-destructive/10 h-8 px-3 flex items-center justify-center" disabled={isProcessingAction} title="Supprimer cette séance">
-																					<Trash2 className="h-4 w-4 sm:mr-1" />
+																				<Button
+																					variant="ghost"
+																					size="sm"
+																					className="text-destructive hover:bg-destructive/10 h-6 w-6 p-0 flex items-center justify-center"
+																					disabled={isProcessingAction}
+																					title="Supprimer cette séance"
+																				>
+																					<Trash2 className="h-3 w-3" />
 																				</Button>
 																			</AlertDialogTrigger>
 																			<AlertDialogContent>

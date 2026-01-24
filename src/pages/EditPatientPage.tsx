@@ -70,10 +70,18 @@ const EditPatientPage = () => {
 	}, [id, navigate]);
 
 	const handleSave = async (updatedData: PatientFormValues) => {
-		if (!patient) return;
+		console.log("🔧 handleSave appelé dans EditPatientPage");
+		console.log("📊 Patient actuel:", patient);
+		console.log("📝 Données du formulaire:", updatedData);
+
+		if (!patient) {
+			console.error("❌ Pas de patient - abandon");
+			return;
+		}
 
 		try {
 			setIsSaving(true);
+			console.info("✅ setIsSaving(true) - début de la sauvegarde");
 			console.info("Submitting values:", updatedData);
 
 			// Convertir les champs numériques correctement - traiter les valeurs undefined
@@ -172,9 +180,12 @@ const EditPatientPage = () => {
 				"Mise à jour du patient avec cabinetId:",
 				patientUpdate.cabinetId
 			);
+			console.log("📦 Objet patient complet à envoyer:", patientUpdate);
 
 			// Use the patientService updatePatient method
+			console.log("🚀 Appel de patientService.updatePatient...");
 			const updatedPatient = await patientService.updatePatient(patientUpdate);
+			console.log("✅ Patient mis à jour avec succès:", updatedPatient);
 			
 			// Update local state immediately
 			setPatient(updatedPatient);
@@ -194,9 +205,12 @@ const EditPatientPage = () => {
 				navigate("/patients");
 			}, 1500);
 		} catch (error: any) {
-			console.error("Error updating patient:", error);
-			toast.error("Impossible de mettre à jour le patient");
+			console.error("❌ Error updating patient:", error);
+			console.error("❌ Stack trace:", error.stack);
+			console.error("❌ Message d'erreur:", error.message);
+			toast.error("Impossible de mettre à jour le patient: " + (error.message || "Erreur inconnue"));
 		} finally {
+			console.log("🏁 setIsSaving(false) - fin de la sauvegarde");
 			setIsSaving(false);
 		}
 	};
