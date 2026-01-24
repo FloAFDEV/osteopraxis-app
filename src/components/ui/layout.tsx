@@ -228,6 +228,15 @@ export function Layout({ children }: LayoutProps) {
 										<span>Paramètres du cabinet</span>
 									</NavLink>
 								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<NavLink
+										to="/settings/osteopath"
+										className="flex items-center cursor-pointer hover:border hover:border-white/20 hover:shadow-sm rounded-sm"
+									>
+										<User className="mr-2 h-4 w-4 text-purple-500" />
+										<span>Profil & Facturation</span>
+									</NavLink>
+								</DropdownMenuItem>
 
 								<DropdownMenuSeparator />
 								<DropdownMenuItem

@@ -71,23 +71,8 @@ const OsteopathSettingsPage = () => {
     return <FancyLoader message="Chargement de votre profil..." />;
   }
 
-  // Bloquer l'accès en mode démo
-  if (isDemoMode) {
-    return (
-      <Layout>
-        <div className="max-w-4xl mx-auto space-y-8">
-          <BackButton to="/settings" />
-          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800 dark:text-red-200">
-              <strong>Accès restreint en mode démo</strong>
-              <p className="mt-2">Les paramètres de profil et de facturation ne sont pas disponibles en mode démonstration pour des raisons de sécurité.</p>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </Layout>
-    );
-  }
+  // En mode démo, afficher un avertissement mais permettre l'accès au tampon
+  const showDemoWarning = isDemoMode;
 
   return (
     <Layout>
@@ -122,20 +107,33 @@ const OsteopathSettingsPage = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Google Calendar Integration */}
-          <GoogleCalendarIntegration />
+        {showDemoWarning && (
+          <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              <strong>Mode démonstration</strong>
+              <p className="mt-2">
+                Certaines fonctionnalités sont limitées en mode démo. La connexion Google Calendar n'est pas disponible.
+                Vous pouvez cependant configurer votre tampon professionnel (stockage local).
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Profile & Billing Form */}
-          <ProfileBillingForm 
+        <div className="space-y-6">
+          {/* Google Calendar Integration - Désactivé en mode démo */}
+          {!isDemoMode && <GoogleCalendarIntegration />}
+
+          {/* Profile & Billing Form (inclut tampon) */}
+          <ProfileBillingForm
             currentOsteopath={osteopath}
-            osteopathId={osteopath?.id} 
-            isEditing={!!osteopath} 
-            onSuccess={handleSuccess} 
+            osteopathId={osteopath?.id}
+            isEditing={!!osteopath}
+            onSuccess={handleSuccess}
           />
 
-          {/* Sécurité du stockage local */}
-          <ProfileSecuritySettings />
+          {/* Sécurité du stockage local - Désactivé en mode démo */}
+          {!isDemoMode && <ProfileSecuritySettings />}
           
           <div className="flex justify-end">
             <button 
