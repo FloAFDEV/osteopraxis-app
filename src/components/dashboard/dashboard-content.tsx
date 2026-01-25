@@ -54,7 +54,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 									: "detailed"
 							)
 						}
-						className="relative w-40 h-8 text-[10px] rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+						className="relative w-40 h-8 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px]"
 					>
 						<div
 							className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] will-change-transform ${

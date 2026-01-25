@@ -308,35 +308,35 @@ export function PatientForm({
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="group flex flex-col items-center gap-1 px-3 py-2.5 text-[11px] font-medium min-h-[55px] flex-1 max-w-[140px] 
-													rounded-md transition-all duration-200 ease-out
+												className="group flex flex-col items-center gap-1 px-3 py-2.5 text-xs font-medium h-14 flex-1 max-w-[140px]
+													rounded-md transition-colors
 													text-muted-foreground dark:text-muted-foreground
-													hover:text-foreground hover:bg-background/80 hover:shadow-md hover:scale-105 hover:-translate-y-0.5
+													hover:text-foreground hover:bg-background/80
 													dark:hover:bg-background/90 dark:hover:text-foreground
-													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
+													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-primary/20
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<tab.icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110" />
-												<span className="text-center leading-tight text-[10px] transition-colors duration-200">{tab.shortLabel}</span>
+												<tab.icon className="w-4 h-4" />
+												<span className="text-center leading-none text-xs">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
 									</div>
-									
+
 									<div className="lg:hidden flex overflow-x-auto gap-1 w-full scrollbar-none">
 										{tabs.map((tab) => (
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="group flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium min-w-[65px] whitespace-nowrap
-													rounded-md transition-all duration-200 ease-out
+												className="group flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium min-w-[65px] h-12 whitespace-nowrap
+													rounded-md transition-colors
 													text-muted-foreground dark:text-muted-foreground
-													hover:text-foreground hover:bg-background/80 hover:shadow-md hover:scale-105
+													hover:text-foreground hover:bg-background/80
 													dark:hover:bg-background/90 dark:hover:text-foreground
-													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-primary/20
+													data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-primary/20
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
-												<tab.icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110" />
-												<span className="text-[10px] text-center leading-tight transition-colors duration-200">{tab.shortLabel}</span>
+												<tab.icon className="w-4 h-4" />
+												<span className="text-xs text-center leading-none">{tab.shortLabel}</span>
 											</TabsTrigger>
 										))}
 									</div>

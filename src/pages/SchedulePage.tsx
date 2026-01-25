@@ -237,46 +237,46 @@ const SchedulePage = () => {
 			{/* Contenu principal */}
 			<div className="flex flex-col min-h-screen">
 				{/* Header type Appointment */}
-				<div className="flex-shrink-0 p-4 sm:p-6 lg:p-8">
+				<div className="flex-shrink-0 p-3">
 					<ScheduleHeader />
 				</div>
-				
-				<div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+
+				<div className="flex-1 overflow-y-auto p-3">
 				{/* Header avec contrôles Google Calendar */}
-				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-					<h1 className="text-3xl font-bold flex items-center gap-2">
-						<Clock className="h-8 w-8 text-amber-500" />
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+					<h1 className="text-lg font-semibold flex items-center gap-2">
+						<Clock className="h-5 w-5 text-slate-500" />
 						Planning
 					</h1>
 					<div className="flex items-center gap-2 flex-wrap">
-						{isGoogleConnected && <div className="flex items-center gap-2">
-								<div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs">
-									<div className="w-2 h-2 bg-green-500 rounded-full"></div>
-									Google Calendar
+						{isGoogleConnected && <div className="flex items-center gap-1">
+								<div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded text-xs leading-none">
+									<div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+									Google
 								</div>
-								<Button variant="outline" size="sm" onClick={() => setShowGoogleEvents(!showGoogleEvents)} className={cn("text-xs", showGoogleEvents ? "bg-blue-50 text-blue-700" : "text-gray-500")}>
-									{showGoogleEvents ? "Masquer Google" : "Afficher Google"}
+								<Button variant="ghost" size="sm" onClick={() => setShowGoogleEvents(!showGoogleEvents)} className={cn("text-xs h-6 px-2", showGoogleEvents ? "text-slate-700" : "text-slate-400")}>
+									{showGoogleEvents ? "Masquer" : "Afficher"}
 								</Button>
 							</div>}
-						<Tabs value={view} onValueChange={v => setView(v as "day" | "week" | "month")} className="mr-2">
-							<TabsList>
-								<TabsTrigger value="day">Jour</TabsTrigger>
-								<TabsTrigger value="week">Semaine</TabsTrigger>
-								<TabsTrigger value="month">Mois</TabsTrigger>
+						<Tabs value={view} onValueChange={v => setView(v as "day" | "week" | "month")} className="mr-1">
+							<TabsList className="h-7">
+								<TabsTrigger value="day" className="text-xs h-6 px-2">Jour</TabsTrigger>
+								<TabsTrigger value="week" className="text-xs h-6 px-2">Semaine</TabsTrigger>
+								<TabsTrigger value="month" className="text-xs h-6 px-2">Mois</TabsTrigger>
 							</TabsList>
 						</Tabs>
-						
+
 						<Popover>
 							<PopoverTrigger asChild>
-								<Button variant="outline" size="sm" className="ml-auto">
-									<CalendarIcon className="mr-2 h-4 w-4" />
-									{selectedDate ? format(selectedDate, "MMMM yyyy", {
+								<Button variant="outline" size="sm" className="h-7 text-xs">
+									<CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+									{selectedDate ? format(selectedDate, "MMM yyyy", {
                     locale: fr
-                  }) : "Date invalide"}
+                  }) : "Date"}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0" align="end">
-								<Calendar mode="single" selected={selectedDate} onSelect={date => date && setSelectedDate(date)} initialFocus className={cn("p-3 pointer-events-auto")} />
+								<Calendar mode="single" selected={selectedDate} onSelect={date => date && setSelectedDate(date)} initialFocus className={cn("p-2 pointer-events-auto")} />
 							</PopoverContent>
 						</Popover>
 					</div>
@@ -286,22 +286,22 @@ const SchedulePage = () => {
 				{isLoading && !appointments.length ? <SmartSkeleton type="schedule" /> : <Tabs value={view} defaultValue={view}>
 						{/* TabsContent value="day" avec Google Events */}
 						<TabsContent value="day">
-							<div className="space-y-4">
-								<div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
-									<div className="flex gap-2">
-										<Button variant="ghost" size="sm" onClick={navigateToPreviousDay}>
-											<ChevronLeft className="h-4 w-4" />{" "}
-											Jour précédent
+							<div className="space-y-3">
+								<div className="flex flex-col sm:flex-row items-center justify-between mb-3 gap-2">
+									<div className="flex gap-1">
+										<Button variant="ghost" size="sm" onClick={navigateToPreviousDay} className="h-7 text-xs">
+											<ChevronLeft className="h-3.5 w-3.5" />
+											Préc.
 										</Button>
-										<Button variant="ghost" size="sm" onClick={navigateToToday}>
-											Aujourd'hui
+										<Button variant="ghost" size="sm" onClick={navigateToToday} className="h-7 text-xs">
+											Auj.
 										</Button>
-										<Button variant="ghost" size="sm" onClick={navigateToNextDay}>
-											Jour suivant{" "}
-											<ChevronRight className="h-4 w-4 ml-1" />
+										<Button variant="ghost" size="sm" onClick={navigateToNextDay} className="h-7 text-xs">
+											Suiv.
+											<ChevronRight className="h-3.5 w-3.5 ml-0.5" />
 										</Button>
 									</div>
-									<h2 className="text-xl font-medium capitalize mt-2 sm:mt-0">
+									<h2 className="text-sm font-medium capitalize">
 										{selectedDate ? format(selectedDate, "EEEE d MMMM yyyy", {
                     locale: fr
                   }) : "Date invalide"}
@@ -313,64 +313,58 @@ const SchedulePage = () => {
 
 						{/* TabsContent value="week" avec Google Events améliorés */}
 						<TabsContent value="week">
-							<div className="space-y-4">
-								{/* Week navigation remains the same */}
-								<div className="flex items-center justify-between mb-4">
-									<Button variant="ghost" size="sm" onClick={navigateToPreviousWeek}>
-										<ChevronLeft className="h-4 w-4" />{" "}
-										Semaine précédente
+							<div className="space-y-3">
+								{/* Week navigation */}
+								<div className="flex items-center justify-between mb-3">
+									<Button variant="ghost" size="sm" onClick={navigateToPreviousWeek} className="h-7 text-xs">
+										<ChevronLeft className="h-3.5 w-3.5" />
+										Préc.
 									</Button>
-									<h2 className="text-xl font-medium">
-										Semaine du{" "}
-										{currentWeek[0] ? format(currentWeek[0], "d MMMM", {
+									<h2 className="text-sm font-medium">
+										{currentWeek[0] ? format(currentWeek[0], "d MMM", {
                     locale: fr
-                  }) : "..."}{" "}
-										au{" "}
-										{currentWeek[6] ? format(currentWeek[6], "d MMMM yyyy", {
+                  }) : "..."} - {currentWeek[6] ? format(currentWeek[6], "d MMM yyyy", {
                     locale: fr
                   }) : "..."}
 									</h2>
-									<Button variant="ghost" size="sm" onClick={navigateToNextWeek}>
-										Semaine suivante{" "}
-										<ChevronRight className="h-4 w-4 ml-1" />
+									<Button variant="ghost" size="sm" onClick={navigateToNextWeek} className="h-7 text-xs">
+										Suiv.
+										<ChevronRight className="h-3.5 w-3.5 ml-0.5" />
 									</Button>
 								</div>
 
 								{/* Grid for the week */}
-								<div className="grid grid-cols-1 md:grid-cols-7 gap-2">
+								<div className="grid grid-cols-1 md:grid-cols-7 gap-1">
 									{currentWeek.map(day => {
                   const dayAppointments = getDayAppointments(day);
                   const dayGoogleEvents = getDayGoogleEvents(day);
                   const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
                   return <div key={day.toString()} className="flex flex-col">
-												{/* Day header button */}
-												<button type="button" className={cn("p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full flex-shrink-0", isSameDay(day, new Date()) ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900" : "bg-muted dark:bg-muted")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter une séance le ${format(day, "d MMMM yyyy", {
+												{/* Day header button - compact */}
+												<button type="button" className={cn("p-1.5 text-center capitalize mb-1 rounded transition-colors w-full flex-shrink-0 h-10", isSameDay(day, new Date()) ? "bg-slate-600 text-white" : "bg-muted hover:bg-muted/80")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter une séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
                     })}`} aria-label={`Ajouter une séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
                     })}`}>
-													<div className="font-medium text-sm">
-														{format(day, "EEEE", {
+													<div className="font-medium text-xs leading-none">
+														{format(day, "EEE", {
                           locale: fr
                         })}
 													</div>
-													<div className="text-xs">
-														{format(day, "d MMM", {
+													<div className="text-xs text-muted-foreground leading-none mt-0.5">
+														{format(day, "d", {
                           locale: fr
                         })}
 													</div>
-													<span className="sr-only">
-														Ajouter une séance
-													</span>
 												</button>
 
 												{/* Events list or empty state */}
-												{!hasAnyEvents ? <div className="flex items-center justify-center p-2 text-center border border-dashed rounded-md h-[60px]">
-														<p className="text-xs text-muted-foreground">
-															Aucune séance
+												{!hasAnyEvents ? <div className="flex items-center justify-center p-1 text-center border border-dashed rounded h-8">
+														<p className="text-xs text-muted-foreground leading-none">
+															—
 														</p>
-													</div> : <div className="space-y-1">
-														{/* Google Calendar Events avec correspondance patient */}
+													</div> : <div className="space-y-0.5">
+														{/* Google Calendar Events - compact */}
 														{dayGoogleEvents.map(event => {
                         let eventStartTime = "??:??";
                         try {
@@ -380,49 +374,20 @@ const SchedulePage = () => {
                         } catch {
                           eventStartTime = "??:??";
                         }
-                        return <Card key={event.id} className="hover-scale border-l-4 border-l-purple-500 bg-purple-100 dark:bg-purple-900/20">
-																	<CardContent className="p-2">
-																		<div className="flex items-center justify-between mb-1">
-																			<Badge className="text-xs px-2 py-0.5 bg-purple-800 text-white">
+                        return <div key={event.id} className="border-l-2 border-l-purple-400 bg-purple-50 dark:bg-purple-900/20 p-1.5 rounded-r h-10 flex flex-col justify-center">
+																		<div className="flex items-center gap-1">
+																			<span className="text-xs font-medium text-purple-700 dark:text-purple-300 leading-none">
 																				{eventStartTime}
-																			</Badge>
-																			<div className="flex gap-1">
-																				{event.is_doctolib && <Badge variant="outline" className="text-teal-700 border-teal-300 dark:text-teal-400 dark:border-teal-700 text-[10px]">
-																						Doctolib
-																					</Badge>}
-																				<Badge variant="outline" className="text-purple-700 border-purple-300 dark:text-purple-400 dark:border-purple-700 text-[10px]">
-																					Google
-																				</Badge>
-																			</div>
+																			</span>
+																			<span className="text-xs text-purple-500 dark:text-purple-400 leading-none">G</span>
 																		</div>
-																		<div className="mb-1">
-																			<h3 className="font-semibold text-sm text-purple-900 dark:text-purple-100 truncate">
-																				{event.summary}
-																			</h3>
-																			{event.location && <p className="text-xs text-purple-700 dark:text-purple-300 truncate">
-																					📍 {event.location}
-																				</p>}
-																			{event.matched_patient_name && <div className="flex items-center gap-1 mt-0.5">
-																					<Users className="h-3 w-3 text-teal-600 dark:text-teal-400" />
-																					<span className="text-xs text-teal-700 dark:text-teal-300">
-																						{event.matched_patient_name}
-																					</span>
-																				</div>}
-																		</div>
-																	</CardContent>
-																	<div className="px-2 pb-1 flex justify-between items-center">
-																		<p className="text-[10px] text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-1.5 py-0.5 rounded">
-																			Externe
+																		<p className="text-sm text-purple-800 dark:text-purple-200 truncate leading-none mt-0.5">
+																			{event.summary}
 																		</p>
-																		{event.matched_patient_id && <Link to={`/patients/${event.matched_patient_id}`} className="text-[10px] text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-0.5">
-																				<ExternalLink className="h-2.5 w-2.5" />
-																				Fiche
-																			</Link>}
-																	</div>
-																</Card>;
+																</div>;
                       })}
 
-														{/* Internal Appointments - Compact cards */}
+														{/* Internal Appointments - very compact */}
 														{dayAppointments.map(appointment => {
                         const patient = getPatientById(appointment.patientId);
                         let appointmentTime = "??:??";
@@ -433,88 +398,29 @@ const SchedulePage = () => {
                         } catch {
                           appointmentTime = "??:??";
                         }
-                        const isProcessingAction = actionInProgress?.id === appointment.id;
-                        return <Card key={appointment.id} className={cn(
-                          "border-l-4 transition-colors",
-                          appointment.status === "COMPLETED"
-                            ? "bg-green-50 border-l-green-500 dark:bg-green-900/20"
-                            : "bg-blue-50 border-l-blue-500 dark:bg-blue-900/20"
+                        const isCompleted = appointment.status === "COMPLETED";
+                        return <Link key={appointment.id} to={`/appointments/${appointment.id}/edit`} className={cn(
+                          "block border-l-2 p-1.5 rounded-r transition-colors h-10 flex flex-col justify-center",
+                          isCompleted
+                            ? "border-l-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+                            : "border-l-slate-400 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800"
                         )}>
-																	<CardContent className="p-1.5">
-																		{/* Compact header with time and status */}
-																		<div className="flex items-center gap-1 mb-0.5">
-																			<Badge className={cn(
-                                "text-[10px] px-1.5 py-0",
-                                appointment.status === "COMPLETED"
-                                  ? "bg-green-700 text-white"
-                                  : "bg-blue-700 text-white"
+																		<div className="flex items-center gap-1">
+																			<span className={cn(
+                                "text-xs font-medium leading-none",
+                                isCompleted ? "text-emerald-700 dark:text-emerald-300" : "text-slate-700 dark:text-slate-300"
                               )}>
 																				{appointmentTime}
-																			</Badge>
-																			{appointment.status === "COMPLETED" && <Badge className="bg-green-600 text-white text-[9px] px-1 py-0">
-																					Terminé
-																				</Badge>}
+																			</span>
+																			{isCompleted && <span className="text-xs text-emerald-600 dark:text-emerald-400 leading-none">OK</span>}
 																		</div>
-																		{/* Patient name and reason - very compact */}
-																		<Link to={`/appointments/${appointment.id}/edit`} className="block group">
-																			<h3 className={cn(
-                                "font-medium text-xs group-hover:text-primary truncate leading-tight",
-                                appointment.status === "COMPLETED" ? "text-green-800 dark:text-green-200" : "text-blue-800 dark:text-blue-200"
-                              )}>
-																				{patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
-																			</h3>
-																			<p className="text-[10px] text-muted-foreground truncate leading-tight">
-																				{appointment.reason}
-																			</p>
-																		</Link>
-																	</CardContent>
-																	{/* Compact action buttons */}
-																	<div className="flex items-center justify-end gap-0.5 px-1 py-0.5 border-t bg-muted/20">
-																		<Button
-																			variant="ghost"
-																			size="sm"
-																			className="text-destructive hover:bg-destructive/10 h-5 w-5 p-0"
-																			onClick={() => handleCancelAppointment(appointment.id)}
-																			disabled={isProcessingAction || appointment.status === "COMPLETED"}
-																			title="Annuler"
-																		>
-																			{actionInProgress?.id === appointment.id && actionInProgress.action === "cancel" ? (
-																				<span className="animate-spin text-[10px]">⏳</span>
-																			) : (
-																				<X className="w-2.5 h-2.5" />
-																			)}
-																		</Button>
-
-																		<AlertDialog>
-																			<AlertDialogTrigger asChild>
-																				<Button
-																					variant="ghost"
-																					size="sm"
-																					className="text-destructive hover:bg-destructive/10 h-5 w-5 p-0"
-																					disabled={isProcessingAction}
-																					title="Supprimer"
-																				>
-																					<Trash2 className="h-2.5 w-2.5" />
-																				</Button>
-																			</AlertDialogTrigger>
-																			<AlertDialogContent>
-																				<AlertDialogHeader>
-																					<AlertDialogTitle>Supprimer la séance</AlertDialogTitle>
-																					<AlertDialogDescription>
-																						Êtes-vous sûr de vouloir supprimer définitivement cette séance ?
-																					</AlertDialogDescription>
-																				</AlertDialogHeader>
-																				<AlertDialogFooter>
-																					<AlertDialogCancel>Annuler</AlertDialogCancel>
-																					<AlertDialogAction onClick={() => handleDeleteAppointment(appointment.id)} className="bg-destructive hover:bg-destructive/90">
-																						{actionInProgress?.id === appointment.id && actionInProgress.action === "delete" ? <span className="animate-spin mr-2">⏳</span> : null}
-																						Supprimer
-																					</AlertDialogAction>
-																				</AlertDialogFooter>
-																			</AlertDialogContent>
-																		</AlertDialog>
-																	</div>
-																</Card>;
+																		<p className={cn(
+                              "text-sm truncate leading-none mt-0.5",
+                              isCompleted ? "text-emerald-800 dark:text-emerald-200" : "text-slate-800 dark:text-slate-200"
+                            )}>
+																			{patient ? `${patient.firstName} ${patient.lastName}` : `#${appointment.patientId}`}
+																		</p>
+																</Link>;
                       })}
 													</div>}
 											</div>;

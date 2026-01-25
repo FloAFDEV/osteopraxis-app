@@ -329,26 +329,26 @@ const InvoicesPage = () => {
         {/* FILTRES OSTEOPATHE / CABINET */}
         
 
-        <div className="mb-6 mt-10">
+        <div className="mb-4 mt-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <FileText className="h-8 w-8 text-blue-600 dark:text-blue-500" />
-              <span className="text-black dark:text-gray-100 font-semibold">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+            <h1 className="text-lg font-semibold flex items-center gap-2">
+              <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              <span className="text-slate-800 dark:text-slate-100">
                 Notes d'honoraires
               </span>
             </h1>
-            <Button onClick={() => navigate("/invoices/new")} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white">
-              <Plus className="h-5 w-5" />
-              Créer une note d'honoraire
+            <Button onClick={() => navigate("/invoices/new")} size="sm" className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white">
+              <Plus className="h-4 w-4" />
+              Nouvelle note
             </Button>
           </div>
 
           {/* Alerte HDS */}
-          <div className="mb-4">
+          <div className="mb-3">
             <Alert>
-              <AlertTitle className="flex items-center gap-2">
-                <Shield className="h-4 w-4" /> Données de facturation sensibles (locales)
+              <AlertTitle className="flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5" /> Données de facturation sensibles (locales)
               </AlertTitle>
               <AlertDescription>
                 Les détails patients et factures restent stockés sur votre appareil. Partage via export sécurisé.

@@ -5,22 +5,28 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs font-medium leading-none",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+          "border-transparent bg-slate-600 text-white",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+          "border-transparent bg-red-600/80 text-white",
         warning:
-          "border-transparent bg-amber-500 text-white hover:bg-amber-600",
-        outline: "text-foreground",
-        gender: "border-transparent shadow-sm cursor-default",
-        minor: "border-transparent bg-emerald-100 text-emerald-800 border-emerald-200",
-        status: "border-transparent bg-blue-100 text-blue-800 border-blue-200",
+          "border-transparent bg-amber-500/80 text-white",
+        success:
+          "border-transparent bg-emerald-600/80 text-white",
+        outline:
+          "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-transparent",
+        gender:
+          "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300",
+        minor:
+          "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300",
+        status:
+          "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300",
       },
     },
     defaultVariants: {

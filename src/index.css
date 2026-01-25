@@ -56,65 +56,44 @@
   scroll-behavior: auto !important;
 }
 
-/* Styles pour focus visible */
-.focus-visible *:focus {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+/* Focus discret global - suppression des focus rings bleus */
+*:focus {
+  outline: none !important;
 }
 
-/* Tailles de police */
-[data-font-size="large"] {
-  font-size: 110%;
-}
-
-[data-font-size="xl"] {
-  font-size: 120%;
-}
-
-/* Amélioration du contraste pour les liens */
-a:focus-visible {
-  outline: 2px solid hsl(var(--primary));
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* Styles pour les éléments interactifs */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+*:focus-visible {
+  outline: 1px solid hsl(var(--border)) !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Amélioration de la lisibilité */
 .text-readable {
-  line-height: 1.6;
-  letter-spacing: 0.02em;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
-/* Animation hover pour les cartes */
+/* Animation hover pour les cartes - subtile */
 .hover-scale {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  cursor: pointer;
+  transition: box-shadow 0.15s ease-in-out;
 }
 
 .hover-scale:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* Dark mode support pour hover-scale */
 .dark .hover-scale:hover {
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.04);
 }
 
-/* Messages d'erreur plus visibles */
+/* Messages d'erreur */
 .error-message {
   color: hsl(var(--destructive));
-  font-weight: 600;
-  border-left: 3px solid hsl(var(--destructive));
-  padding-left: 0.75rem;
+  font-weight: 500;
+  border-left: 2px solid hsl(var(--destructive));
+  padding-left: 0.5rem;
+  font-size: 0.75rem;
 }
 
 /* Indicateur de chargement accessible */
@@ -136,185 +115,119 @@ textarea:focus-visible {
   left: 6px;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  padding: 8px;
+  padding: 6px;
   text-decoration: none;
   border-radius: 4px;
   z-index: 1000;
   transition: top 0.2s;
+  font-size: 0.75rem;
 }
 
 .skip-link:focus {
   top: 6px;
 }
 
-/* Optimisation Desktop - Agrandissement global pour meilleure UX */
-@media (min-width: 1024px) {
-  /* Headers et titres plus grands */
-  h1 { @apply text-3xl lg:text-4xl xl:text-5xl; }
-  h2 { @apply text-2xl lg:text-3xl xl:text-4xl; }
-  h3 { @apply text-xl lg:text-2xl xl:text-3xl; }
-  h4 { @apply text-lg lg:text-xl xl:text-2xl; }
-
-  /* Texte de base plus lisible */
-  body {
-    font-size: 16px;
-  }
-
-  /* Boutons plus grands et faciles à cliquer */
-  button:not(.no-responsive) {
-    @apply lg:text-base xl:text-lg;
-    @apply lg:px-5 lg:py-2.5 xl:px-6 xl:py-3;
-  }
-
-  /* Inputs et selects plus grands */
-  input:not([type="checkbox"]):not([type="radio"]):not(.no-responsive),
-  textarea:not(.no-responsive),
-  select:not(.no-responsive) {
-    @apply lg:text-base xl:text-lg;
-    @apply lg:px-4 lg:py-3 xl:px-5 xl:py-3.5;
-  }
-
-  /* Labels plus lisibles */
-  label:not(.no-responsive) {
-    @apply lg:text-base xl:text-lg;
-  }
-
-  /* Cards avec plus d'espace */
-  .card:not(.no-responsive) {
-    @apply lg:p-6 xl:p-8;
-  }
-}
-
-@media (min-width: 1536px) {
-  /* 2XL screens - Encore plus grand */
-  body {
-    font-size: 18px;
-  }
-}
-
 @layer base {
 	:root {
 		/* Background & Surface Colors */
-		--background: 240 17% 98%;
-		--foreground: 240 10% 8%;
+		--background: 210 20% 98%;
+		--foreground: 215 25% 15%;
 
-		/* Muted Colors - Amélioration contraste (45% → 35%) */
-		--muted: 240 8% 95%;
-		--muted-foreground: 240 6% 35%;
+		/* Muted Colors */
+		--muted: 210 15% 95%;
+		--muted-foreground: 215 15% 45%;
 
 		/* Popover Colors */
-		--popover: 240 17% 98%;
-		--popover-foreground: 240 10% 8%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 215 25% 15%;
 
 		/* Card Colors */
-		--card: 240 17% 98%;
-		--card-foreground: 240 10% 8%;
+		--card: 0 0% 100%;
+		--card-foreground: 215 25% 15%;
 
-		/* Border & Input */
-		--border: 240 8% 90%;
-		--input: 240 8% 90%;
+		/* Border & Input - Discret */
+		--border: 215 15% 88%;
+		--input: 215 15% 88%;
 
-		/* Primary Colors - Bleu médical professionnel (nuancé, moins Bootstrap) */
-		--primary: 210 70% 55%;
-		--primary-foreground: 240 17% 98%;
-		--primary-variant: 200 65% 50%;
+		/* Primary Colors - Slate professionnel */
+		--primary: 215 20% 40%;
+		--primary-foreground: 0 0% 100%;
 
-		/* Interactive Colors - Bleu moderne professionnel (nuancé) */
-		--interactive: 217 75% 58%;
-		--interactive-foreground: 240 17% 98%;
-		--interactive-hover: 217 75% 52%;
+		/* Secondary Colors - Neutres */
+		--secondary: 210 15% 93%;
+		--secondary-foreground: 215 20% 30%;
 
-		/* Secondary Colors - Neutres sobres */
-		--secondary: 240 8% 92%;
-		--secondary-foreground: 240 10% 25%;
+		/* Accent Colors - Slate discret */
+		--accent: 215 15% 90%;
+		--accent-foreground: 215 20% 25%;
 
-		/* Accent Colors - Bleu-cyan médical (nuancé) */
-		--accent: 195 80% 45%;
-		--accent-foreground: 240 17% 98%;
-
-		/* Destructive Colors */
-		--destructive: 0 84% 60%;
-		--destructive-foreground: 240 17% 98%;
+		/* Destructive Colors - Rouge désaturé */
+		--destructive: 0 55% 50%;
+		--destructive-foreground: 0 0% 100%;
 
 		/* Success Colors */
-		--success: 142 71% 45%;
-		--success-foreground: 240 17% 98%;
+		--success: 145 45% 40%;
+		--success-foreground: 0 0% 100%;
 
 		/* Warning Colors */
-		--warning: 45 93% 47%;
-		--warning-foreground: 26 83% 14%;
+		--warning: 40 70% 50%;
+		--warning-foreground: 40 70% 15%;
 
-		/* Ring & Focus - Bleu médical */
-		--ring: 210 100% 50%;
+		/* Ring & Focus - Très discret */
+		--ring: 215 15% 70%;
 
-		/* Gradients - Bleu médical */
-		--gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-variant)));
-		--gradient-interactive: linear-gradient(135deg, hsl(var(--interactive)), hsl(var(--interactive-hover)));
-		--gradient-background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-
-		/* Shadows - Bleu médical */
-		--shadow-primary: 0 10px 30px -10px hsl(var(--primary) / 0.3);
-		--shadow-interactive: 0 10px 30px -10px hsl(var(--interactive) / 0.3);
-		--shadow-card: 0 4px 20px -4px hsl(var(--primary) / 0.1);
-
-		--radius: 0.75rem;
+		--radius: 0.375rem;
 	}
 
 	.dark {
 		/* Dark Background & Surface Colors */
-		--background: 240 10% 8%;
-		--foreground: 240 17% 98%;
+		--background: 220 15% 10%;
+		--foreground: 210 15% 95%;
 
 		/* Dark Muted Colors */
-		--muted: 240 8% 15%;
-		--muted-foreground: 240 6% 65%;
+		--muted: 220 12% 16%;
+		--muted-foreground: 215 12% 60%;
 
 		/* Dark Popover Colors */
-		--popover: 240 10% 8%;
-		--popover-foreground: 240 17% 98%;
+		--popover: 220 15% 12%;
+		--popover-foreground: 210 15% 95%;
 
 		/* Dark Card Colors */
-		--card: 240 8% 12%;
-		--card-foreground: 240 17% 98%;
+		--card: 220 12% 13%;
+		--card-foreground: 210 15% 95%;
 
 		/* Dark Border & Input */
-		--border: 240 8% 20%;
-		--input: 240 8% 20%;
+		--border: 220 12% 22%;
+		--input: 220 12% 22%;
 
-		/* Dark Primary Colors - Bleu médical professionnel (nuancé) */
-		--primary: 210 68% 62%;
-		--primary-foreground: 240 10% 8%;
-		--primary-variant: 200 63% 57%;
+		/* Dark Primary Colors */
+		--primary: 215 18% 55%;
+		--primary-foreground: 220 15% 10%;
 
-		/* Dark Interactive Colors - Bleu moderne professionnel (nuancé) */
-		--interactive: 217 70% 65%;
-		--interactive-foreground: 240 10% 8%;
-		--interactive-hover: 217 70% 58%;
+		/* Dark Secondary Colors */
+		--secondary: 220 12% 18%;
+		--secondary-foreground: 215 12% 70%;
 
-		/* Dark Secondary Colors - Neutres sobres */
-		--secondary: 240 8% 15%;
-		--secondary-foreground: 240 6% 75%;
-
-		/* Dark Accent Colors - Bleu-cyan médical (nuancé) */
-		--accent: 195 70% 52%;
-		--accent-foreground: 240 10% 8%;
+		/* Dark Accent Colors */
+		--accent: 220 12% 20%;
+		--accent-foreground: 210 15% 90%;
 
 		/* Dark Destructive Colors */
-		--destructive: 0 84% 65%;
-		--destructive-foreground: 240 10% 8%;
+		--destructive: 0 55% 55%;
+		--destructive-foreground: 220 15% 10%;
 
 		/* Dark Success Colors */
-		--success: 142 71% 50%;
-		--success-foreground: 240 10% 8%;
+		--success: 145 45% 45%;
+		--success-foreground: 220 15% 10%;
 
 		/* Dark Warning Colors */
-		--warning: 48 96% 53%;
-		--warning-foreground: 26 83% 14%;
+		--warning: 40 70% 55%;
+		--warning-foreground: 40 70% 15%;
 
-		/* Dark Ring & Focus - Bleu médical */
-		--ring: 210 85% 60%;
+		/* Dark Ring & Focus */
+		--ring: 215 15% 50%;
 
-		--radius: 0.75rem;
+		--radius: 0.375rem;
 	}
 }
 
@@ -322,10 +235,26 @@ textarea:focus-visible {
 	* {
 		@apply border-border;
 	}
+
+	/* Typographie desktop-first: base 14px, dense, professionnelle */
+	html {
+		font-size: 14px;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
 	body {
 		@apply bg-background text-foreground;
 		font-feature-settings: "rlig" 1, "calt" 1;
+		line-height: 1.5;
 	}
+
+	/* Échelle typographique compacte et uniforme */
+	h1 { @apply text-xl font-semibold tracking-tight; }
+	h2 { @apply text-lg font-semibold tracking-tight; }
+	h3 { @apply text-base font-medium; }
+	h4 { @apply text-sm font-medium; }
+	h5, h6 { @apply text-xs font-medium; }
 }
 
 /* Add page break styles for printing */
@@ -391,16 +320,16 @@ textarea:focus-visible {
 /* Privacy blur effects */
 .privacy-blur {
 	filter: blur(4px);
-	transition: filter 0.2s ease-in-out;
+	transition: filter 0.15s ease-in-out;
 }
 
 .privacy-blur:hover {
 	filter: blur(0px);
 }
 
-/* Currency amount styling - Bleu médical */
+/* Currency amount styling */
 .currency-amount {
-	font-size: 1.2rem;
-	font-weight: bold;
-	color: hsl(var(--primary));
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: hsl(var(--foreground));
 }

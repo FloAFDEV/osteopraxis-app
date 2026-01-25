@@ -372,7 +372,7 @@ const PatientDetailPage = () => {
 					{/* Left column - Tabs (principal content) - plus large */}
 					<div className="xl:col-span-3 order-2 xl:order-2">
 						<Tabs defaultValue="medical-info">
-							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 text-[10px] md:text-xs">
+							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-9">
 								<TabsTrigger
 									value="medical-info"
 									className="px-2 md:px-4"

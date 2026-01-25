@@ -15,48 +15,33 @@ const StatCard = ({
 	title,
 	value,
 	description,
-	color = "text-blue-500",
+	color = "text-slate-500",
 	icon,
 	subtitle,
 }: StatCardProps) => {
-	const colorName = color.replace("text-", "");
-
 	return (
-		<Card
-			className={cn(
-				"overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px]",
-				"border-t-4",
-				{
-					"border-green-500": colorName === "green-500",
-					"border-purple-500": colorName === "purple-500",
-					"border-amber-500": colorName === "amber-500",
-					"border-blue-500": colorName === "blue-500",
-					"border-indigo-500": colorName === "indigo-500",
-					"border-orange-500": colorName === "orange-500",
-				}
-			)}
-		>
-			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+		<Card className="overflow-hidden rounded-md border-l-2 border-l-slate-300 dark:border-l-slate-600">
+			<CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
 				<div>
-					<CardTitle className="text-xs font-medium">
+					<CardTitle className="text-xs font-medium text-muted-foreground leading-none">
 						{title}
 					</CardTitle>
 					{subtitle && (
-						<p className="text-[10px] text-muted-foreground mt-0.5">
+						<p className="text-xs text-muted-foreground mt-0.5 leading-none">
 							{subtitle}
 						</p>
 					)}
 				</div>
 				{icon && (
-					<div className={cn("h-7 w-7 font-medium", color)}>
+					<div className={cn("h-5 w-5", color)}>
 						{icon}
 					</div>
 				)}
 			</CardHeader>
 
-			<CardContent className="flex flex-col justify-between h-24 pt-0">
-				<div className="text-xl font-bold">{value}</div>
-				<p className={cn("text-[10px] text-muted-foreground", color)}>
+			<CardContent className="flex flex-col justify-between p-3 pt-0">
+				<div className="text-lg font-semibold leading-none">{value}</div>
+				<p className="text-xs text-muted-foreground mt-1 leading-none">
 					{description}
 				</p>
 			</CardContent>

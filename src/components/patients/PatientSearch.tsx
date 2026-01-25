@@ -32,65 +32,63 @@ const PatientSearch: React.FC<PatientSearchProps> = ({
   onViewModeChange
 }) => {
   return (
-    <div className="relative mb-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
+    <div className="relative mb-4">
+      <div className="bg-card rounded-md p-3 border">
+        <div className="flex flex-col md:flex-row gap-2">
           <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 lg:h-6 lg:w-6 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un patient par nom, email, téléphone..."
-              className="pl-12 lg:pl-14 h-12 lg:h-14 text-base lg:text-lg no-responsive"
+              placeholder="Rechercher..."
+              className="pl-8 h-7 text-xs"
               value={searchQuery}
               onChange={onSearchChange}
             />
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="px-4 min-w-36 justify-between">
-                <span className="flex items-center gap-2">
-                  <SortAsc className="h-4 w-4" />
-                  {sortBy === 'name' && 'Trier par nom'}
-                  {sortBy === 'date' && 'Trier par date'}
-                  {sortBy === 'email' && 'Trier par email'}
-                  {sortBy === 'gender' && 'Trier par genre'}
-                </span>
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
+                <SortAsc className="h-3 w-3 mr-1" />
+                {sortBy === 'name' && 'Nom'}
+                {sortBy === 'date' && 'Date'}
+                {sortBy === 'email' && 'Email'}
+                {sortBy === 'gender' && 'Genre'}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Options de tri</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuLabel>Trier par</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onSortChange('name')} className="cursor-pointer">
-                <Users className="mr-2 h-4 w-4" /> Par nom
+                <Users className="mr-1.5 h-3 w-3" /> Nom
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onSortChange('date')} className="cursor-pointer">
-                <Calendar className="mr-2 h-4 w-4" /> Par date d'ajout
+                <Calendar className="mr-1.5 h-3 w-3" /> Date
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onSortChange('email')} className="cursor-pointer">
-                <Mail className="mr-2 h-4 w-4" /> Par email
+                <Mail className="mr-1.5 h-3 w-3" /> Email
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onSortChange('gender')} className="cursor-pointer">
-                <User className="mr-2 h-4 w-4" /> Par genre
+                <User className="mr-1.5 h-3 w-3" /> Genre
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant={viewMode === 'list' ? 'default' : 'outline'} 
-              size="icon" 
+
+          <div className="flex gap-0.5">
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
               onClick={() => onViewModeChange('list')}
-              className={viewMode === 'list' ? 'bg-blue-600' : ''}
+              className="h-7 w-7 p-0"
             >
-              <Users className="h-4 w-4" />
+              <Users className="h-3.5 w-3.5" />
             </Button>
-            <Button 
-              variant={viewMode === 'cards' ? 'default' : 'outline'} 
-              size="icon" 
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'outline'}
+              size="sm"
               onClick={() => onViewModeChange('cards')}
-              className={viewMode === 'cards' ? 'bg-blue-600' : ''}
+              className="h-7 w-7 p-0"
             >
-              <div className="grid grid-cols-2 gap-0.5">
+              <div className="grid grid-cols-2 gap-px">
                 <div className="w-1 h-1 bg-current rounded-sm"></div>
                 <div className="w-1 h-1 bg-current rounded-sm"></div>
                 <div className="w-1 h-1 bg-current rounded-sm"></div>

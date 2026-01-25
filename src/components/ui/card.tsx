@@ -9,7 +9,7 @@ const Card = React.forwardRef<
 	<div
 		ref={ref}
 		className={cn(
-			"flex flex-col justify-between h-full rounded-lg border bg-gradient-to-br from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 text-card-foreground shadow-sm transition-all duration-200 animate-fade-in hover:shadow-md",
+			"flex flex-col justify-between h-full rounded-md border bg-card text-card-foreground",
 			className
 		)}
 		{...props}
@@ -23,7 +23,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<div
 		ref={ref}
-		className={cn("flex flex-col space-y-1.5 p-6", className)}
+		className={cn("flex flex-col space-y-1 p-4", className)}
 		{...props}
 	/>
 ));
@@ -36,7 +36,7 @@ const CardTitle = React.forwardRef<
 	<h3
 		ref={ref}
 		className={cn(
-			"text-2xl font-semibold leading-none tracking-tight",
+			"text-sm font-medium leading-none tracking-tight",
 			className
 		)}
 		{...props}
@@ -50,7 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<p
 		ref={ref}
-		className={cn("text-sm text-muted-foreground", className)}
+		className={cn("text-xs text-muted-foreground", className)}
 		{...props}
 	/>
 ));
@@ -62,7 +62,7 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<div
 		ref={ref}
-		className={cn("p-6 pt-0 flex-1", className)} // <- flex-1 utile si contenu étirable
+		className={cn("p-4 pt-0 flex-1", className)}
 		{...props}
 	/>
 ));
@@ -74,7 +74,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<div
 		ref={ref}
-		className={cn("p-6 pt-0", className)} // tu peux ajouter "mt-auto" à l'utilisation
+		className={cn("p-4 pt-0", className)}
 		{...props}
 	/>
 ));

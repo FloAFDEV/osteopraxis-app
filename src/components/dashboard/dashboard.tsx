@@ -115,7 +115,7 @@ export function Dashboard() {
 	const showContent = !loading || loadingTimeout;
 
 	return (
-		<div className="space-y-6 p-4 sm:p-6 lg:p-8">
+		<div className="space-y-4 p-4">
 			{/* Header Image Banner */}
 			<DashboardHeader />
 
@@ -136,143 +136,141 @@ export function Dashboard() {
 
 			{showContent && (
 				<>
-					{/* Actions principales - CTA visibles et prioritaires */}
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						<Button
+					{/* Actions principales - CTA sobres et cohérents */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+						<button
 							onClick={() => navigate('/patients/new')}
-							className="h-auto py-6 flex flex-col items-center gap-3 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg"
+							className="h-auto py-3 px-3 flex flex-col items-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-md transition-colors"
 						>
-							<UserPlus className="h-8 w-8" />
+							<UserPlus className="h-5 w-5" />
 							<div className="text-center">
-								<div className="font-semibold text-lg">Nouveau patient</div>
-								<div className="text-xs opacity-80">Ajouter un patient</div>
+								<div className="font-medium text-xs">Nouveau patient</div>
+								<div className="text-xs text-slate-300">Ajouter un patient</div>
 							</div>
-						</Button>
+						</button>
 
-						<Button
+						<button
 							onClick={() => navigate('/appointments/new')}
-							className="h-auto py-6 flex flex-col items-center gap-3 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg"
+							className="h-auto py-3 px-3 flex flex-col items-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-md transition-colors"
 						>
-							<Calendar className="h-8 w-8" />
+							<Calendar className="h-5 w-5" />
 							<div className="text-center">
-								<div className="font-semibold text-lg">Nouvelle séance</div>
-								<div className="text-xs opacity-80">Planifier un RDV</div>
+								<div className="font-medium text-xs">Nouvelle séance</div>
+								<div className="text-xs text-slate-300">Planifier un RDV</div>
 							</div>
-						</Button>
+						</button>
 
-						<Button
+						<button
 							onClick={() => navigate('/invoices/new')}
-							className="h-auto py-6 flex flex-col items-center gap-3 bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg"
+							className="h-auto py-3 px-3 flex flex-col items-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-md transition-colors"
 						>
-							<FileText className="h-8 w-8" />
+							<FileText className="h-5 w-5" />
 							<div className="text-center">
-								<div className="font-semibold text-lg">Nouvelle facture</div>
-								<div className="text-xs opacity-80">Créer une note d'honoraire</div>
+								<div className="font-medium text-xs">Nouvelle facture</div>
+								<div className="text-xs text-slate-300">Créer une note d'honoraire</div>
 							</div>
-						</Button>
+						</button>
 					</div>
 
-					{/* Lien vers les statistiques */}
-					<Card className="border-dashed border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/20">
-						<CardContent className="p-4">
+					{/* Lien vers les statistiques - discret */}
+					<Card className="border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
+						<CardContent className="p-3">
 							<Link
 								to="/statistics"
 								className="flex items-center justify-between hover:opacity-80 transition-opacity"
 							>
-								<div className="flex items-center gap-3">
-									<div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
-										<BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+								<div className="flex items-center gap-2">
+									<div className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md">
+										<BarChart3 className="h-4 w-4 text-slate-600 dark:text-slate-400" />
 									</div>
 									<div>
-										<p className="font-medium text-indigo-900 dark:text-indigo-100">
+										<p className="font-medium text-slate-700 dark:text-slate-200 text-xs">
 											Statistiques & Analytics
 										</p>
-										<p className="text-sm text-indigo-600 dark:text-indigo-400">
-											Consultez vos graphiques et indicateurs détaillés
+										<p className="text-xs text-slate-500 dark:text-slate-400">
+											Consultez vos graphiques et indicateurs
 										</p>
 									</div>
 								</div>
-								<ChevronRight className="h-5 w-5 text-indigo-400" />
+								<ChevronRight className="h-4 w-4 text-slate-400" />
 							</Link>
 						</CardContent>
 					</Card>
 
 					{/* Section Rendez-vous à venir */}
-					<Card>
-						<CardHeader className="pb-3">
+					<Card className="border-slate-200 dark:border-slate-700">
+						<CardHeader className="p-3 pb-2">
 							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-									<CardTitle className="text-lg">Prochains rendez-vous</CardTitle>
+								<div className="flex items-center gap-1.5">
+									<Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+									<CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-200">Prochains rendez-vous</CardTitle>
 								</div>
 								<Link
 									to="/schedule"
-									className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
+									className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
 								>
 									Voir le planning
-									<ChevronRight className="h-4 w-4" />
+									<ChevronRight className="h-3 w-3" />
 								</Link>
 							</div>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="p-3 pt-0">
 							<AppointmentsOverview data={dashboardData} />
 						</CardContent>
 					</Card>
 
 					{/* Grille Patients récents + Factures récentes */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 						{/* Patients récents */}
-						<Card>
-							<CardHeader className="pb-3">
+						<Card className="border-slate-200 dark:border-slate-700">
+							<CardHeader className="p-3 pb-2">
 								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										<Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-										<CardTitle className="text-lg">Patients récents</CardTitle>
+									<div className="flex items-center gap-1.5">
+										<Users className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+										<CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-200">Patients récents</CardTitle>
 									</div>
 									<Link
 										to="/patients"
-										className="text-sm text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 flex items-center gap-1"
+										className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
 									>
 										Tous les patients
-										<ChevronRight className="h-4 w-4" />
+										<ChevronRight className="h-3 w-3" />
 									</Link>
 								</div>
 							</CardHeader>
-							<CardContent>
+							<CardContent className="p-3 pt-0">
 								{loadingRecent ? (
-									<div className="space-y-3">
+									<div className="space-y-2">
 										{[1, 2, 3].map((i) => (
-											<div key={i} className="h-12 bg-muted rounded animate-pulse" />
+											<div key={i} className="h-10 bg-muted rounded animate-pulse" />
 										))}
 									</div>
 								) : recentPatients.length === 0 ? (
-									<div className="text-center py-6 text-muted-foreground">
-										<Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
-										<p>Aucun patient pour le moment</p>
+									<div className="text-center py-4 text-muted-foreground">
+										<Users className="h-8 w-8 mx-auto mb-1.5 opacity-50" />
+										<p className="text-xs">Aucun patient pour le moment</p>
 										<Button
 											variant="link"
 											onClick={() => navigate('/patients/new')}
-											className="mt-2"
+											className="mt-1 text-xs"
 										>
 											Ajouter votre premier patient
 										</Button>
 									</div>
 								) : (
-									<div className="space-y-2">
+									<div className="space-y-1">
 										{recentPatients.map((patient) => (
 											<Link
 												key={patient.id}
 												to={`/patients/${patient.id}`}
-												className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
+												className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors"
 											>
-												<div className="flex items-center gap-3">
-													<div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-														patient.gender === 'Femme' ? 'bg-pink-500' : 'bg-blue-500'
-													}`}>
+												<div className="flex items-center gap-2">
+													<div className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium">
 														{patient.firstName?.[0]}{patient.lastName?.[0]}
 													</div>
 													<div>
-														<p className="font-medium text-sm">
+														<p className="font-medium text-xs">
 															{patient.firstName} {patient.lastName}
 														</p>
 														<p className="text-xs text-muted-foreground">
@@ -280,7 +278,7 @@ export function Dashboard() {
 														</p>
 													</div>
 												</div>
-												<ChevronRight className="h-4 w-4 text-muted-foreground" />
+												<ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
 											</Link>
 										))}
 									</div>
@@ -289,51 +287,51 @@ export function Dashboard() {
 						</Card>
 
 						{/* Factures récentes */}
-						<Card>
-							<CardHeader className="pb-3">
+						<Card className="border-slate-200 dark:border-slate-700">
+							<CardHeader className="p-3 pb-2">
 								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										<Receipt className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-										<CardTitle className="text-lg">Dernières factures</CardTitle>
+									<div className="flex items-center gap-1.5">
+										<Receipt className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+										<CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-200">Dernières factures</CardTitle>
 									</div>
 									<Link
 										to="/invoices"
-										className="text-sm text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 flex items-center gap-1"
+										className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
 									>
 										Toutes les factures
-										<ChevronRight className="h-4 w-4" />
+										<ChevronRight className="h-3 w-3" />
 									</Link>
 								</div>
 							</CardHeader>
-							<CardContent>
+							<CardContent className="p-3 pt-0">
 								{loadingRecent ? (
-									<div className="space-y-3">
+									<div className="space-y-2">
 										{[1, 2, 3].map((i) => (
-											<div key={i} className="h-12 bg-muted rounded animate-pulse" />
+											<div key={i} className="h-10 bg-muted rounded animate-pulse" />
 										))}
 									</div>
 								) : recentInvoices.length === 0 ? (
-									<div className="text-center py-6 text-muted-foreground">
-										<Receipt className="h-10 w-10 mx-auto mb-2 opacity-50" />
-										<p>Aucune facture pour le moment</p>
+									<div className="text-center py-4 text-muted-foreground">
+										<Receipt className="h-8 w-8 mx-auto mb-1.5 opacity-50" />
+										<p className="text-xs">Aucune facture pour le moment</p>
 										<Button
 											variant="link"
 											onClick={() => navigate('/invoices/new')}
-											className="mt-2"
+											className="mt-1 text-xs"
 										>
 											Créer votre première facture
 										</Button>
 									</div>
 								) : (
-									<div className="space-y-2">
+									<div className="space-y-1">
 										{recentInvoices.map((invoice) => (
 											<Link
 												key={invoice.id}
 												to={`/invoices/${invoice.id}`}
-												className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
+												className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors"
 											>
-												<div className="flex items-center gap-3">
-													<div className={`px-2 py-1 rounded text-xs font-medium ${
+												<div className="flex items-center gap-2">
+													<div className={`px-1.5 py-0.5 rounded text-xs font-medium ${
 														invoice.paymentStatus === 'PAID'
 															? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
 															: invoice.paymentStatus === 'PENDING'
@@ -344,7 +342,7 @@ export function Dashboard() {
 														 invoice.paymentStatus === 'PENDING' ? 'En attente' : 'Annulée'}
 													</div>
 													<div>
-														<p className="font-medium text-sm">
+														<p className="font-medium text-xs">
 															{invoice.invoiceNumber}
 														</p>
 														<p className="text-xs text-muted-foreground">
@@ -352,11 +350,11 @@ export function Dashboard() {
 														</p>
 													</div>
 												</div>
-												<div className="flex items-center gap-2">
-													<span className="font-semibold text-sm">
+												<div className="flex items-center gap-1.5">
+													<span className="font-semibold text-xs">
 														{invoice.amount}€
 													</span>
-													<ChevronRight className="h-4 w-4 text-muted-foreground" />
+													<ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
 												</div>
 											</Link>
 										))}
