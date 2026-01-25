@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { format, parse, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -24,7 +23,7 @@ export function DateInput({
 	disabled = false,
 }: DateInputProps) {
 	const [inputValue, setInputValue] = React.useState(
-		value ? format(value, dateFormat, { locale: fr }) : ""
+		value ? format(value, dateFormat, { locale: fr }) : "",
 	);
 	const [invalid, setInvalid] = React.useState(false);
 
@@ -77,7 +76,9 @@ export function DateInput({
 			setInvalid(false);
 		} else {
 			// reset à l'ancienne valeur (valeur Date précédente ou chaîne vide)
-			setInputValue(value ? format(value, dateFormat, { locale: fr }) : "");
+			setInputValue(
+				value ? format(value, dateFormat, { locale: fr }) : "",
+			);
 			setInvalid(true);
 		}
 	};
@@ -100,7 +101,7 @@ export function DateInput({
 
 			{/* Mini aide si erreur */}
 			{invalid && (
-				<span className="text-xs text-destructive absolute left-0 -bottom-5">
+				<span className="text-sm text-destructive absolute left-0 -bottom-5">
 					Date invalide ou hors bornes (1900–
 					{new Date().getFullYear()})
 				</span>

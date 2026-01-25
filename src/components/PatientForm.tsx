@@ -24,16 +24,16 @@ import { PatientRelationshipsTab } from "./patient-form/PatientRelationshipsTab"
 import { PatientFormProps, PatientFormValues } from "./patient-form/types";
 import { api } from "@/services/api";
 import { Patient } from "@/types";
-import { 
-	User, 
-	Hospital, 
-	ClipboardList, 
-	Microscope, 
-	Stethoscope, 
-	Baby, 
-	FileText, 
-	TrendingUp, 
-	Users 
+import {
+	User,
+	Hospital,
+	ClipboardList,
+	Microscope,
+	Stethoscope,
+	Baby,
+	FileText,
+	TrendingUp,
+	Users,
 } from "lucide-react";
 import { appIcons } from "@/components/ui/app-icons";
 
@@ -47,10 +47,10 @@ export function PatientForm({
 }: PatientFormProps) {
 	const [activeTab, setActiveTab] = useState("identity");
 	const [childrenAgesInput, setChildrenAgesInput] = useState(
-		patient?.childrenAges ? patient.childrenAges.join(", ") : ""
+		patient?.childrenAges ? patient.childrenAges.join(", ") : "",
 	);
 	const [currentCabinetId, setCurrentCabinetId] = useState<string | null>(
-		selectedCabinetId ? selectedCabinetId.toString() : null
+		selectedCabinetId ? selectedCabinetId.toString() : null,
 	);
 	const [availablePatients, setAvailablePatients] = useState<Patient[]>([]);
 
@@ -85,7 +85,7 @@ export function PatientForm({
 
 	const isChild = patient
 		? calculateAge(patient.birthDate) !== null &&
-		  calculateAge(patient.birthDate)! < 18
+			calculateAge(patient.birthDate)! < 18
 		: false;
 
 	const form = useForm<PatientFormValues>({
@@ -217,7 +217,7 @@ export function PatientForm({
 		console.log("🎯 PatientForm handleSubmit appelé", {
 			hasOnSubmit: !!onSubmit,
 			hasOnSave: !!onSave,
-			data: data
+			data: data,
 		});
 		console.log("📋 Données brutes reçues:", data);
 		try {
@@ -235,13 +235,12 @@ export function PatientForm({
 			}
 
 			// CORRECTION: Validation email unique - générer email unique si vide
-			if (!data.email || data.email.trim() === '') {
+			if (!data.email || data.email.trim() === "") {
 				const timestamp = Date.now();
 				const randomId = Math.floor(Math.random() * 1000);
 				data.email = `patient-${timestamp}-${randomId}@temp.local`;
 			}
 
-	
 			if (onSubmit) {
 				console.log("📤 Appel de onSubmit avec données:", data);
 				await onSubmit(data);
@@ -260,17 +259,68 @@ export function PatientForm({
 	};
 
 	const tabs = [
-		{ id: "identity", label: "Identité", shortLabel: "Identité", icon: appIcons.identity },
-		{ id: "medical-profile", label: "Médical", shortLabel: "Médical", icon: appIcons.medical },
-		{ id: "medical-history", label: "Antécédents", shortLabel: "Antécédents", icon: appIcons.history },
-		{ id: "clinical-examination", label: "Examens cliniques", shortLabel: "Examens", icon: appIcons.examination },
-		{ id: "specialized-spheres", label: "Sphères spéc.", shortLabel: "Spécialisé", icon: appIcons.specialized },
+		{
+			id: "identity",
+			label: "Identité",
+			shortLabel: "Identité",
+			icon: appIcons.identity,
+		},
+		{
+			id: "medical-profile",
+			label: "Médical",
+			shortLabel: "Médical",
+			icon: appIcons.medical,
+		},
+		{
+			id: "medical-history",
+			label: "Antécédents",
+			shortLabel: "Antécédents",
+			icon: appIcons.history,
+		},
+		{
+			id: "clinical-examination",
+			label: "Examens cliniques",
+			shortLabel: "Examens",
+			icon: appIcons.examination,
+		},
+		{
+			id: "specialized-spheres",
+			label: "Sphères spéc.",
+			shortLabel: "Spécialisé",
+			icon: appIcons.specialized,
+		},
 		...(isChild
-			? [{ id: "pediatric-specialized", label: "Pédiatrie", shortLabel: "Pédiatrie", icon: appIcons.pediatric }]
+			? [
+					{
+						id: "pediatric-specialized",
+						label: "Pédiatrie",
+						shortLabel: "Pédiatrie",
+						icon: appIcons.pediatric,
+					},
+				]
 			: []),
-		{ id: "supplementary", label: "Supplémentaire", shortLabel: "Notes", icon: appIcons.notes },
-		{ id: "weight-tracking", label: "Suivi", shortLabel: "Suivi", icon: appIcons.tracking },
-		...(patient?.id ? [{ id: "relationships", label: "Relations familiales", shortLabel: "Famille", icon: appIcons.family }] : []),
+		{
+			id: "supplementary",
+			label: "Supplémentaire",
+			shortLabel: "Notes",
+			icon: appIcons.notes,
+		},
+		{
+			id: "weight-tracking",
+			label: "Suivi",
+			shortLabel: "Suivi",
+			icon: appIcons.tracking,
+		},
+		...(patient?.id
+			? [
+					{
+						id: "relationships",
+						label: "Relations familiales",
+						shortLabel: "Famille",
+						icon: appIcons.family,
+					},
+				]
+			: []),
 	];
 
 	return (
@@ -308,7 +358,7 @@ export function PatientForm({
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="group flex flex-col items-center gap-1 px-3 py-2.5 text-xs font-medium h-14 flex-1 max-w-[140px]
+												className="group flex flex-col items-center gap-1 px-3 py-2.5 text-sm font-medium h-14 flex-1 max-w-[140px]
 													rounded-md transition-colors
 													text-muted-foreground dark:text-muted-foreground
 													hover:text-foreground hover:bg-background/80
@@ -317,7 +367,9 @@ export function PatientForm({
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
 												<tab.icon className="w-4 h-4" />
-												<span className="text-center leading-none text-xs">{tab.shortLabel}</span>
+												<span className="text-center leading-none text-sm">
+													{tab.shortLabel}
+												</span>
 											</TabsTrigger>
 										))}
 									</div>
@@ -327,7 +379,7 @@ export function PatientForm({
 											<TabsTrigger
 												key={tab.id}
 												value={tab.id}
-												className="group flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium min-w-[65px] h-12 whitespace-nowrap
+												className="group flex flex-col items-center gap-1 px-3 py-2 text-sm font-medium min-w-[65px] h-12 whitespace-nowrap
 													rounded-md transition-colors
 													text-muted-foreground dark:text-muted-foreground
 													hover:text-foreground hover:bg-background/80
@@ -336,7 +388,9 @@ export function PatientForm({
 													dark:data-[state=active]:bg-card dark:data-[state=active]:text-primary dark:data-[state=active]:border-primary/30"
 											>
 												<tab.icon className="w-4 h-4" />
-												<span className="text-xs text-center leading-none">{tab.shortLabel}</span>
+												<span className="text-sm text-center leading-none">
+													{tab.shortLabel}
+												</span>
 											</TabsTrigger>
 										))}
 									</div>
@@ -354,11 +408,17 @@ export function PatientForm({
 							</TabsContent>
 
 							<TabsContent value="medical-profile">
-								<MedicalProfileTab form={form} isChild={isChild} />
+								<MedicalProfileTab
+									form={form}
+									isChild={isChild}
+								/>
 							</TabsContent>
 
 							<TabsContent value="medical-history">
-								<MedicalHistoryTab form={form} isChild={isChild} />
+								<MedicalHistoryTab
+									form={form}
+									isChild={isChild}
+								/>
 							</TabsContent>
 
 							<TabsContent value="clinical-examination">
@@ -400,25 +460,42 @@ export function PatientForm({
 								disabled={isLoading}
 								className="min-w-[120px]"
 								onClick={async (e) => {
-									console.log("🖱️ Bouton 'Mettre à jour' cliqué");
+									console.log(
+										"🖱️ Bouton 'Mettre à jour' cliqué",
+									);
 									console.log("🔒 isLoading:", isLoading);
-									console.log("📋 Form errors:", form.formState.errors);
-									console.log("✅ Form isValid:", form.formState.isValid);
-									console.log("📊 Form values:", form.getValues());
+									console.log(
+										"📋 Form errors:",
+										form.formState.errors,
+									);
+									console.log(
+										"✅ Form isValid:",
+										form.formState.isValid,
+									);
+									console.log(
+										"📊 Form values:",
+										form.getValues(),
+									);
 
 									// Forcer la validation
 									const isValid = await form.trigger();
-									console.log("🔍 Validation forcée - isValid:", isValid);
+									console.log(
+										"🔍 Validation forcée - isValid:",
+										isValid,
+									);
 									if (!isValid) {
-										console.error("❌ Validation échouée - Erreurs:", form.formState.errors);
+										console.error(
+											"❌ Validation échouée - Erreurs:",
+											form.formState.errors,
+										);
 									}
 								}}
 							>
 								{isLoading
 									? "Enregistrement..."
 									: patient
-									? "Mettre à jour"
-									: "Enregistrer"}
+										? "Mettre à jour"
+										: "Enregistrer"}
 							</Button>
 						</div>
 					</form>

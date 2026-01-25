@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Patient } from "@/types";
@@ -27,7 +26,8 @@ interface PatientInfoProps {
 
 export function PatientInfo({ patient }: PatientInfoProps) {
 	const { isDemoMode } = useAuth();
-	const { relationships, loading: relationshipsLoading } = usePatientRelationships(patient.id);
+	const { relationships, loading: relationshipsLoading } =
+		usePatientRelationships(patient.id);
 	const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
 	// Charger la photo patient depuis le stockage HDS sécurisé (sauf en mode démo)
@@ -43,13 +43,15 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					}
 				} else {
 					// En mode connecté, charger depuis HDS
-					const photo = await hdsSecurePhotoService.getPatientPhoto(patient.id as number);
+					const photo = await hdsSecurePhotoService.getPatientPhoto(
+						patient.id as number,
+					);
 					if (photo) {
 						setPhotoUrl(photo.photoData);
 					}
 				}
 			} catch (error) {
-				console.error('Erreur chargement photo patient:', error);
+				console.error("Erreur chargement photo patient:", error);
 			}
 		};
 		loadPhoto();
@@ -92,12 +94,15 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				<div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
 					<Avatar className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 flex-shrink-0">
 						{photoUrl && (
-							<AvatarImage src={photoUrl} alt={`${patient.firstName} ${patient.lastName}`} />
+							<AvatarImage
+								src={photoUrl}
+								alt={`${patient.firstName} ${patient.lastName}`}
+							/>
 						)}
 						<AvatarFallback
 							className={`${getAvatarClasses(
-								patient.gender
-							)} flex items-center justify-center text-xs md:text-sm font-bold`}
+								patient.gender,
+							)} flex items-center justify-center text-sm md:text-sm font-bold`}
 						>
 							{getInitials(patient.firstName, patient.lastName)}
 						</AvatarFallback>
@@ -107,19 +112,21 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							{patient.firstName} {patient.lastName}
 						</CardTitle>
 						<div className="flex items-center gap-2 flex-wrap mt-1">
-							<p className="text-xs md:text-sm text-muted-foreground">
+							<p className="text-sm md:text-sm text-muted-foreground">
 								{patient.gender ?? "Genre non spécifié"},{" "}
-								{age !== null ? `${age} ans` : "Âge non spécifié"}
+								{age !== null
+									? `${age} ans`
+									: "Âge non spécifié"}
 							</p>
 							{age !== null && age < 18 && (
-								<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700">
+								<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700">
 									<Baby className="h-3 w-3" />
 									Mineur
 								</span>
 							)}
 						</div>
 						{age !== null && age < 18 && (
-							<div className="text-amber-600 text-xs flex items-center mt-1">
+							<div className="text-amber-600 text-sm flex items-center mt-1">
 								<Baby className="h-3 w-3 mr-1" />
 								Enfant
 							</div>
@@ -149,16 +156,17 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 							showTooltip={true}
 						/>
 					)}
-					{patient.childrenAges && patient.childrenAges.length > 0 && (
-						<InfoBubble
-							icon={Baby}
-							label="Enfants"
-							value={`${patient.childrenAges.length} enfant${patient.childrenAges.length > 1 ? 's' : ''} (${patient.childrenAges.join(', ')} ans)`}
-							variant="default"
-							size="sm"
-							showTooltip={true}
-						/>
-					)}
+					{patient.childrenAges &&
+						patient.childrenAges.length > 0 && (
+							<InfoBubble
+								icon={Baby}
+								label="Enfants"
+								value={`${patient.childrenAges.length} enfant${patient.childrenAges.length > 1 ? "s" : ""} (${patient.childrenAges.join(", ")} ans)`}
+								variant="default"
+								size="sm"
+								showTooltip={true}
+							/>
+						)}
 					{patient.bmi && (
 						<InfoBubble
 							icon={Activity}
@@ -173,13 +181,13 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 				</div>
 
 				{/* Informations de contact */}
-				<div className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-muted-foreground">
+				<div className="space-y-1.5 md:space-y-2 text-sm md:text-sm text-muted-foreground">
 					<div className="flex items-center gap-2">
 						<MapPin className="h-4 w-4 flex-shrink-0" />
 						{patient.address ? (
 							<a
 								href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-									patient.address
+									patient.address,
 								)}`}
 								target="_blank"
 								rel="noopener noreferrer"
@@ -232,7 +240,7 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 					</div>
 
 					{(patient.height || patient.weight) && (
-						<div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm">
+						<div className="flex items-center gap-3 md:gap-4 text-sm md:text-sm">
 							{patient.height && (
 								<div className="flex items-center gap-1">
 									<Ruler className="h-4 w-4" />
@@ -251,8 +259,8 @@ export function PatientInfo({ patient }: PatientInfoProps) {
 
 				{/* Relations familiales */}
 				<div className="mt-3 md:mt-4">
-					<PatientRelationships 
-						relationships={relationships} 
+					<PatientRelationships
+						relationships={relationships}
 						loading={relationshipsLoading}
 						currentPatientId={patient.id}
 						currentPatientGender={patient.gender}

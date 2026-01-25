@@ -1,6 +1,12 @@
 import { api } from "@/services/api";
 import { AppointmentStatus, Patient } from "@/types";
-import { AppointmentConflictInfo, AppointmentFormData, AppointmentUpdateData, AppointmentData, ConflictInfo } from "@/types/appointment";
+import {
+	AppointmentConflictInfo,
+	AppointmentFormData,
+	AppointmentUpdateData,
+	AppointmentData,
+	ConflictInfo,
+} from "@/types/appointment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInYears, parseISO } from "date-fns";
 import { Baby, CalendarIcon, User } from "lucide-react";
@@ -45,13 +51,16 @@ import { CalendarAppointment } from "@/types/calendar";
 import { PatientCombobox } from "@/components/patients/PatientCombobox";
 
 const appointmentFormSchema = z.object({
-	patientId: z.union([z.number(), z.string()]).refine((val) => {
-		if (typeof val === 'number') return val > 0;
-		if (typeof val === 'string') return val.length > 0;
-		return false;
-	}, {
-		message: "L'ID du patient est requis",
-	}),
+	patientId: z.union([z.number(), z.string()]).refine(
+		(val) => {
+			if (typeof val === "number") return val > 0;
+			if (typeof val === "string") return val.length > 0;
+			return false;
+		},
+		{
+			message: "L'ID du patient est requis",
+		},
+	),
 	date: z.date({
 		required_error: "Une date est requise.",
 	}),
@@ -97,7 +106,7 @@ export function AppointmentForm({
 	}>({
 		open: false,
 		conflictInfo: null,
-		formData: null
+		formData: null,
 	});
 	const [conflictResolutionDialog, setConflictResolutionDialog] = useState<{
 		open: boolean;
@@ -106,7 +115,7 @@ export function AppointmentForm({
 	}>({
 		open: false,
 		conflictInfo: null,
-		requestedDate: ""
+		requestedDate: "",
 	});
 	const [appointmentDates, setAppointmentDates] = useState<string[]>([]);
 	const [calendarAppointments, setCalendarAppointments] = useState<any[]>([]);
@@ -137,18 +146,22 @@ export function AppointmentForm({
 		const loadAppointmentData = async () => {
 			try {
 				const appointments = await api.getAppointments();
-				const dates = appointments.map(apt => apt.date);
+				const dates = appointments.map((apt) => apt.date);
 				setAppointmentDates(dates);
-				
+
 				// Transform appointments for calendar tooltips
-				const calendarData = appointments.map(apt => {
-					const patient = patients.find(p => p.id === apt.patientId);
+				const calendarData = appointments.map((apt) => {
+					const patient = patients.find(
+						(p) => p.id === apt.patientId,
+					);
 					return {
 						id: apt.id,
 						time: apt.date,
-						patientName: patient ? `${patient.firstName} ${patient.lastName}` : 'Patient inconnu',
+						patientName: patient
+							? `${patient.firstName} ${patient.lastName}`
+							: "Patient inconnu",
 						reason: apt.reason,
-						status: apt.status
+						status: apt.status,
 					};
 				});
 				setCalendarAppointments(calendarData);
@@ -156,7 +169,7 @@ export function AppointmentForm({
 				console.error("Error loading appointment data:", error);
 			}
 		};
-		
+
 		if (patients.length > 0) {
 			loadAppointmentData();
 		}
@@ -165,7 +178,13 @@ export function AppointmentForm({
 	const form = useForm<AppointmentFormValues>({
 		resolver: zodResolver(appointmentFormSchema),
 		defaultValues: {
-			patientId: defaultValues?.patientId || (patientIdParam ? (isDemoMode ? patientIdParam : Number(patientIdParam)) : 1),
+			patientId:
+				defaultValues?.patientId ||
+				(patientIdParam
+					? isDemoMode
+						? patientIdParam
+						: Number(patientIdParam)
+					: 1),
 			date: defaultValues?.date
 				? new Date(defaultValues.date)
 				: new Date(),
@@ -179,17 +198,21 @@ export function AppointmentForm({
 
 	const handleConflictForceUpdate = async () => {
 		if (!conflictDialog.formData) return;
-		
+
 		try {
 			setIsSubmitting(true);
-			
+
 			// Force update by calling the API directly with a flag
 			// For now, we'll just retry the same operation
 			// In a real implementation, you might want to add a force flag
 			await performUpdate(conflictDialog.formData, true);
-			
-			setConflictDialog({ open: false, conflictInfo: null, formData: null });
-			
+
+			setConflictDialog({
+				open: false,
+				conflictInfo: null,
+				formData: null,
+			});
+
 			if (onSuccess) {
 				onSuccess();
 			} else {
@@ -199,7 +222,9 @@ export function AppointmentForm({
 			}
 		} catch (error) {
 			console.error("Error forcing update:", error);
-			toast.error("⛔ Une erreur est survenue lors de la mise à jour forcée.");
+			toast.error(
+				"⛔ Une erreur est survenue lors de la mise à jour forcée.",
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -207,10 +232,17 @@ export function AppointmentForm({
 
 	const handleAlternativeSelect = (newDate: string) => {
 		form.setValue("date", new Date(newDate));
-		setConflictResolutionDialog({ open: false, conflictInfo: null, requestedDate: "" });
+		setConflictResolutionDialog({
+			open: false,
+			conflictInfo: null,
+			requestedDate: "",
+		});
 	};
 
-	const performUpdate = async (appointmentData: AppointmentUpdateData, force = false) => {
+	const performUpdate = async (
+		appointmentData: AppointmentUpdateData,
+		force = false,
+	) => {
 		if (appointmentId) {
 			// For force updates, we might need to temporarily disable the trigger
 			// This is a simplified approach - in production you might want more sophisticated handling
@@ -225,7 +257,9 @@ export function AppointmentForm({
 	const onSubmit = async (data: AppointmentFormValues) => {
 		// CORRECTION: Empêcher les soumissions multiples
 		if (isSubmitting) {
-			console.warn("Form already submitting, ignoring duplicate submission");
+			console.warn(
+				"Form already submitting, ignoring duplicate submission",
+			);
 			return;
 		}
 
@@ -257,23 +291,24 @@ export function AppointmentForm({
 				updatedAt: new Date().toISOString(),
 			};
 
-	
 			await performUpdate(appointmentData);
 
 			// Émettre l'événement global pour informer les composants
-			const newAppointmentEvent = { 
+			const newAppointmentEvent = {
 				id: Date.now(), // ID temporaire pour l'événement
-				...appointmentData 
+				...appointmentData,
 			};
-				window.dispatchEvent(new CustomEvent('appointment-created', { 
-				detail: newAppointmentEvent
-			}));
+			window.dispatchEvent(
+				new CustomEvent("appointment-created", {
+					detail: newAppointmentEvent,
+				}),
+			);
 
 			// Invalider les queries pour synchroniser les données
-			if (typeof onSuccess === 'function') {
-				onSuccess({ 
+			if (typeof onSuccess === "function") {
+				onSuccess({
 					id: Date.now(), // ID temporaire pour l'optimistic update
-					...appointmentData 
+					...appointmentData,
 				});
 			} else {
 				// Si pas de callback, naviguer vers la liste
@@ -283,37 +318,63 @@ export function AppointmentForm({
 			}
 		} catch (error: unknown) {
 			console.error("Error submitting appointment form:", error);
-			
+
 			// Enhanced conflict handling with resolution dialog
-			const errorObj = error as { isConflict?: boolean; conflictInfo?: AppointmentConflictInfo; message?: string };
+			const errorObj = error as {
+				isConflict?: boolean;
+				conflictInfo?: AppointmentConflictInfo;
+				message?: string;
+			};
 			if (errorObj.isConflict && errorObj.conflictInfo) {
-				const selectedPatient = patients.find(p => p.id === data.patientId);
-				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'le patient sélectionné';
-				
+				const selectedPatient = patients.find(
+					(p) => p.id === data.patientId,
+				);
+				const patientName = selectedPatient
+					? `${selectedPatient.firstName} ${selectedPatient.lastName}`
+					: "le patient sélectionné";
+
 				// Show the enhanced conflict resolution dialog
 				setConflictResolutionDialog({
 					open: true,
 					conflictInfo: errorObj.conflictInfo,
-					requestedDate: new Date(data.date).toISOString()
+					requestedDate: new Date(data.date).toISOString(),
 				});
-				
-				toast.warning(`Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`);
+
+				toast.warning(
+					`Conflit détecté pour ${patientName}. Des créneaux alternatifs sont proposés.`,
+				);
 			} else if (errorObj.message?.includes("créneau horaire")) {
 				// Cas d'erreur de conflit sans détails
-				const selectedPatient = patients.find(p => p.id === data.patientId);
-				const patientName = selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : 'ce patient';
-				
-				toast.error(`⛔ Impossible de programmer le rendez-vous pour ${patientName}. Ce créneau horaire est déjà occupé par un autre rendez-vous.`);
+				const selectedPatient = patients.find(
+					(p) => p.id === data.patientId,
+				);
+				const patientName = selectedPatient
+					? `${selectedPatient.firstName} ${selectedPatient.lastName}`
+					: "ce patient";
+
+				toast.error(
+					`⛔ Impossible de programmer le rendez-vous pour ${patientName}. Ce créneau horaire est déjà occupé par un autre rendez-vous.`,
+				);
 			} else if (errorObj.message?.includes("Patient introuvable")) {
-				toast.error("⛔ Patient introuvable. Veuillez actualiser la page et réessayer.");
+				toast.error(
+					"⛔ Patient introuvable. Veuillez actualiser la page et réessayer.",
+				);
 			} else if (errorObj.message?.includes("non autorisé")) {
-				toast.error("⛔ Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient.");
+				toast.error(
+					"⛔ Vous n'êtes pas autorisé à créer un rendez-vous pour ce patient.",
+				);
 			} else {
 				// Erreur générique avec plus de contexte
-				const selectedPatient = patients.find(p => p.id === data.patientId);
-				const patientName = selectedPatient ? ` pour ${selectedPatient.firstName} ${selectedPatient.lastName}` : '';
-				
-				toast.error(`⛔ Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous${patientName}. ${errorObj.message || 'Veuillez réessayer dans quelques instants.'}`);
+				const selectedPatient = patients.find(
+					(p) => p.id === data.patientId,
+				);
+				const patientName = selectedPatient
+					? ` pour ${selectedPatient.firstName} ${selectedPatient.lastName}`
+					: "";
+
+				toast.error(
+					`⛔ Impossible de ${appointmentId ? "modifier" : "créer"} le rendez-vous${patientName}. ${errorObj.message || "Veuillez réessayer dans quelques instants."}`,
+				);
 			}
 		} finally {
 			setIsSubmitting(false);
@@ -331,7 +392,10 @@ export function AppointmentForm({
 	return (
 		<>
 			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="space-y-6"
+				>
 					{/* Honeypot field - hidden from users */}
 					<FormField
 						control={form.control}
@@ -370,26 +434,31 @@ export function AppointmentForm({
 									const age = selectedPatient.birthDate
 										? differenceInYears(
 												new Date(),
-												parseISO(selectedPatient.birthDate)
-										  )
+												parseISO(
+													selectedPatient.birthDate,
+												),
+											)
 										: null;
 									const isChild = age !== null && age < 12;
 									const iconColor = isChild
 										? "text-amber-500"
 										: selectedPatient.gender === "Homme"
-										? "text-blue-500"
-										: selectedPatient.gender === "Femme"
-										? "text-pink-500"
-										: "text-gray-500";
+											? "text-blue-500"
+											: selectedPatient.gender === "Femme"
+												? "text-pink-500"
+												: "text-gray-500";
 									const Icon = isChild ? Baby : User;
 									return (
 										<>
-											<Icon className={`w-4 h-4 ${iconColor}`} />
+											<Icon
+												className={`w-4 h-4 ${iconColor}`}
+											/>
 											<span>
-												{selectedPatient.lastName} {selectedPatient.firstName}
+												{selectedPatient.lastName}{" "}
+												{selectedPatient.firstName}
 											</span>
 											{age !== null && (
-												<span className="text-xs text-muted-foreground ml-2">
+												<span className="text-sm text-muted-foreground ml-2">
 													({age} ans)
 												</span>
 											)}
@@ -448,7 +517,9 @@ export function AppointmentForm({
 							name="time"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Heure de début de séance</FormLabel>
+									<FormLabel>
+										Heure de début de séance
+									</FormLabel>
 									<FormControl>
 										<Input
 											type="time"
@@ -466,8 +537,12 @@ export function AppointmentForm({
 											disabled={isSubmitting}
 										/>
 									</FormControl>
-									<p className="text-xs text-muted-foreground mt-1">
-										ℹ️ Lors de la clôture de la séance (bouton « Clôturer la séance »), l'heure réelle de fin sera automatiquement enregistrée selon l'heure à laquelle vous validez le formulaire.
+									<p className="text-sm text-muted-foreground mt-1">
+										ℹ️ Lors de la clôture de la séance
+										(bouton « Clôturer la séance »), l'heure
+										réelle de fin sera automatiquement
+										enregistrée selon l'heure à laquelle
+										vous validez le formulaire.
 									</p>
 									<FormMessage />
 								</FormItem>
@@ -557,19 +632,23 @@ export function AppointmentForm({
 						<Button
 							type="button"
 							variant="outline"
-							onClick={() => onSuccess ? onSuccess() : navigate("/appointments")}
+							onClick={() =>
+								onSuccess
+									? onSuccess()
+									: navigate("/appointments")
+							}
 							disabled={isSubmitting}
 						>
 							Annuler
 						</Button>
 						<Button type="submit" disabled={isSubmitting}>
 							{isSubmitting
-								? (form.getValues("status") === "COMPLETED"
+								? form.getValues("status") === "COMPLETED"
 									? "Clôture en cours..."
-									: "Enregistrement...")
-								: (form.getValues("status") === "COMPLETED"
+									: "Enregistrement..."
+								: form.getValues("status") === "COMPLETED"
 									? "Clôturer la séance"
-									: "Enregistrer la séance")}
+									: "Enregistrer la séance"}
 						</Button>
 					</div>
 				</form>
@@ -577,20 +656,36 @@ export function AppointmentForm({
 
 			<AppointmentConflictDialog
 				open={conflictDialog.open}
-				onOpenChange={(open) => setConflictDialog(prev => ({ ...prev, open }))}
+				onOpenChange={(open) =>
+					setConflictDialog((prev) => ({ ...prev, open }))
+				}
 				conflictInfo={conflictDialog.conflictInfo}
 				onForceUpdate={handleConflictForceUpdate}
-				onCancel={() => setConflictDialog({ open: false, conflictInfo: null, formData: null })}
+				onCancel={() =>
+					setConflictDialog({
+						open: false,
+						conflictInfo: null,
+						formData: null,
+					})
+				}
 			/>
 
 			<ConflictResolutionDialog
 				open={conflictResolutionDialog.open}
-				onOpenChange={(open) => setConflictResolutionDialog(prev => ({ ...prev, open }))}
+				onOpenChange={(open) =>
+					setConflictResolutionDialog((prev) => ({ ...prev, open }))
+				}
 				conflictInfo={conflictResolutionDialog.conflictInfo}
 				requestedDate={conflictResolutionDialog.requestedDate}
 				onSelectAlternative={handleAlternativeSelect}
 				onForceUpdate={handleConflictForceUpdate}
-				onCancel={() => setConflictResolutionDialog({ open: false, conflictInfo: null, requestedDate: "" })}
+				onCancel={() =>
+					setConflictResolutionDialog({
+						open: false,
+						conflictInfo: null,
+						requestedDate: "",
+					})
+				}
 			/>
 		</>
 	);

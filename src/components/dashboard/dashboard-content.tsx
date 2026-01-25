@@ -13,13 +13,15 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 	dashboardData,
 }) => {
 	const [chartType, setChartType] = useState<"detailed" | "simple">(
-		"detailed"
+		"detailed",
 	);
 
 	return (
 		<CollapsibleSection
 			title="Évolution de l'activité"
-			icon={<ChartLine className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+			icon={
+				<ChartLine className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+			}
 			defaultOpen={true}
 			storageKey="dashboard-activity-section"
 			className="animate-fade-in animate-delay-300"
@@ -51,10 +53,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 							setChartType(
 								chartType === "detailed"
 									? "simple"
-									: "detailed"
+									: "detailed",
 							)
 						}
-						className="relative w-40 h-8 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px]"
+						className="relative w-40 h-8 text-sm rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px]"
 					>
 						<div
 							className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] will-change-transform ${

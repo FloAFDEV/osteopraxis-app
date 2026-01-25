@@ -54,14 +54,14 @@ export function QuoteViewModal({
 				// Charger les informations du cabinet
 				if (quote.cabinetId) {
 					const cabinet = await api.getCabinetById(
-						Number(quote.cabinetId)
+						Number(quote.cabinetId),
 					);
 					setCabinetInfo(cabinet);
 				}
 			} catch (error) {
 				console.error(
 					"Erreur lors du chargement des informations légales:",
-					error
+					error,
 				);
 			} finally {
 				setLoading(false);
@@ -168,7 +168,7 @@ export function QuoteViewModal({
 										"dd MMMM yyyy",
 										{
 											locale: fr,
-										}
+										},
 									)}
 								</span>
 							</div>
@@ -184,7 +184,7 @@ export function QuoteViewModal({
 										"dd MMMM yyyy",
 										{
 											locale: fr,
-										}
+										},
 									)}
 								</span>
 							</div>
@@ -431,14 +431,14 @@ export function QuoteViewModal({
 					</div>
 
 					{/* Dernière modification */}
-					<div className="text-xs text-muted-foreground border-t pt-4">
+					<div className="text-sm text-muted-foreground border-t pt-4">
 						Dernière modification:{" "}
 						{format(
 							new Date(quote.updatedAt),
 							"dd/MM/yyyy à HH:mm",
 							{
 								locale: fr,
-							}
+							},
 						)}
 					</div>
 				</div>

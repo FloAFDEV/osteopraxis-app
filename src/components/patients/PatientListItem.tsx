@@ -1,16 +1,8 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Patient } from "@/types";
 import { differenceInYears, parseISO } from "date-fns";
-import {
-	Baby,
-	User,
-	Users,
-	Briefcase,
-	Phone,
-	Mail,
-} from "lucide-react";
+import { Baby, User, Users, Briefcase, Phone, Mail } from "lucide-react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PatientOwnershipBadge } from "./PatientOwnershipBadge";
@@ -22,7 +14,8 @@ interface PatientListItemProps {
 
 const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 	const navigate = useNavigate();
-	const { displayName, displayEmail, isDemoPatient } = usePatientDisplayInfo(patient);
+	const { displayName, displayEmail, isDemoPatient } =
+		usePatientDisplayInfo(patient);
 	const age = patient.birthDate
 		? differenceInYears(new Date(), parseISO(patient.birthDate))
 		: null;
@@ -96,24 +89,26 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 									{displayName}
 								</Link>
 								{age !== null && (
-									<span className="text-xs text-muted-foreground flex-shrink-0">
+									<span className="text-sm text-muted-foreground flex-shrink-0">
 										({age} ans)
 									</span>
 								)}
 								<PatientOwnershipBadge patientId={patient.id} />
 								{isMinor && (
-									<span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700 flex-shrink-0 leading-none">
+									<span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-sm font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-700 flex-shrink-0 leading-none">
 										<Baby className="h-3 w-3" />
 										Mineur
 									</span>
 								)}
 							</div>
 
-							<div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 leading-none">
+							<div className="flex items-center gap-3 text-sm text-muted-foreground mt-1 leading-none">
 								{patient.email && (
 									<span className="flex items-center">
 										<Mail className="h-3 w-3 mr-1 text-slate-400" />
-										<span className="truncate max-w-[150px]">{displayEmail}</span>
+										<span className="truncate max-w-[150px]">
+											{displayEmail}
+										</span>
 									</span>
 								)}
 
@@ -127,7 +122,9 @@ const PatientListItem: React.FC<PatientListItemProps> = ({ patient }) => {
 								{patient.occupation && (
 									<span className="flex items-center text-muted-foreground">
 										<Briefcase className="h-3 w-3 mr-1 text-slate-400" />
-										<span className="truncate max-w-[100px]">{patient.occupation}</span>
+										<span className="truncate max-w-[100px]">
+											{patient.occupation}
+										</span>
 									</span>
 								)}
 							</div>

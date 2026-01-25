@@ -23,7 +23,13 @@ import {
 import { HeroStat, CompactStat } from "@/components/ui/hero-stat";
 import { BlurredNumber, BlurredAmount } from "@/components/ui/blurred-amount";
 import { PrivacyToggle } from "@/components/ui/privacy-toggle";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
@@ -36,11 +42,11 @@ interface DashboardStatsProps {
 	selectedCabinetId?: number | null;
 }
 
-export function DashboardStats({ 
-	data, 
-	selectedCabinetName, 
+export function DashboardStats({
+	data,
+	selectedCabinetName,
 	onCabinetChange,
-	selectedCabinetId 
+	selectedCabinetId,
 }: DashboardStatsProps) {
 	const today = new Date();
 	const formattedToday = format(today, "EEEE d MMMM yyyy", { locale: fr });
@@ -94,7 +100,7 @@ export function DashboardStats({
 							</div>
 						</CardContent>
 						<CardFooter className="mt-auto">
-							<div className="text-xs text-muted-foreground">
+							<div className="text-sm text-muted-foreground">
 								Chargement des données
 							</div>
 						</CardFooter>
@@ -104,11 +110,16 @@ export function DashboardStats({
 		);
 	}
 
-	const showCabinetSelector = !loadingCabinets && cabinets.length > 1 && onCabinetChange;
+	const showCabinetSelector =
+		!loadingCabinets && cabinets.length > 1 && onCabinetChange;
 
 	// Helper function to get positive message when values are 0
 	const getEmptyStateMessage = () => {
-		if (data.appointmentsToday === 0 && data.consultationsThisMonth === 0 && data.revenueThisMonth === 0) {
+		if (
+			data.appointmentsToday === 0 &&
+			data.consultationsThisMonth === 0 &&
+			data.revenueThisMonth === 0
+		) {
 			return "Aucun RDV prévu aujourd'hui, profitez de votre temps libre !";
 		}
 		return null;
@@ -127,11 +138,13 @@ export function DashboardStats({
 							Tableau de bord
 						</h2>
 						<p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
-							{selectedCabinetName ? `Cabinet : ${selectedCabinetName}` : 'Vue globale - Tous les cabinets'}
+							{selectedCabinetName
+								? `Cabinet : ${selectedCabinetName}`
+								: "Vue globale - Tous les cabinets"}
 						</p>
 					</div>
 				</div>
-				
+
 				<div className="flex items-center gap-3">
 					{showCabinetSelector && (
 						<div className="flex items-center gap-2">
@@ -143,8 +156,13 @@ export function DashboardStats({
 										onCabinetChange(null);
 									} else {
 										const cabinetId = parseInt(value);
-										const cabinet = cabinets.find(c => c.id === cabinetId);
-										onCabinetChange(cabinetId, cabinet?.name);
+										const cabinet = cabinets.find(
+											(c) => c.id === cabinetId,
+										);
+										onCabinetChange(
+											cabinetId,
+											cabinet?.name,
+										);
 									}
 								}}
 							>
@@ -159,7 +177,10 @@ export function DashboardStats({
 										</div>
 									</SelectItem>
 									{cabinets.map((cabinet) => (
-										<SelectItem key={cabinet.id} value={cabinet.id.toString()}>
+										<SelectItem
+											key={cabinet.id}
+											value={cabinet.id.toString()}
+										>
 											<div className="flex items-center gap-2">
 												<Building2 className="h-4 w-4" />
 												{cabinet.name}
@@ -214,19 +235,31 @@ export function DashboardStats({
 										Total Patients
 									</p>
 									<p className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-gray-100">
-										<BlurredNumber value={data.totalPatients} />
+										<BlurredNumber
+											value={data.totalPatients}
+										/>
 									</p>
 									<p className="text-sm lg:text-base xl:text-lg text-gray-600 dark:text-gray-400 mt-2">
-										{data.newPatientsThisMonth} nouveaux patients ce mois-ci
+										{data.newPatientsThisMonth} nouveaux
+										patients ce mois-ci
 									</p>
 								</div>
 							</div>
 							<div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-								<TrendingUp className={`h-4 w-4 ${(data.thirtyDayGrowthPercentage || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`} />
-								<span className={`text-sm font-medium ${(data.thirtyDayGrowthPercentage || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-									{(data.thirtyDayGrowthPercentage || 0) >= 0 ? '+' : ''}{data.thirtyDayGrowthPercentage || 0}%
+								<TrendingUp
+									className={`h-4 w-4 ${(data.thirtyDayGrowthPercentage || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+								/>
+								<span
+									className={`text-sm font-medium ${(data.thirtyDayGrowthPercentage || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+								>
+									{(data.thirtyDayGrowthPercentage || 0) >= 0
+										? "+"
+										: ""}
+									{data.thirtyDayGrowthPercentage || 0}%
 								</span>
-								<span className="text-xs text-gray-500 dark:text-gray-400">vs mois dernier</span>
+								<span className="text-sm text-gray-500 dark:text-gray-400">
+									vs mois dernier
+								</span>
 							</div>
 						</div>
 					</div>
@@ -246,7 +279,7 @@ export function DashboardStats({
 							<p className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredNumber value={data.appointmentsToday} />
 							</p>
-							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
+							<p className="text-sm lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
 								{nextAppointmentText}
 							</p>
 						</div>
@@ -262,14 +295,16 @@ export function DashboardStats({
 								</p>
 							</div>
 							<p className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-								<BlurredNumber value={data.consultationsThisMonth} />
+								<BlurredNumber
+									value={data.consultationsThisMonth}
+								/>
 							</p>
-							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
+							<p className="text-sm lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
 								{data.consultationsTrend > 0
 									? `+${data.consultationsTrend}% vs mois dernier`
 									: data.consultationsTrend < 0
-									? `${data.consultationsTrend}% vs mois dernier`
-									: "Stable vs mois dernier"}
+										? `${data.consultationsTrend}% vs mois dernier`
+										: "Stable vs mois dernier"}
 							</p>
 						</div>
 
@@ -286,13 +321,13 @@ export function DashboardStats({
 							<p className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 								<BlurredAmount amount={data.revenueThisMonth} />
 							</p>
-							<p className="text-xs lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
+							<p className="text-sm lg:text-sm xl:text-base text-gray-600 dark:text-gray-400">
 								{data.revenueTrend !== undefined
 									? data.revenueTrend > 0
 										? `+${data.revenueTrend}% vs mois dernier`
 										: data.revenueTrend < 0
-										? `${data.revenueTrend}% vs mois dernier`
-										: "Stable vs mois dernier"
+											? `${data.revenueTrend}% vs mois dernier`
+											: "Stable vs mois dernier"
 									: `${data.pendingInvoices} factures en attente`}
 							</p>
 						</div>
@@ -357,15 +392,17 @@ export function DashboardStats({
 						<StatCard
 							title="Revenu annuel"
 							value={
-								<BlurredAmount amount={data.revenueThisYear || 0} />
+								<BlurredAmount
+									amount={data.revenueThisYear || 0}
+								/>
 							}
 							description={
 								data.annualTrend !== undefined
 									? data.annualTrend > 0
 										? `+${data.annualTrend}% vs année dernière`
 										: data.annualTrend < 0
-										? `${data.annualTrend}% vs année dernière`
-										: "Stable vs année dernière"
+											? `${data.annualTrend}% vs année dernière`
+											: "Stable vs année dernière"
 									: "Revenus depuis janvier"
 							}
 							color="text-slate-600"
@@ -375,7 +412,11 @@ export function DashboardStats({
 						<StatCard
 							title="Revenu moyen / RDV"
 							value={
-								<BlurredAmount amount={data.averageRevenuePerAppointment || 0} />
+								<BlurredAmount
+									amount={
+										data.averageRevenuePerAppointment || 0
+									}
+								/>
 							}
 							description="Par consultation facturée"
 							color="text-slate-600"

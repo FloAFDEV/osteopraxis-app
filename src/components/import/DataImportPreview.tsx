@@ -1,8 +1,20 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { Eye, ArrowLeft, ArrowRight, FileSpreadsheet } from "lucide-react";
 import type { ImportData } from "@/types/import";
 
@@ -12,7 +24,11 @@ interface DataImportPreviewProps {
 	onBack: () => void;
 }
 
-export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreviewProps) => {
+export const DataImportPreview = ({
+	data,
+	onConfirm,
+	onBack,
+}: DataImportPreviewProps) => {
 	const previewRows = data.rows.slice(0, 10); // Afficher les 10 premières lignes
 
 	return (
@@ -24,7 +40,8 @@ export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreview
 						Prévisualisation des données
 					</CardTitle>
 					<CardDescription>
-						Vérifiez que vos données sont correctement détectées avant de continuer
+						Vérifiez que vos données sont correctement détectées
+						avant de continuer
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -34,7 +51,7 @@ export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreview
 						<div>
 							<h4 className="font-medium">{data.fileName}</h4>
 							<div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-								<Badge variant="secondary" className="text-xs">
+								<Badge variant="secondary" className="text-sm">
 									{data.fileType.toUpperCase()}
 								</Badge>
 								<span>{data.totalRows} lignes</span>
@@ -51,7 +68,10 @@ export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreview
 								<TableRow>
 									<TableHead className="w-12">#</TableHead>
 									{data.headers.map((header, index) => (
-										<TableHead key={index} className="min-w-[120px]">
+										<TableHead
+											key={index}
+											className="min-w-[120px]"
+										>
 											{header || `Colonne ${index + 1}`}
 										</TableHead>
 									))}
@@ -60,11 +80,14 @@ export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreview
 							<TableBody>
 								{previewRows.map((row, rowIndex) => (
 									<TableRow key={rowIndex}>
-										<TableCell className="font-mono text-xs text-muted-foreground">
+										<TableCell className="font-mono text-sm text-muted-foreground">
 											{rowIndex + 1}
 										</TableCell>
 										{row.map((cell, cellIndex) => (
-											<TableCell key={cellIndex} className="max-w-[200px] truncate">
+											<TableCell
+												key={cellIndex}
+												className="max-w-[200px] truncate"
+											>
 												{cell || "-"}
 											</TableCell>
 										))}
@@ -76,7 +99,8 @@ export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreview
 
 					{data.totalRows > 10 && (
 						<p className="text-sm text-muted-foreground text-center">
-							Affichage des 10 premières lignes sur {data.totalRows} au total
+							Affichage des 10 premières lignes sur{" "}
+							{data.totalRows} au total
 						</p>
 					)}
 				</CardContent>
@@ -88,7 +112,7 @@ export const DataImportPreview = ({ data, onConfirm, onBack }: DataImportPreview
 					<ArrowLeft className="h-4 w-4 mr-2" />
 					Retour
 				</Button>
-				
+
 				<Button onClick={onConfirm}>
 					Continuer
 					<ArrowRight className="h-4 w-4 ml-2" />

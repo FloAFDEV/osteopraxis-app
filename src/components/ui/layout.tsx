@@ -34,7 +34,8 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
 	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-	const { user, signOut, isDemoMode, demoCabinetName, remainingDemoTime } = useAuth();
+	const { user, signOut, isDemoMode, demoCabinetName, remainingDemoTime } =
+		useAuth();
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -68,8 +69,9 @@ export function Layout({ children }: LayoutProps) {
 	return (
 		<div className="flex min-h-screen flex-col bg-background">
 			{isDemoMode && (
-				<div className="bg-slate-500 text-slate-100 px-3 py-1 text-center text-xs leading-none">
-					Démo • {demoCabinetName} • {formatRemainingTime(remainingDemoTime)}
+				<div className="bg-slate-500 text-slate-100 px-3 py-1 text-center text-sm leading-none">
+					Démo • {demoCabinetName} •{" "}
+					{formatRemainingTime(remainingDemoTime)}
 				</div>
 			)}
 
@@ -81,7 +83,9 @@ export function Layout({ children }: LayoutProps) {
 							className="flex items-center gap-1.5 font-semibold"
 						>
 							<Activity className="h-4 w-4 text-slate-500" />
-							<span className="text-sm font-bold tracking-tight text-foreground">OstéoPraxis</span>
+							<span className="text-sm font-bold tracking-tight text-foreground">
+								OstéoPraxis
+							</span>
 						</NavLink>
 					</div>
 
@@ -104,10 +108,10 @@ export function Layout({ children }: LayoutProps) {
 							to="/"
 							className={({ isActive }) =>
 								cn(
-									"text-xs transition-colors flex items-center gap-1",
+									"text-sm transition-colors flex items-center gap-1",
 									isActive
 										? "text-foreground font-medium"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-muted-foreground hover:text-foreground",
 								)
 							}
 						>
@@ -118,10 +122,10 @@ export function Layout({ children }: LayoutProps) {
 							to="/patients"
 							className={({ isActive }) =>
 								cn(
-									"text-xs transition-colors flex items-center gap-1",
+									"text-sm transition-colors flex items-center gap-1",
 									isActive
 										? "text-foreground font-medium"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-muted-foreground hover:text-foreground",
 								)
 							}
 						>
@@ -132,10 +136,10 @@ export function Layout({ children }: LayoutProps) {
 							to="/appointments"
 							className={({ isActive }) =>
 								cn(
-									"text-xs transition-colors flex items-center gap-1",
+									"text-sm transition-colors flex items-center gap-1",
 									isActive
 										? "text-foreground font-medium"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-muted-foreground hover:text-foreground",
 								)
 							}
 						>
@@ -146,10 +150,10 @@ export function Layout({ children }: LayoutProps) {
 							to="/schedule"
 							className={({ isActive }) =>
 								cn(
-									"text-xs transition-colors flex items-center gap-1",
+									"text-sm transition-colors flex items-center gap-1",
 									isActive
 										? "text-foreground font-medium"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-muted-foreground hover:text-foreground",
 								)
 							}
 						>
@@ -160,10 +164,10 @@ export function Layout({ children }: LayoutProps) {
 							to="/invoices"
 							className={({ isActive }) =>
 								cn(
-									"text-xs transition-colors flex items-center gap-1",
+									"text-sm transition-colors flex items-center gap-1",
 									isActive
 										? "text-foreground font-medium"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-muted-foreground hover:text-foreground",
 								)
 							}
 						>
@@ -174,10 +178,10 @@ export function Layout({ children }: LayoutProps) {
 							to="/statistics"
 							className={({ isActive }) =>
 								cn(
-									"text-xs transition-colors flex items-center gap-1",
+									"text-sm transition-colors flex items-center gap-1",
 									isActive
 										? "text-foreground font-medium"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-muted-foreground hover:text-foreground",
 								)
 							}
 						>
@@ -195,9 +199,7 @@ export function Layout({ children }: LayoutProps) {
 									className="ml-1 p-0 hover:bg-transparent"
 								>
 									<Avatar className="h-6 w-6">
-										<AvatarFallback
-											className="bg-slate-600 text-white text-xs font-medium"
-										>
+										<AvatarFallback className="bg-slate-600 text-white text-sm font-medium">
 											{getInitials()}
 										</AvatarFallback>
 									</Avatar>
@@ -205,11 +207,11 @@ export function Layout({ children }: LayoutProps) {
 							</DropdownMenuTrigger>
 
 							<DropdownMenuContent align="end" className="w-48">
-								<DropdownMenuLabel className="text-xs">
+								<DropdownMenuLabel className="text-sm">
 									Mon compte
 								</DropdownMenuLabel>
 								{user && (
-									<div className="px-2 py-1 text-xs text-muted-foreground">
+									<div className="px-2 py-1 text-sm text-muted-foreground">
 										{user.email}
 									</div>
 								)}
@@ -217,7 +219,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings/profile"
-										className="flex items-center cursor-pointer text-xs"
+										className="flex items-center cursor-pointer text-sm"
 									>
 										<User className="mr-2 h-3.5 w-3.5 text-slate-500" />
 										<span>Mon Profil</span>
@@ -226,7 +228,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings"
-										className="flex items-center cursor-pointer text-xs"
+										className="flex items-center cursor-pointer text-sm"
 									>
 										<HelpCircle className="mr-2 h-3.5 w-3.5 text-slate-500" />
 										<span>Guide</span>
@@ -235,7 +237,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings/cabinet"
-										className="flex items-center cursor-pointer text-xs"
+										className="flex items-center cursor-pointer text-sm"
 									>
 										<Building className="mr-2 h-3.5 w-3.5 text-slate-500" />
 										<span>Paramètres cabinet</span>
@@ -244,7 +246,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuItem asChild>
 									<NavLink
 										to="/settings/osteopath"
-										className="flex items-center cursor-pointer text-xs"
+										className="flex items-center cursor-pointer text-sm"
 									>
 										<User className="mr-2 h-3.5 w-3.5 text-slate-500" />
 										<span>Profil & Facturation</span>
@@ -254,7 +256,7 @@ export function Layout({ children }: LayoutProps) {
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
 									onClick={handleLogout}
-									className="text-destructive cursor-pointer text-xs"
+									className="text-destructive cursor-pointer text-sm"
 								>
 									<LogOut className="mr-2 h-3.5 w-3.5" />
 									<span>Déconnexion</span>
@@ -266,17 +268,19 @@ export function Layout({ children }: LayoutProps) {
 			</header>
 
 			{isMenuOpen && (
-				<div className={cn(
-					"md:hidden fixed inset-0 z-30 bg-background/98 print:hidden",
-					isDemoMode ? "pt-[72px]" : "pt-11"
-				)}>
+				<div
+					className={cn(
+						"md:hidden fixed inset-0 z-30 bg-background/98 print:hidden",
+						isDemoMode ? "pt-[72px]" : "pt-11",
+					)}
+				>
 					<nav className="px-4 py-3 flex flex-col gap-1">
 						<NavLink
 							to="/"
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -289,7 +293,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -302,7 +306,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -315,7 +319,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -328,7 +332,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -341,7 +345,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -355,7 +359,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -368,7 +372,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}
@@ -381,7 +385,7 @@ export function Layout({ children }: LayoutProps) {
 							className={({ isActive }) =>
 								cn(
 									"p-2 rounded-md transition-colors flex items-center gap-2 text-sm",
-									isActive ? "bg-muted font-medium" : ""
+									isActive ? "bg-muted font-medium" : "",
 								)
 							}
 							onClick={() => setIsMenuOpen(false)}

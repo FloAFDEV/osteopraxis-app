@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -28,7 +27,10 @@ interface AppointmentCardProps {
 	patient?: Patient;
 	onEdit?: () => void;
 	onCancel?: () => void;
-	onStatusChange?: (appointmentId: number, status: AppointmentStatus) => Promise<void>;
+	onStatusChange?: (
+		appointmentId: number,
+		status: AppointmentStatus,
+	) => Promise<void>;
 }
 
 export function AppointmentCard({
@@ -102,7 +104,7 @@ export function AppointmentCard({
 								<Baby className="h-4 w-4 text-emerald-400" />
 							)}
 							{isMinor && (
-								<span className="ml-1 text-xs text-gray-600">
+								<span className="ml-1 text-sm text-gray-600">
 									Mineur
 								</span>
 							)}

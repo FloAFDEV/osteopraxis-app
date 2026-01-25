@@ -15,7 +15,7 @@ import {
 	Users,
 	Receipt,
 	BarChart3,
-	ChevronRight
+	ChevronRight,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -52,22 +52,30 @@ export function Dashboard() {
 			try {
 				const [patients, invoices] = await Promise.all([
 					api.getPatients(),
-					api.getInvoices()
+					api.getInvoices(),
 				]);
 
 				// Trier par date de création et prendre les 5 derniers
 				const sortedPatients = [...patients]
-					.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+					.sort(
+						(a, b) =>
+							new Date(b.createdAt).getTime() -
+							new Date(a.createdAt).getTime(),
+					)
 					.slice(0, 5);
 
 				const sortedInvoices = [...invoices]
-					.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+					.sort(
+						(a, b) =>
+							new Date(b.createdAt).getTime() -
+							new Date(a.createdAt).getTime(),
+					)
 					.slice(0, 5);
 
 				setRecentPatients(sortedPatients);
 				setRecentInvoices(sortedInvoices);
 			} catch (err) {
-				console.error('Erreur chargement données récentes:', err);
+				console.error("Erreur chargement données récentes:", err);
 			} finally {
 				setLoadingRecent(false);
 			}
@@ -97,8 +105,12 @@ export function Dashboard() {
 	if (!isDemoMode && (!isAuthenticated || !user)) {
 		return (
 			<div className="flex flex-col items-center justify-center p-8 text-center">
-				<h2 className="text-xl font-semibold mb-2">Authentification requise</h2>
-				<p className="text-muted-foreground">Veuillez vous connecter pour accéder au tableau de bord.</p>
+				<h2 className="text-xl font-semibold mb-2">
+					Authentification requise
+				</h2>
+				<p className="text-muted-foreground">
+					Veuillez vous connecter pour accéder au tableau de bord.
+				</p>
 			</div>
 		);
 	}
@@ -139,35 +151,47 @@ export function Dashboard() {
 					{/* Actions principales - CTA sobres et cohérents */}
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 						<button
-							onClick={() => navigate('/patients/new')}
+							onClick={() => navigate("/patients/new")}
 							className="h-auto py-3 px-3 flex flex-col items-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-md transition-colors"
 						>
 							<UserPlus className="h-5 w-5" />
 							<div className="text-center">
-								<div className="font-medium text-xs">Nouveau patient</div>
-								<div className="text-xs text-slate-300">Ajouter un patient</div>
+								<div className="font-medium text-sm">
+									Nouveau patient
+								</div>
+								<div className="text-sm text-slate-300">
+									Ajouter un patient
+								</div>
 							</div>
 						</button>
 
 						<button
-							onClick={() => navigate('/appointments/new')}
+							onClick={() => navigate("/appointments/new")}
 							className="h-auto py-3 px-3 flex flex-col items-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-md transition-colors"
 						>
 							<Calendar className="h-5 w-5" />
 							<div className="text-center">
-								<div className="font-medium text-xs">Nouvelle séance</div>
-								<div className="text-xs text-slate-300">Planifier un RDV</div>
+								<div className="font-medium text-sm">
+									Nouvelle séance
+								</div>
+								<div className="text-sm text-slate-300">
+									Planifier un RDV
+								</div>
 							</div>
 						</button>
 
 						<button
-							onClick={() => navigate('/invoices/new')}
+							onClick={() => navigate("/invoices/new")}
 							className="h-auto py-3 px-3 flex flex-col items-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-md transition-colors"
 						>
 							<FileText className="h-5 w-5" />
 							<div className="text-center">
-								<div className="font-medium text-xs">Nouvelle facture</div>
-								<div className="text-xs text-slate-300">Créer une note d'honoraire</div>
+								<div className="font-medium text-sm">
+									Nouvelle facture
+								</div>
+								<div className="text-sm text-slate-300">
+									Créer une note d'honoraire
+								</div>
 							</div>
 						</button>
 					</div>
@@ -184,11 +208,12 @@ export function Dashboard() {
 										<BarChart3 className="h-4 w-4 text-slate-600 dark:text-slate-400" />
 									</div>
 									<div>
-										<p className="font-medium text-slate-700 dark:text-slate-200 text-xs">
+										<p className="font-medium text-slate-700 dark:text-slate-200 text-sm">
 											Statistiques & Analytics
 										</p>
-										<p className="text-xs text-slate-500 dark:text-slate-400">
-											Consultez vos graphiques et indicateurs
+										<p className="text-sm text-slate-500 dark:text-slate-400">
+											Consultez vos graphiques et
+											indicateurs
 										</p>
 									</div>
 								</div>
@@ -203,11 +228,13 @@ export function Dashboard() {
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-1.5">
 									<Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-									<CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-200">Prochains rendez-vous</CardTitle>
+									<CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">
+										Prochains rendez-vous
+									</CardTitle>
 								</div>
 								<Link
 									to="/schedule"
-									className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
+									className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
 								>
 									Voir le planning
 									<ChevronRight className="h-3 w-3" />
@@ -227,11 +254,13 @@ export function Dashboard() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-1.5">
 										<Users className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-										<CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-200">Patients récents</CardTitle>
+										<CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">
+											Patients récents
+										</CardTitle>
 									</div>
 									<Link
 										to="/patients"
-										className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
+										className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
 									>
 										Tous les patients
 										<ChevronRight className="h-3 w-3" />
@@ -242,17 +271,24 @@ export function Dashboard() {
 								{loadingRecent ? (
 									<div className="space-y-2">
 										{[1, 2, 3].map((i) => (
-											<div key={i} className="h-10 bg-muted rounded animate-pulse" />
+											<div
+												key={i}
+												className="h-10 bg-muted rounded animate-pulse"
+											/>
 										))}
 									</div>
 								) : recentPatients.length === 0 ? (
 									<div className="text-center py-4 text-muted-foreground">
 										<Users className="h-8 w-8 mx-auto mb-1.5 opacity-50" />
-										<p className="text-xs">Aucun patient pour le moment</p>
+										<p className="text-sm">
+											Aucun patient pour le moment
+										</p>
 										<Button
 											variant="link"
-											onClick={() => navigate('/patients/new')}
-											className="mt-1 text-xs"
+											onClick={() =>
+												navigate("/patients/new")
+											}
+											className="mt-1 text-sm"
 										>
 											Ajouter votre premier patient
 										</Button>
@@ -266,15 +302,19 @@ export function Dashboard() {
 												className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors"
 											>
 												<div className="flex items-center gap-2">
-													<div className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium">
-														{patient.firstName?.[0]}{patient.lastName?.[0]}
+													<div className="w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium">
+														{patient.firstName?.[0]}
+														{patient.lastName?.[0]}
 													</div>
 													<div>
-														<p className="font-medium text-xs">
-															{patient.firstName} {patient.lastName}
+														<p className="font-medium text-sm">
+															{patient.firstName}{" "}
+															{patient.lastName}
 														</p>
-														<p className="text-xs text-muted-foreground">
-															{patient.phone || patient.email || 'Pas de contact'}
+														<p className="text-sm text-muted-foreground">
+															{patient.phone ||
+																patient.email ||
+																"Pas de contact"}
 														</p>
 													</div>
 												</div>
@@ -292,11 +332,13 @@ export function Dashboard() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-1.5">
 										<Receipt className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-										<CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-200">Dernières factures</CardTitle>
+										<CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">
+											Dernières factures
+										</CardTitle>
 									</div>
 									<Link
 										to="/invoices"
-										className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
+										className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 flex items-center gap-0.5"
 									>
 										Toutes les factures
 										<ChevronRight className="h-3 w-3" />
@@ -307,17 +349,24 @@ export function Dashboard() {
 								{loadingRecent ? (
 									<div className="space-y-2">
 										{[1, 2, 3].map((i) => (
-											<div key={i} className="h-10 bg-muted rounded animate-pulse" />
+											<div
+												key={i}
+												className="h-10 bg-muted rounded animate-pulse"
+											/>
 										))}
 									</div>
 								) : recentInvoices.length === 0 ? (
 									<div className="text-center py-4 text-muted-foreground">
 										<Receipt className="h-8 w-8 mx-auto mb-1.5 opacity-50" />
-										<p className="text-xs">Aucune facture pour le moment</p>
+										<p className="text-sm">
+											Aucune facture pour le moment
+										</p>
 										<Button
 											variant="link"
-											onClick={() => navigate('/invoices/new')}
-											className="mt-1 text-xs"
+											onClick={() =>
+												navigate("/invoices/new")
+											}
+											className="mt-1 text-sm"
 										>
 											Créer votre première facture
 										</Button>
@@ -331,27 +380,42 @@ export function Dashboard() {
 												className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors"
 											>
 												<div className="flex items-center gap-2">
-													<div className={`px-1.5 py-0.5 rounded text-xs font-medium ${
-														invoice.paymentStatus === 'PAID'
-															? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-															: invoice.paymentStatus === 'PENDING'
-															? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
-															: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-													}`}>
-														{invoice.paymentStatus === 'PAID' ? 'Payée' :
-														 invoice.paymentStatus === 'PENDING' ? 'En attente' : 'Annulée'}
+													<div
+														className={`px-1.5 py-0.5 rounded text-sm font-medium ${
+															invoice.paymentStatus ===
+															"PAID"
+																? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+																: invoice.paymentStatus ===
+																	  "PENDING"
+																	? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+																	: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+														}`}
+													>
+														{invoice.paymentStatus ===
+														"PAID"
+															? "Payée"
+															: invoice.paymentStatus ===
+																  "PENDING"
+																? "En attente"
+																: "Annulée"}
 													</div>
 													<div>
-														<p className="font-medium text-xs">
-															{invoice.invoiceNumber}
+														<p className="font-medium text-sm">
+															{
+																invoice.invoiceNumber
+															}
 														</p>
-														<p className="text-xs text-muted-foreground">
-															{new Date(invoice.date).toLocaleDateString('fr-FR')}
+														<p className="text-sm text-muted-foreground">
+															{new Date(
+																invoice.date,
+															).toLocaleDateString(
+																"fr-FR",
+															)}
 														</p>
 													</div>
 												</div>
 												<div className="flex items-center gap-1.5">
-													<span className="font-semibold text-xs">
+													<span className="font-semibold text-sm">
 														{invoice.amount}€
 													</span>
 													<ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />

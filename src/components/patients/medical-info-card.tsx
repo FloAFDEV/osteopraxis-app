@@ -26,10 +26,10 @@ export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 						({ label, value, showSeparatorAfter }, index) => (
 							<div key={index}>
 								<div>
-									<dt className="text-xs md:text-sm font-medium text-muted-foreground leading-tight">
+									<dt className="text-sm md:text-sm font-medium text-muted-foreground leading-tight">
 										{label}
 									</dt>
-									<dd className="mt-0.5 md:mt-1 text-xs md:text-sm leading-tight">
+									<dd className="mt-0.5 md:mt-1 text-sm md:text-sm leading-tight">
 										{value || "Non spécifié"}
 									</dd>
 								</div>
@@ -37,7 +37,7 @@ export function MedicalInfoCard({ title, items, icon }: MedicalInfoCardProps) {
 									<Separator className="my-2 md:my-3" />
 								)}
 							</div>
-						)
+						),
 					)}
 				</dl>
 			</CardContent>

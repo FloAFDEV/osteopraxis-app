@@ -25,7 +25,7 @@ export function InfoBubble({
 	if (!value) return null;
 
 	const sizeClasses = {
-		sm: "text-xs px-2 py-1",
+		sm: "text-sm px-2 py-1",
 		md: "text-sm px-3 py-2",
 		lg: "text-base px-4 py-3",
 	};
@@ -48,12 +48,12 @@ export function InfoBubble({
 				"max-w-xs",
 				sizeClasses[size],
 				variantClasses[variant],
-				onClick ? "cursor-pointer hover:shadow-md hover:scale-105" : ""
+				onClick ? "cursor-pointer hover:shadow-md hover:scale-105" : "",
 			)}
 		>
 			<Icon className="h-4 w-4 flex-shrink-0" />
 			<div className="flex flex-col min-w-0">
-				<span className="font-medium text-xs opacity-75">{label}</span>
+				<span className="font-medium text-sm opacity-75">{label}</span>
 				<span className="font-semibold truncate">{value}</span>
 			</div>
 		</div>

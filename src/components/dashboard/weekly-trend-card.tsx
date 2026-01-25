@@ -19,7 +19,7 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 	// Calculate weekly trend percentage
 	const currentWeekTotal = data.consultationsLast7Days.reduce(
 		(sum, day) => sum + day.consultations,
-		0
+		0,
 	);
 	const weeklyAverage = currentWeekTotal / 7;
 
@@ -28,30 +28,30 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 		weeklyAverage > data.averageConsultationsPerDay
 			? "text-green-500"
 			: weeklyAverage < data.averageConsultationsPerDay
-			? "text-red-500"
-			: "text-gray-500";
+				? "text-red-500"
+				: "text-gray-500";
 
 	const TrendIcon =
 		weeklyAverage > data.averageConsultationsPerDay
 			? TrendingUp
 			: weeklyAverage < data.averageConsultationsPerDay
-			? TrendingDown
-			: TrendingUp;
+				? TrendingDown
+				: TrendingUp;
 
 	const trendPercentage =
 		data.averageConsultationsPerDay > 0
 			? Math.round(
 					((weeklyAverage - data.averageConsultationsPerDay) /
 						data.averageConsultationsPerDay) *
-						100
-			  )
+						100,
+				)
 			: 0;
 
 	return (
 		<Card
 			className={cn(
 				"overflow-hidden rounded-lg shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-[2px]",
-				"border-t-4 border-orange-500"
+				"border-t-4 border-orange-500",
 			)}
 		>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -59,7 +59,7 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 					<CardTitle className="text-sm font-medium">
 						Tendance 7 jours
 					</CardTitle>
-					<p className="text-xs text-muted-foreground mt-0.5">
+					<p className="text-sm text-muted-foreground mt-0.5">
 						Évolution hebdomadaire
 					</p>
 				</div>
@@ -79,7 +79,7 @@ export function WeeklyTrendCard({ data }: WeeklyTrendCardProps) {
 					</div>
 				</div>
 
-				<p className="text-xs text-orange-500">
+				<p className="text-sm text-orange-500">
 					Moyenne: {weeklyAverage.toFixed(1)} consultations/jour
 				</p>
 			</CardContent>

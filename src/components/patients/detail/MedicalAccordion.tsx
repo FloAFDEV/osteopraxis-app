@@ -36,25 +36,25 @@ interface MedicalAccordionProps {
 
 const labelColorClasses: Record<string, string> = {
 	"Antécédents de traumatismes": "text-red-400",
-	"Traumatismes": "text-red-400",
-	"Fractures": "text-yellow-600",
-	"Chirurgies": "text-sky-700",
+	Traumatismes: "text-red-400",
+	Fractures: "text-yellow-600",
+	Chirurgies: "text-sky-700",
 	"Antécédents médicaux familiaux": "text-purple-600",
 	"Antécédents cardiaques": "text-red-600",
 	"Antécédents pulmonaires": "text-blue-700",
-	"Rhumatologie": "text-orange-600",
-	"Scoliose": "text-yellow-700",
+	Rhumatologie: "text-orange-600",
+	Scoliose: "text-yellow-700",
 	// Ajoute d'autres si besoin pour nouveaux champs
 };
 
 const categoryTitleColorClasses: Record<string, string> = {
-  "general": "text-red-700",
-  "lifestyle": "text-green-700",
-  "sensory": "text-purple-700",
-  "digestive": "text-orange-700",
-  "reproductive": "text-pink-700",
-  "pediatric": "text-sky-700",
-  "additional": "text-gray-700",
+	general: "text-red-700",
+	lifestyle: "text-green-700",
+	sensory: "text-purple-700",
+	digestive: "text-orange-700",
+	reproductive: "text-pink-700",
+	pediatric: "text-sky-700",
+	additional: "text-gray-700",
 };
 
 const getIconColor = (category?: string) => {
@@ -80,19 +80,17 @@ const getIconColor = (category?: string) => {
 
 const getDefaultValue = (sections: MedicalSectionProps[]) => {
 	const highPrioritySections = sections
-		.filter(
-			(section) => section.defaultOpen || section.priority === "high"
-		)
+		.filter((section) => section.defaultOpen || section.priority === "high")
 		.map((_, index) => `section-${index}`);
 	return highPrioritySections;
 };
 
 const getImportanceLevel = (section: MedicalSectionProps) => {
 	const criticalItems = section.items.filter(
-		(item) => item.isCritical && item.value
+		(item) => item.isCritical && item.value,
 	);
 	const importantItems = section.items.filter(
-		(item) => item.isImportant && !item.isCritical && item.value
+		(item) => item.isImportant && !item.isCritical && item.value,
 	);
 	if (criticalItems.length > 0) {
 		return {
@@ -149,7 +147,10 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 				{sections.map((section, index) => {
 					const Icon = section.icon;
 					const iconColor = getIconColor(section.category);
-					const titleColor = categoryTitleColorClasses[section.category ?? "general"] || "";
+					const titleColor =
+						categoryTitleColorClasses[
+							section.category ?? "general"
+						] || "";
 
 					return (
 						<AccordionItem
@@ -161,10 +162,14 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 								section.title.toLowerCase().replace(/\s+/g, "-")
 							}
 						>
-							<AccordionTrigger className={`px-4 py-3 hover:no-underline bg-gray-50/80 dark:bg-gray-900/30 rounded-t-lg ${titleColor}`}>
+							<AccordionTrigger
+								className={`px-4 py-3 hover:no-underline bg-gray-50/80 dark:bg-gray-900/30 rounded-t-lg ${titleColor}`}
+							>
 								<div className="flex items-center gap-3 text-left w-full">
 									<Icon className={`h-5 w-5 ${iconColor}`} />
-									<span className={`font-medium flex-1 ${titleColor}`}>
+									<span
+										className={`font-medium flex-1 ${titleColor}`}
+									>
 										{section.title}
 									</span>
 									{/* plus de badge global section ici */}
@@ -175,9 +180,12 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 									{section.items.map((item, itemIndex) => {
 										if (!item.value) return null;
 
-										const valueFilled = isValueFilled(item.value);
+										const valueFilled = isValueFilled(
+											item.value,
+										);
 
-										let dtClass = "text-sm font-medium text-muted-foreground";
+										let dtClass =
+											"text-sm font-medium text-muted-foreground";
 										let badge = null;
 										// Afficher le badge critique/rouge UNIQUEMENT si la valeur est bien renseignée
 										if (item.isCritical && valueFilled) {
@@ -185,7 +193,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 											badge = (
 												<Badge
 													variant="destructive"
-													className="ml-2 text-xs"
+													className="ml-2 text-sm"
 												>
 													Critique
 												</Badge>
@@ -195,7 +203,7 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 											badge = (
 												<Badge
 													variant="warning"
-													className="ml-2 text-xs"
+													className="ml-2 text-sm"
 												>
 													Important
 												</Badge>
@@ -207,7 +215,8 @@ export function MedicalAccordion({ sections }: MedicalAccordionProps) {
 											<div
 												key={itemIndex}
 												className={
-													item.isCritical && valueFilled
+													item.isCritical &&
+													valueFilled
 														? `p-3 rounded border-l-4 bg-red-50 dark:bg-red-900/10 border-red-500`
 														: item.isImportant
 															? "p-3 rounded border-l-4 bg-yellow-50 dark:bg-amber-900/10 border-yellow-500"

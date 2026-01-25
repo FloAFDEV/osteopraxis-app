@@ -61,7 +61,10 @@ const PatientDetailPage = () => {
 	const patientId = isDemoMode ? id : parseInt(id, 10);
 
 	// Validation : en mode réel, vérifier que c'est un number valide
-	if (!isDemoMode && (isNaN(patientId as number) || (patientId as number) <= 0)) {
+	if (
+		!isDemoMode &&
+		(isNaN(patientId as number) || (patientId as number) <= 0)
+	) {
 		return (
 			<Layout>
 				<div className="flex flex-col justify-center items-center h-full">
@@ -103,26 +106,26 @@ const PatientDetailPage = () => {
 		() =>
 			appointments
 				.filter(
-					(appointment) => new Date(appointment.date) >= new Date()
+					(appointment) => new Date(appointment.date) >= new Date(),
 				)
 				.sort(
 					(a, b) =>
-						new Date(a.date).getTime() - new Date(b.date).getTime()
+						new Date(a.date).getTime() - new Date(b.date).getTime(),
 				),
-		[appointments]
+		[appointments],
 	);
 
 	const pastAppointments = useMemo(
 		() =>
 			appointments
 				.filter(
-					(appointment) => new Date(appointment.date) < new Date()
+					(appointment) => new Date(appointment.date) < new Date(),
 				)
 				.sort(
 					(a, b) =>
-						new Date(b.date).getTime() - new Date(a.date).getTime()
+						new Date(b.date).getTime() - new Date(a.date).getTime(),
 				),
-		[appointments]
+		[appointments],
 	);
 
 	useEffect(() => {
@@ -169,7 +172,7 @@ const PatientDetailPage = () => {
 		try {
 			await updateAppointmentStatusOptimistically(
 				appointmentId,
-				"CANCELED"
+				"CANCELED",
 			);
 			toast.success("La séance a été annulée avec succès");
 		} catch (error) {
@@ -180,7 +183,7 @@ const PatientDetailPage = () => {
 
 	const handleUpdateAppointmentStatus = async (
 		appointmentId: number,
-		status: AppointmentStatus
+		status: AppointmentStatus,
 	) => {
 		try {
 			await updateAppointmentStatusOptimistically(appointmentId, status);
@@ -262,7 +265,7 @@ const PatientDetailPage = () => {
 				appointments,
 				invoices,
 				osteopath,
-				cabinet
+				cabinet,
 			);
 
 			toast.success("Dossier patient exporté avec succès");
@@ -312,7 +315,7 @@ const PatientDetailPage = () => {
 						disabled={isExporting}
 						variant="secondary"
 						size="sm"
-						className="self-start px-2 py-1 text-xs rounded-full flex items-center gap-1"
+						className="self-start px-2 py-1 text-sm rounded-full flex items-center gap-1"
 					>
 						{isExporting ? (
 							<Loader2 className="h-3 w-3 animate-spin" />
@@ -343,9 +346,11 @@ const PatientDetailPage = () => {
 							value={
 								upcomingAppointments[0]
 									? format(
-											new Date(upcomingAppointments[0].date),
-											"dd/MM/yyyy"
-									  )
+											new Date(
+												upcomingAppointments[0].date,
+											),
+											"dd/MM/yyyy",
+										)
 									: "Aucune"
 							}
 							icon={<Calendar className="h-5 w-5" />}
@@ -357,8 +362,8 @@ const PatientDetailPage = () => {
 								pastAppointments[0]
 									? format(
 											new Date(pastAppointments[0].date),
-											"dd/MM/yyyy"
-									  )
+											"dd/MM/yyyy",
+										)
 									: "Aucune"
 							}
 							icon={<History className="h-5 w-5" />}
@@ -451,8 +456,8 @@ const PatientDetailPage = () => {
 									onPatientUpdated={handlePatientUpdated}
 									selectedCabinetId={parseInt(
 										localStorage.getItem(
-											"selectedCabinetId"
-										) || "1"
+											"selectedCabinetId",
+										) || "1",
 									)}
 								/>
 							</TabsContent>

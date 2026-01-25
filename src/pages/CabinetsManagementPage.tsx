@@ -40,10 +40,14 @@ import { toast } from "sonner";
 const CabinetsManagementPage = () => {
 	const navigate = useNavigate();
 	const { user } = useAuth();
-	const { data: cabinets = [], isLoading: loading, invalidateAndRefetch } = useCabinets();
+	const {
+		data: cabinets = [],
+		isLoading: loading,
+		invalidateAndRefetch,
+	} = useCabinets();
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [cabinetToDelete, setCabinetToDelete] = useState<Cabinet | null>(
-		null
+		null,
 	);
 	const [osteopathData, setOsteopathData] = useState<Record<number, any>>({});
 
@@ -62,7 +66,7 @@ const CabinetsManagementPage = () => {
 		} catch (error) {
 			console.error("Erreur lors de la suppression du cabinet:", error);
 			toast.error(
-				"Impossible de supprimer le cabinet. Veuillez réessayer."
+				"Impossible de supprimer le cabinet. Veuillez réessayer.",
 			);
 		} finally {
 			setDeleteModalOpen(false);
@@ -132,7 +136,7 @@ const CabinetsManagementPage = () => {
 			} catch (error) {
 				console.error(
 					"Erreur lors de la récupération des données ostéopathes:",
-					error
+					error,
 				);
 			}
 		};
@@ -217,7 +221,7 @@ const CabinetsManagementPage = () => {
 				</div>
 				<div className="container mx-auto px-6 py-8">
 					{/* Message de bienvenue pour nouveaux utilisateurs */}
-					<WelcomeMessage 
+					<WelcomeMessage
 						hasCabinets={cabinets.length > 0}
 						hasPatients={false} // TODO: Ajouter le check des patients si nécessaire
 						userName={user?.firstName}
@@ -292,7 +296,7 @@ const CabinetsManagementPage = () => {
 													{isOwner(cabinet) && (
 														<Badge
 															variant="outline"
-															className="text-xs bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
+															className="text-sm bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
 														>
 															Propriétaire
 														</Badge>
@@ -382,7 +386,7 @@ const CabinetsManagementPage = () => {
 																	>
 																		<Badge
 																			variant="outline"
-																			className="text-xs bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
+																			className="text-sm bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300"
 																		>
 																			SIRET
 																		</Badge>
@@ -422,7 +426,7 @@ const CabinetsManagementPage = () => {
 																	>
 																		<Badge
 																			variant="outline"
-																			className="text-xs bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300"
+																			className="text-sm bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300"
 																		>
 																			RPPS
 																		</Badge>
@@ -463,7 +467,7 @@ const CabinetsManagementPage = () => {
 																	>
 																		<Badge
 																			variant="outline"
-																			className="text-xs bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
+																			className="text-sm bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300"
 																		>
 																			APE
 																		</Badge>

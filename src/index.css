@@ -3,240 +3,234 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Classes utilitaires pour l'accessibilité */
+/* ============================================================
+   ACCESSIBILITÉ – UTILITAIRES
+   ============================================================ */
+
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
 
 .sr-only:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: inherit;
-  margin: inherit;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-
-/* Styles pour contraste élevé */
-.high-contrast {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 0%;
-  --primary: 210 100% 50%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84% 50%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 89%;
-  --input: 0 0% 89%;
-  --ring: 210 100% 50%;
-}
-
-/* Styles pour mouvement réduit */
-.reduced-motion *,
-.reduced-motion *::before,
-.reduced-motion *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
-}
-
-/* Focus discret global - suppression des focus rings bleus */
-*:focus {
-  outline: none !important;
-}
-
-*:focus-visible {
-  outline: 1px solid hsl(var(--border)) !important;
-  outline-offset: 0 !important;
-  box-shadow: none !important;
-}
-
-/* Amélioration de la lisibilité */
-.text-readable {
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-}
-
-/* Animation hover pour les cartes - subtile */
-.hover-scale {
-  transition: box-shadow 0.15s ease-in-out;
-}
-
-.hover-scale:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-/* Dark mode support pour hover-scale */
-.dark .hover-scale:hover {
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.04);
-}
-
-/* Messages d'erreur */
-.error-message {
-  color: hsl(var(--destructive));
-  font-weight: 500;
-  border-left: 2px solid hsl(var(--destructive));
-  padding-left: 0.5rem;
-  font-size: 0.75rem;
-}
-
-/* Indicateur de chargement accessible */
-.loading-indicator {
-  position: relative;
-}
-
-.loading-indicator::after {
-  content: "Chargement en cours...";
-  position: absolute;
-  left: -9999px;
-  top: -9999px;
+	position: static;
+	width: auto;
+	height: auto;
+	padding: inherit;
+	margin: inherit;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
 }
 
 /* Skip links */
 .skip-link {
-  position: absolute;
-  top: -40px;
-  left: 6px;
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  padding: 6px;
-  text-decoration: none;
-  border-radius: 4px;
-  z-index: 1000;
-  transition: top 0.2s;
-  font-size: 0.75rem;
+	position: absolute;
+	top: -40px;
+	left: 6px;
+	background: hsl(var(--primary));
+	color: hsl(var(--primary-foreground));
+	padding: 6px;
+	text-decoration: none;
+	border-radius: 4px;
+	z-index: 1000;
+	transition: top 0.2s;
+	font-size: 0.75rem;
 }
 
 .skip-link:focus {
-  top: 6px;
+	top: 6px;
 }
+
+/* ============================================================
+   CONTRASTE ÉLEVÉ
+   ============================================================ */
+
+.high-contrast {
+	--background: 0 0% 100%;
+	--foreground: 0 0% 0%;
+	--primary: 210 100% 50%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 0 0% 96%;
+	--secondary-foreground: 0 0% 9%;
+	--muted: 0 0% 96%;
+	--muted-foreground: 0 0% 45%;
+	--accent: 0 0% 96%;
+	--accent-foreground: 0 0% 9%;
+	--destructive: 0 84% 50%;
+	--destructive-foreground: 0 0% 100%;
+	--border: 0 0% 89%;
+	--input: 0 0% 89%;
+	--ring: 210 100% 50%;
+}
+
+/* ============================================================
+   RÉDUCTION DES MOUVEMENTS
+   ============================================================ */
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}
+
+/* ============================================================
+   FOCUS – DISCRET MAIS ACCESSIBLE
+   ============================================================ */
+
+*:focus {
+	outline: none !important;
+}
+
+*:focus-visible {
+	outline: 1px solid hsl(var(--border)) !important;
+	outline-offset: 0 !important;
+	box-shadow: none !important;
+}
+
+/* ============================================================
+   LISIBILITÉ & MICRO-INTERACTIONS
+   ============================================================ */
+
+.text-readable {
+	line-height: 1.5;
+	letter-spacing: 0.01em;
+}
+
+.hover-scale {
+	transition: box-shadow 0.15s ease-in-out;
+}
+
+.hover-scale:hover {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .hover-scale:hover {
+	box-shadow: 0 2px 8px rgba(255, 255, 255, 0.04);
+}
+
+/* Messages d'erreur */
+.error-message {
+	color: hsl(var(--destructive));
+	font-weight: 500;
+	border-left: 2px solid hsl(var(--destructive));
+	padding-left: 0.5rem;
+	font-size: 0.75rem;
+}
+
+/* Chargement accessible */
+.loading-indicator {
+	position: relative;
+}
+
+.loading-indicator::after {
+	content: "Chargement en cours...";
+	position: absolute;
+	left: -9999px;
+	top: -9999px;
+}
+
+/* ============================================================
+   VARIABLES DE THÈME
+   ============================================================ */
 
 @layer base {
 	:root {
-		/* Background & Surface Colors */
 		--background: 210 20% 98%;
 		--foreground: 215 25% 15%;
 
-		/* Muted Colors */
 		--muted: 210 15% 95%;
 		--muted-foreground: 215 15% 45%;
 
-		/* Popover Colors */
 		--popover: 0 0% 100%;
 		--popover-foreground: 215 25% 15%;
 
-		/* Card Colors */
 		--card: 0 0% 100%;
 		--card-foreground: 215 25% 15%;
 
-		/* Border & Input - Discret */
 		--border: 215 15% 88%;
 		--input: 215 15% 88%;
 
-		/* Primary Colors - Slate professionnel */
 		--primary: 215 20% 40%;
 		--primary-foreground: 0 0% 100%;
 
-		/* Secondary Colors - Neutres */
 		--secondary: 210 15% 93%;
 		--secondary-foreground: 215 20% 30%;
 
-		/* Accent Colors - Slate discret */
 		--accent: 215 15% 90%;
 		--accent-foreground: 215 20% 25%;
 
-		/* Destructive Colors - Rouge désaturé */
 		--destructive: 0 55% 50%;
 		--destructive-foreground: 0 0% 100%;
 
-		/* Success Colors */
 		--success: 145 45% 40%;
 		--success-foreground: 0 0% 100%;
 
-		/* Warning Colors */
 		--warning: 40 70% 50%;
 		--warning-foreground: 40 70% 15%;
 
-		/* Ring & Focus - Très discret */
 		--ring: 215 15% 70%;
-
 		--radius: 0.375rem;
 	}
 
 	.dark {
-		/* Dark Background & Surface Colors */
 		--background: 220 15% 10%;
 		--foreground: 210 15% 95%;
 
-		/* Dark Muted Colors */
 		--muted: 220 12% 16%;
 		--muted-foreground: 215 12% 60%;
 
-		/* Dark Popover Colors */
 		--popover: 220 15% 12%;
 		--popover-foreground: 210 15% 95%;
 
-		/* Dark Card Colors */
 		--card: 220 12% 13%;
 		--card-foreground: 210 15% 95%;
 
-		/* Dark Border & Input */
 		--border: 220 12% 22%;
 		--input: 220 12% 22%;
 
-		/* Dark Primary Colors */
 		--primary: 215 18% 55%;
 		--primary-foreground: 220 15% 10%;
 
-		/* Dark Secondary Colors */
 		--secondary: 220 12% 18%;
 		--secondary-foreground: 215 12% 70%;
 
-		/* Dark Accent Colors */
 		--accent: 220 12% 20%;
 		--accent-foreground: 210 15% 90%;
 
-		/* Dark Destructive Colors */
 		--destructive: 0 55% 55%;
 		--destructive-foreground: 220 15% 10%;
 
-		/* Dark Success Colors */
 		--success: 145 45% 45%;
 		--success-foreground: 220 15% 10%;
 
-		/* Dark Warning Colors */
 		--warning: 40 70% 55%;
 		--warning-foreground: 40 70% 15%;
 
-		/* Dark Ring & Focus */
 		--ring: 215 15% 50%;
-
 		--radius: 0.375rem;
 	}
 }
+
+/* ============================================================
+   BASE TYPOGRAPHIQUE – AMÉLIORÉE
+   ============================================================ */
 
 @layer base {
 	* {
 		@apply border-border;
 	}
 
-	/* Typographie desktop-first: base 14px, dense, professionnelle */
 	html {
 		font-size: 14px;
 		-webkit-font-smoothing: antialiased;
@@ -245,27 +239,73 @@
 
 	body {
 		@apply bg-background text-foreground;
-		font-feature-settings: "rlig" 1, "calt" 1;
+		font-feature-settings:
+			"rlig" 1,
+			"calt" 1;
 		line-height: 1.5;
 	}
 
-	/* Échelle typographique compacte et uniforme */
-	h1 { @apply text-xl font-semibold tracking-tight; }
-	h2 { @apply text-lg font-semibold tracking-tight; }
-	h3 { @apply text-base font-medium; }
-	h4 { @apply text-sm font-medium; }
-	h5, h6 { @apply text-xs font-medium; }
+	/* Hiérarchie titres – lisibilité renforcée */
+	h1 {
+		@apply text-xl font-semibold tracking-tight;
+	}
+	h2 {
+		@apply text-lg font-semibold tracking-tight;
+	}
+	h3 {
+		@apply text-base font-medium;
+	}
+	h4 {
+		@apply text-base font-medium;
+	}
+	h5,
+	h6 {
+		@apply text-sm font-medium;
+	}
+
+	/* Texte métier : jamais en xs */
+	.patient-name,
+	.patient-label,
+	.medical-data,
+	.planning-item,
+	.data-key {
+		@apply text-sm font-medium;
+	}
+
+	/* UI uniquement (badges, méta, statuts) */
+	.ui-meta,
+	.badge,
+	.chip,
+	.tooltip,
+	.table-meta {
+		@apply text-sm;
+	}
+
+	/* Tableaux lisibles */
+	table {
+		font-size: 0.875rem;
+		line-height: 1.4;
+	}
+
+	th {
+		font-weight: 500;
+	}
+
+	td {
+		vertical-align: middle;
+	}
 }
 
-/* Add page break styles for printing */
+/* ============================================================
+   PRINT
+   ============================================================ */
+
 @media print {
-	/* Force dark mode off for printing */
 	* {
 		print-color-adjust: exact !important;
 		-webkit-print-color-adjust: exact !important;
 	}
 
-	/* Reset body styles for print */
 	body {
 		background: white !important;
 		color: black !important;
@@ -273,21 +313,18 @@
 		line-height: 1.4;
 	}
 
-	/* Hide elements that shouldn't appear in print */
-	.print\\:hidden {
+	.print\:hidden {
 		display: none !important;
 	}
 
-	/* Remove padding and margins for print main content */
-	.print\\:p-0 {
+	.print\:p-0 {
 		padding: 0 !important;
 	}
 
-	.print\\:m-0 {
+	.print\:m-0 {
 		margin: 0 !important;
 	}
 
-	/* Page break controls */
 	.page-break-after {
 		page-break-after: always;
 		break-after: page;
@@ -298,18 +335,11 @@
 		break-before: page;
 	}
 
-	/* Ensure invoice content fits on one page */
-	.print\\:min-h-max {
-		min-height: auto !important;
-	}
-
-	/* Optimize print layout */
 	@page {
 		margin: 0.5in;
 		size: A4;
 	}
 
-	/* Ensure proper scaling */
 	html,
 	body {
 		width: 210mm;
@@ -317,17 +347,19 @@
 	}
 }
 
-/* Privacy blur effects */
+/* ============================================================
+   CONFIDENTIALITÉ & DONNÉES
+   ============================================================ */
+
 .privacy-blur {
 	filter: blur(4px);
 	transition: filter 0.15s ease-in-out;
 }
 
 .privacy-blur:hover {
-	filter: blur(0px);
+	filter: blur(0);
 }
 
-/* Currency amount styling */
 .currency-amount {
 	font-size: 0.9375rem;
 	font-weight: 600;

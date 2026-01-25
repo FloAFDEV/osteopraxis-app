@@ -30,7 +30,7 @@ export function AppointmentsOverview({
 		Appointment[]
 	>([]);
 	const [nextAppointment, setNextAppointment] = useState<Appointment | null>(
-		null
+		null,
 	);
 	const [patients, setPatients] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export function AppointmentsOverview({
 			})
 			.sort(
 				(a, b) =>
-					parseISO(a.date).getTime() - parseISO(b.date).getTime()
+					parseISO(a.date).getTime() - parseISO(b.date).getTime(),
 			);
 
 		// Séparer le prochain rendez-vous des autres rendez-vous à venir
@@ -81,8 +81,14 @@ export function AppointmentsOverview({
 					api.getPatients(),
 				]);
 
-				console.log('📅 [AppointmentsOverview] Appointments chargés:', appointmentsData.length);
-				console.log('👥 [AppointmentsOverview] Patients chargés:', patientsData.length);
+				console.log(
+					"📅 [AppointmentsOverview] Appointments chargés:",
+					appointmentsData.length,
+				);
+				console.log(
+					"👥 [AppointmentsOverview] Patients chargés:",
+					patientsData.length,
+				);
 
 				setAllAppointments(appointmentsData);
 				setPatients(patientsData);
@@ -91,7 +97,7 @@ export function AppointmentsOverview({
 			} catch (error) {
 				console.error(
 					"Erreur lors de la récupération des rendez-vous:",
-					error
+					error,
 				);
 				setLoading(false);
 			}
@@ -114,14 +120,24 @@ export function AppointmentsOverview({
 	const handleAppointmentClick = (appointmentId: number | string) => {
 		try {
 			// Fix: Assurons-nous que l'ID est valide (0 est invalide aussi!)
-			if (!appointmentId || appointmentId === 0 || appointmentId === '0') {
-				console.error('[AppointmentsOverview] ID invalide:', appointmentId);
+			if (
+				!appointmentId ||
+				appointmentId === 0 ||
+				appointmentId === "0"
+			) {
+				console.error(
+					"[AppointmentsOverview] ID invalide:",
+					appointmentId,
+				);
 				toast.error("ID de rendez-vous invalide");
 				return;
 			}
 
 			// Log pour debug
-			console.log('[AppointmentsOverview] Navigation vers RDV:', appointmentId);
+			console.log(
+				"[AppointmentsOverview] Navigation vers RDV:",
+				appointmentId,
+			);
 
 			// ✅ Navigation vers rendez-vous
 
@@ -130,7 +146,7 @@ export function AppointmentsOverview({
 
 			// Afficher un toast pour confirmer l'action
 			toast.info(
-				`Chargement des détails du rendez-vous #${appointmentId}`
+				`Chargement des détails du rendez-vous #${appointmentId}`,
 			);
 		} catch (error) {
 			console.error("Erreur lors de la navigation:", error);
@@ -174,11 +190,14 @@ export function AppointmentsOverview({
 	const renderAppointmentItem = (
 		appointment: Appointment,
 		isHighlighted = false,
-		isLastItem = false
+		isLastItem = false,
 	) => {
 		// Validation: ignorer les appointments sans ID valide
 		if (!appointment?.id || appointment.id === 0) {
-			console.warn('[AppointmentsOverview] Appointment sans ID valide:', appointment);
+			console.warn(
+				"[AppointmentsOverview] Appointment sans ID valide:",
+				appointment,
+			);
 			return null;
 		}
 
@@ -196,11 +215,13 @@ export function AppointmentsOverview({
 					<div className="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center">
 						<User
 							className={`h-6 w-6 ${
-								patient?.gender === "F" || patient?.gender === "Femme"
+								patient?.gender === "F" ||
+								patient?.gender === "Femme"
 									? "text-pink-500"
-									: patient?.gender === "M" || patient?.gender === "Homme"
-									? "text-blue-500"
-									: "text-gray-500"
+									: patient?.gender === "M" ||
+										  patient?.gender === "Homme"
+										? "text-blue-500"
+										: "text-gray-500"
 							}`}
 						/>
 					</div>
@@ -210,11 +231,13 @@ export function AppointmentsOverview({
 					<Link
 						to={`/patients/${appointment.patientId}`}
 						className={`font-medium hover:underline text-base truncate inline-flex items-center ${
-							patient?.gender === "F" || patient?.gender === "Femme"
+							patient?.gender === "F" ||
+							patient?.gender === "Femme"
 								? "text-pink-700 dark:text-pink-400"
-								: patient?.gender === "M" || patient?.gender === "Homme"
-								? "text-blue-700 dark:text-blue-400"
-								: "text-slate-800 dark:text-white"
+								: patient?.gender === "M" ||
+									  patient?.gender === "Homme"
+									? "text-blue-700 dark:text-blue-400"
+									: "text-slate-800 dark:text-white"
 						}`}
 					>
 						{patient
@@ -231,11 +254,11 @@ export function AppointmentsOverview({
 						{appointment.reason}
 					</p>
 					<div className="mt-2 flex flex-wrap gap-3">
-						<div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+						<div className="flex items-center text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
 							<Clock className="h-3 w-3 text-blue-500 mr-1" />
 							<span>{format(appointmentDate, "HH:mm")}</span>
 						</div>
-						<div className="flex items-center text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+						<div className="flex items-center text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
 							<Calendar className="h-3 w-3 text-purple-500 mr-1" />
 							<span>
 								{format(appointmentDate, "dd MMM yyyy", {
@@ -244,17 +267,17 @@ export function AppointmentsOverview({
 							</span>
 						</div>
 						{isToday(appointmentDate) && (
-							<Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs font-normal">
+							<Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-sm font-normal">
 								Aujourd'hui
 							</Badge>
 						)}
 						{isHighlighted && !isToday(appointmentDate) && (
-							<Badge className="bg-blue-100 hover:bg-blue-200 transition-colors duration-150 ease-in text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-normal">
+							<Badge className="bg-blue-100 hover:bg-blue-200 transition-colors duration-150 ease-in text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-sm font-normal">
 								Prochain
 							</Badge>
 						)}
 						{appointment.status === "COMPLETED" && (
-							<Badge className="bg-amber-100 hover:bg-amber-200 transition-colors duration-150 ease-in text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-normal">
+							<Badge className="bg-amber-100 hover:bg-amber-200 transition-colors duration-150 ease-in text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-sm font-normal">
 								Terminé
 							</Badge>
 						)}
@@ -263,14 +286,14 @@ export function AppointmentsOverview({
 				<div className="ml-2 flex gap-2">
 					<button
 						onClick={() => handleAppointmentClick(appointment.id)}
-						className="px-3 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-sky-700 dark:hover:bg-sky-800 dark:text-white text-blue-600 rounded text-xs font-medium transition-colors"
+						className="px-3 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-sky-700 dark:hover:bg-sky-800 dark:text-white text-blue-600 rounded text-sm font-medium transition-colors"
 					>
 						Détails
 					</button>
 					{appointment.status === "COMPLETED" && (
 						<button
 							onClick={() => handleCreateInvoice(appointment.id)}
-							className="px-3 py-1 bg-green-50 hover:bg-green-100 dark:bg-green-700 dark:hover:bg-green-800 dark:text-white text-green-600 rounded text-xs font-medium transition-colors flex items-center gap-1"
+							className="px-3 py-1 bg-green-50 hover:bg-green-100 dark:bg-green-700 dark:hover:bg-green-800 dark:text-white text-green-600 rounded text-sm font-medium transition-colors flex items-center gap-1"
 						>
 							<FileText className="h-3 w-3" />
 							Facture
@@ -288,12 +311,11 @@ export function AppointmentsOverview({
 					variant="outline"
 					className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
 				>
-					{(nextAppointment &&
-					isToday(parseISO(nextAppointment.date))
+					{(nextAppointment && isToday(parseISO(nextAppointment.date))
 						? 1
 						: 0) +
 						upcomingAppointments.filter((app) =>
-							isToday(parseISO(app.date))
+							isToday(parseISO(app.date)),
 						).length}{" "}
 					aujourd'hui
 				</Badge>
@@ -314,7 +336,7 @@ export function AppointmentsOverview({
 						renderAppointmentItem(
 							nextAppointment,
 							true,
-							upcomingAppointments.length === 0
+							upcomingAppointments.length === 0,
 						)}
 
 					{upcomingAppointments.map((appointment, index) => {
@@ -323,7 +345,7 @@ export function AppointmentsOverview({
 						return renderAppointmentItem(
 							appointment,
 							false,
-							isLastItem
+							isLastItem,
 						);
 					})}
 

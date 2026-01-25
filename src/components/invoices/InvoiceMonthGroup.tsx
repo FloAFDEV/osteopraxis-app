@@ -1,4 +1,3 @@
-
 import { InvoiceDetails } from "@/components/InvoiceDetails";
 import {
 	AccordionContent,
@@ -67,7 +66,7 @@ export const InvoiceMonthGroup = ({
 					}}
 				>
 					<Download className="h-4 w-4 mr-1" />
-					<span className="text-xs">PDF</span>
+					<span className="text-sm">PDF</span>
 				</Button>
 			</div>
 
@@ -79,15 +78,21 @@ export const InvoiceMonthGroup = ({
 								<InvoiceDetails
 									invoice={invoice}
 									patient={patientDataMap.get(
-										invoice.patientId
+										invoice.patientId,
 									)}
-									osteopath={osteopathDataMap?.get(invoice.osteopathId || 0)}
+									osteopath={osteopathDataMap?.get(
+										invoice.osteopathId || 0,
+									)}
 									onDelete={() => onDeleteInvoice(invoice.id)}
 									onPrint={() => onPrintInvoice(invoice)}
 									onDownload={() =>
 										onDownloadInvoice(invoice)
 									}
-									onEdit={onEditInvoice ? () => onEditInvoice(invoice) : undefined}
+									onEdit={
+										onEditInvoice
+											? () => onEditInvoice(invoice)
+											: undefined
+									}
 								/>
 							</div>
 						</div>

@@ -67,9 +67,8 @@ export function CabinetInvitationManager({
 	const loadInvitations = async () => {
 		try {
 			setLoading(true);
-			const data = await cabinetInvitationService.getCabinetInvitations(
-				cabinetId
-			);
+			const data =
+				await cabinetInvitationService.getCabinetInvitations(cabinetId);
 			setInvitations(data);
 		} catch (error) {
 			console.error("Erreur lors du chargement des invitations:", error);
@@ -165,13 +164,13 @@ export function CabinetInvitationManager({
 
 	// Statistiques des invitations
 	const activeInvitations = invitations.filter(
-		(inv) => !isUsed(inv.used_at) && !isExpired(inv.expires_at)
+		(inv) => !isUsed(inv.used_at) && !isExpired(inv.expires_at),
 	).length;
 	const usedInvitations = invitations.filter((inv) =>
-		isUsed(inv.used_at)
+		isUsed(inv.used_at),
 	).length;
 	const expiredInvitations = invitations.filter(
-		(inv) => isExpired(inv.expires_at) && !isUsed(inv.used_at)
+		(inv) => isExpired(inv.expires_at) && !isUsed(inv.used_at),
 	).length;
 
 	if (loading) {
@@ -369,7 +368,7 @@ export function CabinetInvitationManager({
 													variant="ghost"
 													onClick={() =>
 														handleCopyCode(
-															invitation.invitation_code
+															invitation.invitation_code,
 														)
 													}
 													className="h-6 w-6 p-0"
@@ -394,10 +393,10 @@ export function CabinetInvitationManager({
 											</p>
 										)}
 
-										<p className="text-xs text-muted-foreground">
+										<p className="text-sm text-muted-foreground">
 											Expire le{" "}
 											{new Date(
-												invitation.expires_at
+												invitation.expires_at,
 											).toLocaleDateString("fr-FR", {
 												year: "numeric",
 												month: "long",
@@ -408,10 +407,10 @@ export function CabinetInvitationManager({
 										</p>
 
 										{invitation.used_at && (
-											<p className="text-xs text-green-600 dark:text-green-400">
+											<p className="text-sm text-green-600 dark:text-green-400">
 												Utilisée le{" "}
 												{new Date(
-													invitation.used_at
+													invitation.used_at,
 												).toLocaleDateString("fr-FR", {
 													year: "numeric",
 													month: "long",
@@ -426,7 +425,7 @@ export function CabinetInvitationManager({
 									<div className="flex items-center gap-2">
 										{!isUsed(invitation.used_at) &&
 											!isExpired(
-												invitation.expires_at
+												invitation.expires_at,
 											) && (
 												<>
 													<Button
@@ -434,7 +433,7 @@ export function CabinetInvitationManager({
 														variant="outline"
 														onClick={() =>
 															handleCopyInvitationLink(
-																invitation.invitation_code
+																invitation.invitation_code,
 															)
 														}
 														className="flex items-center gap-1"
@@ -484,7 +483,7 @@ export function CabinetInvitationManager({
 																	className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 																	onClick={() =>
 																		handleRevokeInvitation(
-																			invitation.id
+																			invitation.id,
 																		)
 																	}
 																>
