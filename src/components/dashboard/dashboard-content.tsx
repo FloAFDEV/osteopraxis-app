@@ -45,7 +45,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 						aria-label={`Changer le type de graphique (actuellement : ${
 							chartType === "detailed"
 								? "Évolution mensuelle"
-								: "Comparaison avec N-1"
+								: "Comparaison N-1"
 						})`}
 						onClick={() =>
 							setChartType(
@@ -54,20 +54,20 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 									: "detailed"
 							)
 						}
-						className="relative w-44 h-9 text-xs rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px] focus:outline-none"
+						className="relative w-40 h-8 text-[10px] rounded border border-gray-300 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 perspective-[1000px] focus:outline-none focus:ring-2 focus:ring-indigo-500"
 					>
 						<div
-							className={`relative w-full h-full transition-transform duration-700 ease-&lsqb;cubic-bezier(0.4,0.0,0.2,1)&rsqb; [transform-style:preserve-3d] will-change-transform ${
+							className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] will-change-transform ${
 								chartType === "simple"
 									? "[transform:rotateY(180deg)]"
 									: ""
 							}`}
 						>
-							<div className="absolute inset-0 flex items-center justify-center px-2 font-bold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden]">
+							<div className="absolute inset-0 flex items-center justify-center px-1 font-semibold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden]">
 								Évolution mensuelle
 							</div>
-							<div className="absolute inset-0 flex items-center justify-center px-2 font-bold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-								Comparaison avec N-1
+							<div className="absolute inset-0 flex items-center justify-center px-1 font-semibold text-center text-teal-700 dark:text-sky-400 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+								Comparaison N-1
 							</div>
 						</div>
 					</button>

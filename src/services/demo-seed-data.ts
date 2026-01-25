@@ -50,20 +50,33 @@ export function seedDemoData(cabinetId: string, userId: string, cabinetName: str
   };
 
   // 12 patients démo avec données variées (incluant 2 enfants)
-  // Distribution des patients sur les 12 derniers mois pour montrer l'évolution de l'activité
+  // Distribution sur les 2 dernières années pour montrer l'évolution comparée
+  const currentYear = now.getFullYear();
+  const lastYear = currentYear - 1;
+
+  // Patients créés cette année (8 patients)
+  const patientCreationDatesThisYear = [
+    new Date(currentYear, 0, 15),   // Janvier
+    new Date(currentYear, 1, 8),    // Février
+    new Date(currentYear, 2, 22),   // Mars
+    new Date(currentYear, 4, 12),   // Mai
+    new Date(currentYear, 6, 5),    // Juillet
+    new Date(currentYear, 8, 18),   // Septembre
+    new Date(currentYear, 10, 25),  // Novembre
+    new Date(currentYear, now.getMonth(), 7), // Ce mois-ci
+  ];
+
+  // Patients créés l'année dernière (4 patients pour comparaison)
+  const patientCreationDatesLastYear = [
+    new Date(lastYear, 1, 20),   // Février N-1
+    new Date(lastYear, 4, 15),   // Mai N-1
+    new Date(lastYear, 7, 10),   // Août N-1
+    new Date(lastYear, 10, 5),   // Novembre N-1
+  ];
+
   const patientCreationDates = [
-    new Date(now.getFullYear(), now.getMonth() - 11, 15), // Il y a 11 mois
-    new Date(now.getFullYear(), now.getMonth() - 10, 8),  // Il y a 10 mois
-    new Date(now.getFullYear(), now.getMonth() - 9, 22),  // Il y a 9 mois
-    new Date(now.getFullYear(), now.getMonth() - 7, 12),  // Il y a 7 mois
-    new Date(now.getFullYear(), now.getMonth() - 6, 5),   // Il y a 6 mois
-    new Date(now.getFullYear(), now.getMonth() - 5, 18),  // Il y a 5 mois
-    new Date(now.getFullYear(), now.getMonth() - 3, 25),  // Il y a 3 mois
-    new Date(now.getFullYear(), now.getMonth() - 2, 10),  // Il y a 2 mois
-    new Date(now.getFullYear(), now.getMonth() - 1, 3),   // Il y a 1 mois
-    new Date(now.getFullYear(), now.getMonth(), 7),       // Ce mois-ci
-    new Date(now.getFullYear(), now.getMonth() - 4, 20),  // Il y a 4 mois (enfant 1)
-    new Date(now.getFullYear(), now.getMonth() - 1, 14),  // Il y a 1 mois (enfant 2)
+    ...patientCreationDatesThisYear,
+    ...patientCreationDatesLastYear,
   ];
 
   const patients: Patient[] = [

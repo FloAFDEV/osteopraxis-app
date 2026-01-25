@@ -46,6 +46,9 @@ import EditPatientPage from "@/pages/EditPatientPage";
 import EditAppointmentPage from "@/pages/EditAppointmentPage";
 import EditInvoicePage from "@/pages/EditInvoicePage";
 import HDSOnboardingWizard from "@/pages/HDSOnboardingWizard";
+import StatisticsPage from "@/pages/StatisticsPage";
+import MentionsLegalesPage from "@/pages/MentionsLegalesPage";
+import CGUPage from "@/pages/CGUPage";
 
 import CabinetsManagementPage from "@/pages/CabinetsManagementPage";
 import NewCabinetPage from "@/pages/NewCabinetPage";
@@ -112,6 +115,8 @@ function App() {
                         <Route path="/privacy" element={<PrivacyPolicyPage />} />
                         <Route path="/cgu" element={<TermsOfServicePage />} />
                         <Route path="/terms" element={<TermsOfServicePage />} />
+                        <Route path="/legal/mentions-legales" element={<MentionsLegalesPage />} />
+                        <Route path="/legal/cgu" element={<CGUPage />} />
 
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
@@ -170,6 +175,11 @@ function App() {
                         <Route path="/schedule" element={
                           <ProtectedRoute>
                             <SchedulePage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/statistics" element={
+                          <ProtectedRoute>
+                            <StatisticsPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/invoices" element={

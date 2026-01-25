@@ -343,33 +343,33 @@ const SchedulePage = () => {
                   const dayGoogleEvents = getDayGoogleEvents(day);
                   const hasAnyEvents = dayAppointments.length > 0 || dayGoogleEvents.length > 0;
                   return <div key={day.toString()} className="flex flex-col">
-												{/* Day header button remains the same */}
-												<button type="button" className={cn("p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full flex-shrink-0", isSameDay(day, new Date()) ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900" : "bg-muted dark:bg-muted")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter un Séance le ${format(day, "d MMMM yyyy", {
+												{/* Day header button */}
+												<button type="button" className={cn("p-2 text-center capitalize mb-2 rounded-md transition-colors hover:bg-blue-100 active:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-primary w-full flex-shrink-0", isSameDay(day, new Date()) ? "bg-amber-600 text-amber-100 dark:bg-amber-500 dark:text-amber-900" : "bg-muted dark:bg-muted")} onClick={() => handleDayHeaderClick(day)} tabIndex={0} title={`Ajouter une séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
-                    })}`} aria-label={`Ajouter un Séance le ${format(day, "d MMMM yyyy", {
+                    })}`} aria-label={`Ajouter une séance le ${format(day, "d MMMM yyyy", {
                       locale: fr
                     })}`}>
-													<div className="font-medium">
+													<div className="font-medium text-sm">
 														{format(day, "EEEE", {
                           locale: fr
                         })}
 													</div>
-													<div className="text-sm">
+													<div className="text-xs">
 														{format(day, "d MMM", {
                           locale: fr
                         })}
 													</div>
 													<span className="sr-only">
-														Ajouter un Séance
+														Ajouter une séance
 													</span>
 												</button>
 
 												{/* Events list or empty state */}
-												{!hasAnyEvents ? <div className="flex items-center justify-center p-2 text-center border border-dashed rounded-md min-h-[60px]">
+												{!hasAnyEvents ? <div className="flex items-center justify-center p-2 text-center border border-dashed rounded-md h-[60px]">
 														<p className="text-xs text-muted-foreground">
 															Aucune séance
 														</p>
-													</div> : <div className="space-y-1 flex-shrink-0">
+													</div> : <div className="space-y-1">
 														{/* Google Calendar Events avec correspondance patient */}
 														{dayGoogleEvents.map(event => {
                         let eventStartTime = "??:??";
@@ -422,7 +422,7 @@ const SchedulePage = () => {
 																</Card>;
                       })}
 
-														{/* Internal Appointments - keep existing code */}
+														{/* Internal Appointments - Compact cards */}
 														{dayAppointments.map(appointment => {
                         const patient = getPatientById(appointment.patientId);
                         let appointmentTime = "??:??";
@@ -435,94 +435,79 @@ const SchedulePage = () => {
                         }
                         const isProcessingAction = actionInProgress?.id === appointment.id;
                         return <Card key={appointment.id} className={cn(
-                          "hover-scale border-l-4 transition-colors",
+                          "border-l-4 transition-colors",
                           appointment.status === "COMPLETED"
-                            ? "bg-green-100 text-green-800 border-l-green-500 dark:bg-green-900/20 dark:text-green-100"
-                            : "bg-blue-100 text-blue-800 border-l-blue-500 dark:bg-blue-900/20 dark:text-blue-100"
+                            ? "bg-green-50 border-l-green-500 dark:bg-green-900/20"
+                            : "bg-blue-50 border-l-blue-500 dark:bg-blue-900/20"
                         )}>
-																	<CardContent className="p-2">
-																		{/* Top section: Time Badge */}
-																		<div className="flex items-center justify-between mb-1">
+																	<CardContent className="p-1.5">
+																		{/* Compact header with time and status */}
+																		<div className="flex items-center gap-1 mb-0.5">
 																			<Badge className={cn(
-                                "text-xs px-2 py-0.5",
+                                "text-[10px] px-1.5 py-0",
                                 appointment.status === "COMPLETED"
-                                  ? "bg-green-800 text-white"
-                                  : "bg-blue-800 text-white"
+                                  ? "bg-green-700 text-white"
+                                  : "bg-blue-700 text-white"
                               )}>
 																				{appointmentTime}
 																			</Badge>
-																			{appointment.status === "COMPLETED" && <Badge className="bg-green-700 text-white dark:bg-green-600 text-[10px] px-1.5 py-0.5">
+																			{appointment.status === "COMPLETED" && <Badge className="bg-green-600 text-white text-[9px] px-1 py-0">
 																					Terminé
 																				</Badge>}
 																		</div>
-																		{/* Middle section: Link to patient/reason */}
-																		<Link to={`/appointments/${appointment.id}/edit`} className="block group mb-1">
-																			<h3 className="font-semibold text-sm group-hover:text-primary truncate">
+																		{/* Patient name and reason - very compact */}
+																		<Link to={`/appointments/${appointment.id}/edit`} className="block group">
+																			<h3 className={cn(
+                                "font-medium text-xs group-hover:text-primary truncate leading-tight",
+                                appointment.status === "COMPLETED" ? "text-green-800 dark:text-green-200" : "text-blue-800 dark:text-blue-200"
+                              )}>
 																				{patient ? `${patient.firstName} ${patient.lastName}` : `Patient #${appointment.patientId}`}
 																			</h3>
-																			<p className="text-xs text-muted-foreground truncate">
+																			<p className="text-[10px] text-muted-foreground truncate leading-tight">
 																				{appointment.reason}
 																			</p>
 																		</Link>
 																	</CardContent>
-																	{/* Bottom section: Action Buttons - Plus compact pour vue semaine */}
-																	<div className="flex flex-row items-center justify-end gap-1 p-1 border-t bg-muted/30 flex-shrink-0">
-																		{/* Cancel Button - Icon only in week view */}
+																	{/* Compact action buttons */}
+																	<div className="flex items-center justify-end gap-0.5 px-1 py-0.5 border-t bg-muted/20">
 																		<Button
 																			variant="ghost"
 																			size="sm"
-																			className="text-destructive hover:bg-destructive/10 h-6 w-6 p-0 flex items-center justify-center"
+																			className="text-destructive hover:bg-destructive/10 h-5 w-5 p-0"
 																			onClick={() => handleCancelAppointment(appointment.id)}
 																			disabled={isProcessingAction || appointment.status === "COMPLETED"}
-																			title="Annuler cette séance"
+																			title="Annuler"
 																		>
 																			{actionInProgress?.id === appointment.id && actionInProgress.action === "cancel" ? (
-																				<span className="animate-spin text-xs">⏳</span>
+																				<span className="animate-spin text-[10px]">⏳</span>
 																			) : (
-																				<X className="w-3 h-3" />
+																				<X className="w-2.5 h-2.5" />
 																			)}
 																		</Button>
 
-																		{/* Delete Button Trigger - Icon only */}
 																		<AlertDialog>
 																			<AlertDialogTrigger asChild>
 																				<Button
 																					variant="ghost"
 																					size="sm"
-																					className="text-destructive hover:bg-destructive/10 h-6 w-6 p-0 flex items-center justify-center"
+																					className="text-destructive hover:bg-destructive/10 h-5 w-5 p-0"
 																					disabled={isProcessingAction}
-																					title="Supprimer cette séance"
+																					title="Supprimer"
 																				>
-																					<Trash2 className="h-3 w-3" />
+																					<Trash2 className="h-2.5 w-2.5" />
 																				</Button>
 																			</AlertDialogTrigger>
 																			<AlertDialogContent>
 																				<AlertDialogHeader>
-																					<AlertDialogTitle>
-																						Supprimer
-																						le
-																						Séance
-																					</AlertDialogTitle>
+																					<AlertDialogTitle>Supprimer la séance</AlertDialogTitle>
 																					<AlertDialogDescription>
-																						Êtes-vous
-																						sûr
-																						de
-																						vouloir
-																						supprimer
-																						définitivement
-																						cette
-																						séance
-																						?
+																						Êtes-vous sûr de vouloir supprimer définitivement cette séance ?
 																					</AlertDialogDescription>
 																				</AlertDialogHeader>
 																				<AlertDialogFooter>
-																					<AlertDialogCancel>
-																						Annuler
-																					</AlertDialogCancel>
+																					<AlertDialogCancel>Annuler</AlertDialogCancel>
 																					<AlertDialogAction onClick={() => handleDeleteAppointment(appointment.id)} className="bg-destructive hover:bg-destructive/90">
-																						{actionInProgress?.id === appointment.id && actionInProgress.action === "delete" ? <span className="animate-spin mr-2">
-																								⏳
-																							</span> : null}
+																						{actionInProgress?.id === appointment.id && actionInProgress.action === "delete" ? <span className="animate-spin mr-2">⏳</span> : null}
 																						Supprimer
 																					</AlertDialogAction>
 																				</AlertDialogFooter>

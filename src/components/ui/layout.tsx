@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import {
 	Activity,
+	BarChart3,
 	Building,
 	Calendar,
 	Clock,
@@ -170,6 +171,20 @@ export function Layout({ children }: LayoutProps) {
 						>
 							<FileText className="h-4 w-4 text-emerald-500" />
 							Notes d'honoraires
+						</NavLink>
+						<NavLink
+							to="/statistics"
+							className={({ isActive }) =>
+								cn(
+									"text-sm font-medium transition-colors flex items-center gap-1",
+									isActive
+										? "text-indigo-500"
+										: "hover:text-indigo-500 text-muted-foreground"
+								)
+							}
+						>
+							<BarChart3 className="h-4 w-4 text-indigo-500" />
+							Stats
 						</NavLink>
 
 						<ThemeToggle />
@@ -332,6 +347,21 @@ export function Layout({ children }: LayoutProps) {
 						>
 							<FileText className="h-5 w-5 text-amber-500" />
 							Notes d'honoraires
+						</NavLink>
+						<NavLink
+							to="/statistics"
+							className={({ isActive }) =>
+								cn(
+									"p-2 rounded-md transition-colors flex items-center gap-2",
+									isActive
+										? "bg-indigo-500/10 text-foreground"
+										: "text-foreground"
+								)
+							}
+							onClick={() => setIsMenuOpen(false)}
+						>
+							<BarChart3 className="h-5 w-5 text-indigo-500" />
+							Statistiques
 						</NavLink>
 						<NavLink
 							to="/settings/profile"

@@ -386,10 +386,18 @@ export default function LandingPage() {
 							<ul className="space-y-2 text-sm text-muted-foreground">
 								<li>
 									<a
-										href="/mentions-legales"
+										href="/legal/mentions-legales"
 										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
 									>
 										Mentions légales
+									</a>
+								</li>
+								<li>
+									<a
+										href="/legal/cgu"
+										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
+									>
+										CGU
 									</a>
 								</li>
 								<li>
