@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { FeaturePreview, FeatureBadge } from "@/components/landing";
 import {
 	Calendar,
 	Check,
@@ -155,40 +156,97 @@ export default function LandingPage() {
 
 				{/* FEATURES SECTION */}
 				<section className="py-20 bg-muted/30">
-					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-12">
+					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-4">
 							Ce que vous pouvez tester
 						</h3>
+						<p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+							Découvrez les fonctionnalités essentielles pour gérer votre cabinet en toute simplicité
+						</p>
+
 						<div className="grid md:grid-cols-3 gap-8">
-							<div className="flex flex-col items-center text-center p-6 rounded-lg bg-background hover:shadow-lg transition-shadow motion-safe:hover:scale-105">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Calendar className="h-6 w-6 text-primary" aria-hidden="true" />
+							{/* Gestion des rendez-vous */}
+							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+								{/* Preview */}
+								<div className="p-4 bg-muted/30">
+									<FeaturePreview type="calendar" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
 								</div>
-								<h4 className="font-semibold mb-2 text-lg">Gestion des rendez-vous</h4>
-								<p className="text-muted-foreground text-sm">
-									Planifiez et organisez vos consultations avec un calendrier simple
-								</p>
+								{/* Content */}
+								<div className="p-5 flex-1 flex flex-col">
+									<div className="flex items-center gap-2 mb-3">
+										<FeatureBadge type="simple" />
+										<FeatureBadge type="rapide" />
+									</div>
+									<div className="flex items-center gap-3 mb-2">
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+											<Calendar className="h-5 w-5 text-primary" aria-hidden="true" />
+										</div>
+										<h4 className="font-semibold text-lg">Gestion des rendez-vous</h4>
+									</div>
+									<p className="text-muted-foreground text-sm flex-1">
+										Planifiez et organisez vos consultations avec un calendrier intuitif. Visualisez votre planning en un coup d'œil.
+									</p>
+								</div>
 							</div>
 
-							<div className="flex flex-col items-center text-center p-6 rounded-lg bg-background hover:shadow-lg transition-shadow motion-safe:hover:scale-105">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Users className="h-6 w-6 text-primary" aria-hidden="true" />
+							{/* Dossiers patients */}
+							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+								{/* Preview */}
+								<div className="p-4 bg-muted/30">
+									<FeaturePreview type="patient" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
 								</div>
-								<h4 className="font-semibold mb-2 text-lg">Dossiers patients</h4>
-								<p className="text-muted-foreground text-sm">
-									Créez et gérez les fiches de vos patients avec leurs informations médicales
-								</p>
+								{/* Content */}
+								<div className="p-5 flex-1 flex flex-col">
+									<div className="flex items-center gap-2 mb-3">
+										<FeatureBadge type="securise" />
+										<FeatureBadge type="intuitif" />
+									</div>
+									<div className="flex items-center gap-3 mb-2">
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+											<Users className="h-5 w-5 text-primary" aria-hidden="true" />
+										</div>
+										<h4 className="font-semibold text-lg">Dossiers patients</h4>
+									</div>
+									<p className="text-muted-foreground text-sm flex-1">
+										Créez et gérez les fiches de vos patients avec leurs informations médicales complètes, en toute sécurité.
+									</p>
+								</div>
 							</div>
 
-							<div className="flex flex-col items-center text-center p-6 rounded-lg bg-background hover:shadow-lg transition-shadow motion-safe:hover:scale-105">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<FileText className="h-6 w-6 text-primary" aria-hidden="true" />
+							{/* Facturation */}
+							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+								{/* Preview */}
+								<div className="p-4 bg-muted/30">
+									<FeaturePreview type="invoice" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
 								</div>
-								<h4 className="font-semibold mb-2 text-lg">Facturation</h4>
-								<p className="text-muted-foreground text-sm">
-									Générez vos factures et suivez vos paiements
-								</p>
+								{/* Content */}
+								<div className="p-5 flex-1 flex flex-col">
+									<div className="flex items-center gap-2 mb-3">
+										<FeatureBadge type="rapide" />
+										<FeatureBadge type="simple" />
+									</div>
+									<div className="flex items-center gap-3 mb-2">
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+											<FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+										</div>
+										<h4 className="font-semibold text-lg">Facturation</h4>
+									</div>
+									<p className="text-muted-foreground text-sm flex-1">
+										Générez vos factures en quelques clics et suivez vos paiements. Export PDF automatique.
+									</p>
+								</div>
 							</div>
+						</div>
+
+						{/* CTA vers démo */}
+						<div className="text-center mt-12">
+							<Button
+								onClick={startDemo}
+								size="lg"
+								className="text-lg px-8 py-6 transition-all hover:scale-105"
+							>
+								Tester gratuitement pendant 60 minutes
+							</Button>
 						</div>
 					</div>
 				</section>
