@@ -117,6 +117,7 @@ function App() {
                         <Route path="/terms" element={<TermsOfServicePage />} />
                         <Route path="/legal/mentions-legales" element={<MentionsLegalesPage />} />
                         <Route path="/legal/cgu" element={<CGUPage />} />
+                        <Route path="/legal/politique-de-confidentialite" element={<PrivacyPolicyPage />} />
 
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />

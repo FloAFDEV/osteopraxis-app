@@ -9,6 +9,10 @@ import {
 	Sparkles,
 	Shield,
 	Zap,
+	Bell,
+	Lock,
+	Construction,
+	Mail,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -39,26 +43,26 @@ export default function LandingPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			<Helmet>
-				<title>OstéoPraxis - Logiciel de gestion pour ostéopathes | 49€ à vie</title>
+				<title>OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie</title>
 				<meta
 					name="description"
-					content="Gérez votre cabinet d'ostéopathie simplement. Patients, rendez-vous, facturation. 49€ à vie, sans abonnement. Données locales, conforme RGPD. Essai gratuit 60 min."
+					content="Gérez votre cabinet d'ostéopathie simplement. Patients, rendez-vous, facturation. Licence à vie 249€, sans abonnement. Données sécurisées, conforme RGPD. Démo gratuite."
 				/>
-				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical" />
+				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, HDS" />
 				<link rel="canonical" href="https://osteopraxis.fr" />
 
 				{/* OpenGraph */}
 				<meta property="og:type" content="website" />
-				<meta property="og:title" content="OstéoPraxis - Logiciel de gestion pour ostéopathes | 49€ à vie" />
-				<meta property="og:description" content="Gérez votre cabinet d'ostéopathie simplement. 49€ à vie, sans abonnement. Essai gratuit immédiat." />
+				<meta property="og:title" content="OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie" />
+				<meta property="og:description" content="Gérez votre cabinet d'ostéopathie simplement. Licence à vie, sans abonnement. Démo gratuite." />
 				<meta property="og:url" content="https://osteopraxis.fr" />
 				<meta property="og:site_name" content="OstéoPraxis" />
 				<meta property="og:locale" content="fr_FR" />
 
 				{/* Twitter Card */}
 				<meta name="twitter:card" content="summary_large_image" />
-				<meta name="twitter:title" content="OstéoPraxis - Logiciel de gestion pour ostéopathes | 49€ à vie" />
-				<meta name="twitter:description" content="Gérez votre cabinet d'ostéopathie simplement. 49€ à vie, sans abonnement." />
+				<meta name="twitter:title" content="OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie" />
+				<meta name="twitter:description" content="Gérez votre cabinet d'ostéopathie simplement. Licence à vie, sans abonnement." />
 
 				{/* JSON-LD Schema */}
 				<script type="application/ld+json">
@@ -68,19 +72,13 @@ export default function LandingPage() {
 						"name": "OstéoPraxis",
 						"applicationCategory": "BusinessApplication",
 						"operatingSystem": "Web Browser",
-						"description": "Logiciel de gestion pour cabinets d'ostéopathie",
+						"description": "Logiciel de gestion pour cabinets d'ostéopathie - Projet en développement",
 						"offers": {
 							"@type": "Offer",
-							"price": "49",
+							"price": "249",
 							"priceCurrency": "EUR",
-							"availability": "https://schema.org/InStock",
-							"priceValidUntil": "2030-12-31",
-							"description": "Licence à vie, paiement unique"
-						},
-						"aggregateRating": {
-							"@type": "AggregateRating",
-							"ratingValue": "4.8",
-							"reviewCount": "127"
+							"availability": "https://schema.org/PreOrder",
+							"description": "Licence à vie, paiement unique - Bientôt disponible"
 						}
 					})}
 				</script>
@@ -113,7 +111,7 @@ export default function LandingPage() {
 						<div className="text-center">
 							<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 motion-safe:animate-fade-in">
 								<Sparkles className="h-4 w-4" aria-hidden="true" />
-								<span>Une solution complète — 49€ à vie</span>
+								<span>Licence à vie — Lancement bientôt</span>
 							</div>
 
 							<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-foreground motion-safe:animate-fade-in">
@@ -136,12 +134,15 @@ export default function LandingPage() {
 									Essayer gratuitement
 								</Button>
 								<Button
-									onClick={handleGetStarted}
+									asChild
 									size="lg"
 									variant="outline"
 									className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 								>
-									Passer à la version complète
+									<a href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis&body=Bonjour,%0A%0AJe%20souhaite%20être%20informé(e)%20du%20lancement%20d'OstéoPraxis.%0A%0AMerci%20!">
+										<Bell className="mr-2 h-5 w-5" aria-hidden="true" />
+										Rejoindre la liste d'attente
+									</a>
 								</Button>
 							</div>
 
@@ -192,31 +193,35 @@ export default function LandingPage() {
 					</div>
 				</section>
 
-				{/* PRICING SECTION - NOUVELLE */}
+				{/* PRICING SECTION - PRÉ-LANCEMENT */}
 				<section className="py-20 sm:py-32 bg-gradient-to-b from-background to-muted/20">
 					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
 						<div className="text-center mb-12">
 							<h3 className="text-3xl sm:text-4xl font-bold mb-4">
-								Tarif simple, accès complet
+								Licence à vie
 							</h3>
 							<p className="text-muted-foreground text-lg">
-								Un seul paiement pour une utilisation à vie
+								Un seul paiement pour une utilisation illimitée
 							</p>
 						</div>
 
 						<div className="max-w-md mx-auto">
-							<div className="relative bg-background border-2 border-primary rounded-2xl p-8 sm:p-10 shadow-xl motion-safe:hover:scale-105 transition-transform">
-								{/* Badge "Recommandé" */}
-								<div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
-									Idéal pour jeunes ostéos
+							<div className="relative bg-background border-2 border-primary rounded-2xl p-8 sm:p-10 shadow-xl">
+								{/* Badge "Bientôt disponible" */}
+								<div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-500 text-white text-sm font-semibold rounded-full flex items-center gap-2">
+									<Construction className="h-4 w-4" aria-hidden="true" />
+									Bientôt disponible
 								</div>
 
 								<div className="text-center mb-8">
 									<div className="flex items-baseline justify-center gap-2 mb-2">
-										<span className="text-5xl sm:text-6xl font-bold text-foreground">49€</span>
-										<span className="text-2xl text-muted-foreground">à vie</span>
+										<span className="text-5xl sm:text-6xl font-bold text-foreground">249€</span>
+										<span className="text-xl text-muted-foreground">TTC</span>
 									</div>
-									<p className="text-muted-foreground">Paiement unique, aucun abonnement</p>
+									<p className="text-lg font-medium text-primary">Licence à vie</p>
+									<p className="text-muted-foreground text-sm mt-1">
+										Une seule fois, pour toujours
+									</p>
 								</div>
 
 								<ul className="space-y-4 mb-8" role="list">
@@ -229,51 +234,61 @@ export default function LandingPage() {
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Patients illimités</strong> sans restriction
+											<strong className="text-foreground">Mises à jour incluses</strong> à vie
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Mises à jour gratuites</strong> à vie
+											<strong className="text-foreground">Support prioritaire</strong> par email
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Données locales</strong> conformes RGPD
+											<strong className="text-foreground">Données hébergées en France</strong> (HDS)
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Support technique</strong> par email
+											<strong className="text-foreground">Sans abonnement</strong>, sans frais cachés
 										</span>
 									</li>
 								</ul>
 
-								<Button
-									onClick={handleGetStarted}
-									size="lg"
-									className="w-full text-lg py-6 transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
-								>
-									Passer à la version complète
-								</Button>
+								{/* Encadré pré-lancement */}
+								<div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 mb-6">
+									<p className="text-sm text-amber-800 dark:text-amber-200 text-center font-medium">
+										Le paiement sera bientôt disponible
+									</p>
+									<p className="text-xs text-amber-700 dark:text-amber-300 text-center mt-1">
+										Aucun paiement n'est demandé pour le moment
+									</p>
+								</div>
 
-								<p className="text-center text-sm text-muted-foreground mt-4">
-									💡 Parfait pour débuter votre activité
-				</p>
+								<a
+									href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis&body=Bonjour,%0A%0AJe%20souhaite%20être%20informé(e)%20du%20lancement%20d'OstéoPraxis.%0A%0AMerci%20!"
+									className="flex items-center justify-center gap-2 w-full text-lg py-4 px-6 bg-primary text-primary-foreground rounded-lg font-medium transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
+								>
+									<Bell className="h-5 w-5" aria-hidden="true" />
+									Être informé du lancement
+								</a>
+
+								<p className="text-center text-xs text-muted-foreground mt-4">
+									Prix indicatif susceptible d'évoluer avant le lancement commercial.
+								</p>
 							</div>
 						</div>
 
 						<div className="text-center mt-12">
 							<p className="text-muted-foreground">
-								Pas encore prêt ? {" "}
+								Découvrez l'application dès maintenant avec la{" "}
 								<button
 									onClick={startDemo}
-									className="text-primary hover:underline focus:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+									className="text-primary hover:underline focus:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
 								>
-									Essayez la démo gratuite
+									démo gratuite
 								</button>
 							</p>
 						</div>
@@ -313,7 +328,7 @@ export default function LandingPage() {
 								</div>
 								<h4 className="font-semibold mb-2">Sans surprise</h4>
 								<p className="text-muted-foreground text-sm">
-									Un seul paiement de 49€, aucun abonnement caché ou frais supplémentaires
+									Licence à vie unique, aucun abonnement caché ou frais supplémentaires
 								</p>
 							</div>
 						</div>
@@ -324,7 +339,7 @@ export default function LandingPage() {
 				<section className="py-20 sm:py-32">
 					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center">
 						<h3 className="text-3xl sm:text-4xl font-bold mb-6">
-							Prêt à tester ?
+							Prêt à découvrir ?
 						</h3>
 						<p className="text-muted-foreground mb-8 text-lg max-w-2xl mx-auto">
 							Essayez toutes les fonctionnalités pendant 60 minutes,
@@ -336,28 +351,53 @@ export default function LandingPage() {
 								size="lg"
 								className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 							>
-								Essayer gratuitement
+								Essayer la démo gratuite
 							</Button>
 							<Button
-								onClick={handleGetStarted}
+								asChild
 								size="lg"
 								variant="outline"
 								className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 							>
-								Acheter maintenant — 49€
+								<a href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis&body=Bonjour,%0A%0AJe%20souhaite%20être%20informé(e)%20du%20lancement%20d'OstéoPraxis.%0A%0AMerci%20!">
+									<Bell className="mr-2 h-5 w-5" aria-hidden="true" />
+									Être informé du lancement
+								</a>
 							</Button>
 						</div>
+						<p className="text-sm text-muted-foreground mt-6">
+							Aucun paiement n'est demandé pour le moment
+						</p>
 					</div>
 				</section>
 			</main>
 
 			<footer className="border-t border-border py-12 mt-20 bg-muted/30">
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+					{/* Micro-copy de réassurance */}
+					<div className="flex flex-wrap justify-center gap-6 mb-10 pb-8 border-b border-border">
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<Lock className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+							<span>Données protégées (RGPD)</span>
+						</div>
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<Shield className="h-4 w-4 text-blue-600" aria-hidden="true" />
+							<span>Aucun paiement requis</span>
+						</div>
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<Construction className="h-4 w-4 text-amber-600" aria-hidden="true" />
+							<span>Projet en développement</span>
+						</div>
+					</div>
+
 					<div className="grid md:grid-cols-3 gap-8 mb-8">
 						<div>
 							<h4 className="font-semibold mb-4 text-foreground">OstéoPraxis</h4>
 							<p className="text-sm text-muted-foreground">
 								Logiciel de gestion pour cabinets d'ostéopathie. Simple, sécurisé, conforme RGPD.
+							</p>
+							<p className="text-xs text-muted-foreground mt-2">
+								Projet en cours de création
 							</p>
 						</div>
 						<div>
@@ -372,12 +412,13 @@ export default function LandingPage() {
 									</button>
 								</li>
 								<li>
-									<button
-										onClick={handleGetStarted}
-										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
+									<a
+										href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis"
+										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors flex items-center gap-1"
 									>
-										Tarifs
-									</button>
+										<Mail className="h-3 w-3" aria-hidden="true" />
+										Rejoindre la liste d'attente
+									</a>
 								</li>
 							</ul>
 						</div>
@@ -402,7 +443,7 @@ export default function LandingPage() {
 								</li>
 								<li>
 									<a
-										href="/confidentialite"
+										href="/legal/politique-de-confidentialite"
 										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
 									>
 										Politique de confidentialité
@@ -412,7 +453,7 @@ export default function LandingPage() {
 						</div>
 					</div>
 					<div className="text-center text-sm text-muted-foreground pt-8 border-t border-border">
-						<p>&copy; 2024 OstéoPraxis. Tous droits réservés.</p>
+						<p>&copy; 2026 OstéoPraxis · Projet en cours de création · Aucun paiement requis · France</p>
 					</div>
 				</div>
 			</footer>

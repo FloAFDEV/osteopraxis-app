@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AppointmentForm } from "@/components/AppointmentForm";
+import { parseEntityId } from "@/utils/id-utils";
 
 const EditAppointmentPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +30,9 @@ const EditAppointmentPage = () => {
         }
 
         // Support à la fois les IDs numériques (mode connecté) et les UUIDs (mode démo)
-        const parsedInt = parseInt(id, 10);
-        const appointmentId: number | string = !isNaN(parsedInt) && parsedInt > 0 ? parsedInt : id;
+        // IMPORTANT: Utiliser parseEntityId() et non parseInt() car:
+        // parseInt("4c455db1-...") = 4 (BUG!) vs Number("4c455db1-...") = NaN (correct)
+        const appointmentId = parseEntityId(id);
 
         console.log(`EditAppointmentPage: Loading appointment ${appointmentId} (original: ${id}, type: ${typeof appointmentId})`);
 
@@ -164,7 +166,7 @@ const EditAppointmentPage = () => {
               status: appointment?.status,
               website: "", // Champ honeypot
             }}
-            appointmentId={!isNaN(parseInt(id!, 10)) ? parseInt(id!, 10) : id!}
+            appointmentId={parseEntityId(id!)}
           />
         </section>
       </div>
