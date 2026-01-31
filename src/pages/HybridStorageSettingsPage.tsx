@@ -169,7 +169,7 @@ const HybridStorageSettingsPage: React.FC = () => {
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800 dark:text-red-200">
               <strong>Accès restreint en mode démo</strong>
-              <p className="mt-2">Les paramètres de stockage HDS ne sont pas disponibles en mode démonstration pour des raisons de sécurité.</p>
+              <p className="mt-2">Les paramètres de stockage ne sont pas disponibles en mode démonstration.</p>
             </AlertDescription>
           </Alert>
         </div>
@@ -259,7 +259,7 @@ const HybridStorageSettingsPage: React.FC = () => {
               
               {!status?.isConfigured && (
                 <p className="text-sm text-muted-foreground">
-                  Configurez d'abord le stockage HDS pour accéder aux fonctionnalités de sauvegarde.
+                  Configurez d'abord le stockage local pour accéder aux fonctionnalités de sauvegarde.
                 </p>
               )}
             </CardContent>
@@ -273,7 +273,7 @@ const HybridStorageSettingsPage: React.FC = () => {
         onOpenChange={setShowExportConfirm}
         onConfirm={confirmExport}
         title="Confirmer l'export des données"
-        description="Vous êtes sur le point d'exporter toutes vos données HDS sensibles dans un fichier chiffré. Cette opération créera une sauvegarde complète contenant tous les patients, rendez-vous et factures."
+        description="Vous êtes sur le point d'exporter toutes vos données dans un fichier chiffré. Cette sauvegarde contient tous les patients, rendez-vous et factures."
         confirmButtonText="Exporter les données"
         variant="default"
       />

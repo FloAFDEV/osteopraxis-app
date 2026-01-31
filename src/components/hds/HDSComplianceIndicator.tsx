@@ -87,7 +87,7 @@ export const HDSComplianceIndicator = () => {
           ) : (
             <ShieldAlert className="w-5 h-5 text-red-600" />
           )}
-          Conformité HDS
+          Stockage local sécurisé
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -113,7 +113,7 @@ export const HDSComplianceIndicator = () => {
           <div className="bg-green-50 border border-green-200 rounded-md p-3">
             <p className="text-sm text-green-800 flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              <strong>Stockage local configuré</strong> : Les données sensibles sont stockées localement selon les exigences HDS.
+              <strong>Stockage local configuré</strong> : Vos données sensibles sont chiffrées et stockées localement.
             </p>
           </div>
         )}

@@ -220,14 +220,14 @@ const PatientsPage = () => {
 					onRefresh={handleRetry}
 				/>
 
-				{/* HDS notice */}
+				{/* Notice stockage local */}
 				<div className="mb-4">
 					<Alert>
 						<AlertTitle className="flex items-center gap-2">
-							<Shield className="h-4 w-4" /> Données patients stockées localement (HDS)
+							<Shield className="h-4 w-4" /> Données stockées localement
 						</AlertTitle>
 						<AlertDescription>
-							Vos données sensibles ne quittent pas votre appareil. Partage via export USB sécurisé ou future synchronisation de cabinet.
+							Vos données sensibles restent sur votre appareil. Aucune donnée n'est transmise à un serveur externe.
 						</AlertDescription>
 					</Alert>
 				</div>

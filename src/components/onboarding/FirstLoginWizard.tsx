@@ -67,7 +67,7 @@ export const FirstLoginWizard: React.FC<FirstLoginWizardProps> = ({
 						Bienvenue dans OstéoPraxis !
 					</CardTitle>
 					<CardDescription className="text-base">
-						Votre cabinet numérique sécurisé et conforme HDS
+						Votre cabinet numérique avec stockage local sécurisé
 					</CardDescription>
 					<Progress value={getStepProgress()} className="w-full" />
 				</CardHeader>

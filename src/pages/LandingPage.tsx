@@ -49,7 +49,7 @@ export default function LandingPage() {
 					name="description"
 					content="Gérez votre cabinet d'ostéopathie simplement. Patients, rendez-vous, facturation. Licence à vie 249€, sans abonnement. Données sécurisées, conforme RGPD. Démo gratuite."
 				/>
-				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, HDS" />
+				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, stockage local" />
 				<link rel="canonical" href="https://osteopraxis.fr" />
 
 				{/* OpenGraph */}
@@ -148,7 +148,7 @@ export default function LandingPage() {
 							</div>
 
 							<p className="text-sm text-muted-foreground mt-4">
-								Accès immédiat • 60 minutes de test • Aucune inscription
+								Accès immédiat • 3 heures de test • Aucune inscription
 							</p>
 						</div>
 					</div>
@@ -298,13 +298,13 @@ export default function LandingPage() {
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Support prioritaire</strong> par email
+											<strong className="text-foreground">Données 100% locales</strong> sur votre appareil
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Données hébergées en France</strong> (HDS)
+											<strong className="text-foreground">Export et sauvegarde</strong> de vos données
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
@@ -400,7 +400,7 @@ export default function LandingPage() {
 							Prêt à découvrir ?
 						</h3>
 						<p className="text-muted-foreground mb-8 text-lg max-w-2xl mx-auto">
-							Essayez toutes les fonctionnalités pendant 60 minutes,
+							Essayez toutes les fonctionnalités pendant 3 heures,
 							sans inscription et sans engagement
 						</p>
 						<div className="flex flex-col sm:flex-row items-center justify-center gap-4">

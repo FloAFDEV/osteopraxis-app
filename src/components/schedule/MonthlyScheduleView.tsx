@@ -240,19 +240,10 @@ export function MonthlyScheduleView({
 											</div>
 
 											{/* Rendez-vous du jour */}
-											<div className="space-y-1">
-												{/* Affichage responsive: 3 sur petits écrans, 5 sur moyens, tous sur grands */}
+											<div className="space-y-0.5">
+												{/* Afficher les 4 premiers rendez-vous */}
 												{dayAppointments
-													.slice(
-														0,
-														window.innerWidth >=
-															1536
-															? dayAppointments.length
-															: window.innerWidth >=
-																  1280
-																? 5
-																: 3,
-													)
+													.slice(0, 4)
 													.map((appointment) => {
 														const patient =
 															getPatientById(
@@ -272,13 +263,12 @@ export function MonthlyScheduleView({
 																	appointment.id
 																}
 																className={cn(
-																	"p-2 rounded transition-colors cursor-pointer shadow-sm",
-																	// Texte plus grand sur grands écrans
-																	"text-sm lg:text-base xl:text-base 2xl:text-lg",
+																	"p-1.5 rounded-r transition-colors cursor-pointer",
+																	"text-xs",
 																	appointment.status ===
 																		"COMPLETED"
-																		? "bg-green-100 text-green-800 border-l-4 border-l-green-500 hover:bg-green-200 hover:text-green-900 dark:bg-green-900/20 dark:text-green-100 dark:hover:bg-green-900/30"
-																		: "bg-blue-100 text-blue-800 border-l-4 border-l-blue-500 hover:bg-blue-200 hover:text-blue-900 dark:bg-blue-900/20 dark:text-blue-100 dark:hover:bg-blue-900/30",
+																		? "bg-emerald-50 border-l-2 border-l-emerald-500 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
+																		: "bg-slate-50 border-l-2 border-l-slate-400 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800",
 																)}
 																onClick={(
 																	e,
@@ -289,47 +279,34 @@ export function MonthlyScheduleView({
 																	);
 																}}
 															>
-																<div className="font-semibold text-base lg:text-lg xl:text-xl">
-																	{
-																		appointmentTime
-																	}
+																<div className={cn(
+																	"font-medium text-xs",
+																	appointment.status === "COMPLETED"
+																		? "text-emerald-700 dark:text-emerald-300"
+																		: "text-slate-700 dark:text-slate-300"
+																)}>
+																	{appointmentTime}
 																</div>
-																<div className="truncate font-medium">
+																<div className={cn(
+																	"truncate text-xs",
+																	appointment.status === "COMPLETED"
+																		? "text-emerald-800 dark:text-emerald-200"
+																		: "text-slate-800 dark:text-slate-200"
+																)}>
 																	{patient
 																		? `${patient.firstName} ${patient.lastName}`
-																		: `Patient #${appointment.patientId}`}
+																		: `#${appointment.patientId}`}
 																</div>
-																{/* Afficher la raison sur grands écrans */}
-																{window.innerWidth >=
-																	1536 &&
-																	appointment.reason && (
-																		<div className="text-sm opacity-75 truncate mt-1">
-																			{
-																				appointment.reason
-																			}
-																		</div>
-																	)}
 															</div>
 														);
 													})}
 
-												{/* Indicateur s'il y a plus de rendez-vous (seulement sur petits/moyens écrans) */}
-												{window.innerWidth < 1536 &&
-													dayAppointments.length >
-														(window.innerWidth >=
-														1280
-															? 5
-															: 3) && (
-														<div className="text-sm text-muted-foreground text-center py-1">
-															+
-															{dayAppointments.length -
-																(window.innerWidth >=
-																1280
-																	? 5
-																	: 3)}{" "}
-															autres
-														</div>
-													)}
+												{/* Indicateur s'il y a plus de rendez-vous */}
+												{dayAppointments.length > 4 && (
+													<div className="text-xs text-muted-foreground text-center">
+														+{dayAppointments.length - 4}
+													</div>
+												)}
 
 												{/* État vide pour les jours sans rendez-vous */}
 												{dayAppointments.length === 0 &&

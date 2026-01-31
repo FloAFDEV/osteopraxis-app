@@ -213,7 +213,7 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
 							🔒 Vos données sont chiffrées localement avec
 							AES-256-GCM
 						</p>
-						<p>📋 Conforme aux exigences HDS françaises</p>
+						<p>📋 Données stockées localement, jamais transmises</p>
 					</div>
 				</CardContent>
 			</Card>

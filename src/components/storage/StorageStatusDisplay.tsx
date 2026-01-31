@@ -84,7 +84,7 @@ export const StorageStatusDisplay: React.FC = () => {
 						État du stockage hybride
 					</CardTitle>
 					<CardDescription>
-						Statut de votre stockage local sécurisé conforme HDS
+						Statut de votre stockage local sécurisé
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -109,8 +109,8 @@ export const StorageStatusDisplay: React.FC = () => {
 							</div>
 							<p className="text-sm text-muted-foreground">
 								{status?.physicalStorageAvailable
-									? "✅ Données sensibles stockées localement (conforme HDS)"
-									: "❌ Stockage local indisponible - Conformité HDS compromise"}
+									? "✅ Données sensibles stockées localement"
+									: "❌ Stockage local indisponible"}
 							</p>
 						</div>
 
