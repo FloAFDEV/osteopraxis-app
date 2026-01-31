@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { seedDemoData } from '@/services/demo-seed-data';
 import { DemoStorage } from '@/services/demo-storage';
+import { toast } from 'sonner';
 
-const DEMO_DURATION_MS = 1 * 60 * 60 * 1000; // 60 minutes (1 heure)
+const DEMO_DURATION_MS = 3 * 60 * 60 * 1000; // 3 heures
 const DEMO_MAX_ATTEMPTS = 5;
 const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 const STORAGE_KEY = 'demo_session';
@@ -21,12 +22,16 @@ interface DemoSessionData {
   cabinetName: string;
 }
 
+// Seuil d'avertissement avant expiration (10 minutes)
+const WARNING_THRESHOLD_MS = 10 * 60 * 1000;
+
 export function useDemoSession() {
   const [isDemoActive, setIsDemoActive] = useState(false);
   const [remainingMs, setRemainingMs] = useState(0);
   const [demoUserId, setDemoUserId] = useState<string | null>(null);
   const [demoCabinetId, setDemoCabinetId] = useState<string | null>(null);
   const [demoCabinetName, setDemoCabinetName] = useState<string | null>(null);
+  const warningShownRef = useRef(false);
 
   // Mode développeur automatique (localhost ou dev environment)
   const isDevMode = useCallback((): boolean => {
@@ -197,8 +202,21 @@ export function useDemoSession() {
       const remaining = session.endTime - now;
 
       if (remaining <= 0) {
+        toast.info("Votre session démo a expiré", {
+          description: "Merci d'avoir testé OsteoPraxis ! Les données de démonstration ont été effacées.",
+          duration: 8000
+        });
         endDemo();
       } else {
+        // Avertissement 10 minutes avant expiration
+        if (remaining <= WARNING_THRESHOLD_MS && !warningShownRef.current) {
+          warningShownRef.current = true;
+          const minutesLeft = Math.ceil(remaining / 60000);
+          toast.warning(`Votre session démo expire dans ${minutesLeft} minutes`, {
+            description: "Les données de démonstration seront effacées à la fin de la session.",
+            duration: 10000
+          });
+        }
         setRemainingMs(remaining);
       }
     }, 1000);
@@ -232,7 +250,7 @@ export function useDemoSession() {
     demoUserId,
     demoCabinetId,
     demoCabinetName,
-    // Informations sur les essais (5 essais de 1h sur 30 jours)
+    // Informations sur les essais (5 essais de 3h sur 30 jours)
     attemptsInfo: {
       used: isDevMode() ? 0 : (parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10)),
       max: isDevMode() ? 999 : DEMO_MAX_ATTEMPTS,
