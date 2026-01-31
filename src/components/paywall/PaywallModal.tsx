@@ -30,7 +30,7 @@ const PAYWALL_CONFIG: Record<
 	timer_expired: {
 		title: "Temps écoulé",
 		message:
-			"Votre session démo de 1 heure est terminée. Créez votre compte pour continuer sans limite.",
+			"Votre session démo de 3 heures est terminée. Créez votre compte pour continuer sans limite.",
 		icon: <Clock className="h-12 w-12 text-orange-500" />,
 		blocking: true,
 	},
@@ -140,7 +140,7 @@ export function PaywallModal({
 							<div className="flex justify-between text-sm">
 								<span className="text-gray-500">Durée</span>
 								<span className="font-medium">
-									1h → Illimitée
+									3h → Illimitée
 								</span>
 							</div>
 							<div className="flex justify-between text-sm">

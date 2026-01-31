@@ -21,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   isDemoMode: boolean;
+  isAuthenticated: boolean; // True si user connecté OU en mode démo
   startDemo: () => void;
   endDemo: () => void;
   remainingDemoTime: number;
@@ -99,11 +100,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // isAuthenticated est true si l'utilisateur est connecté OU en mode démo actif
+  const isAuthenticated = isDemoActive || !!user;
+
   const value: AuthContextType = {
     user,
     loading,
     signOut: handleSignOut,
     isDemoMode: isDemoActive,
+    isAuthenticated,
     startDemo: handleStartDemo,
     endDemo: endDemoSession,
     remainingDemoTime: remainingMs,

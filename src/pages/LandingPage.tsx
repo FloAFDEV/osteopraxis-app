@@ -15,7 +15,7 @@ import {
 	Mail,
 } from "lucide-react";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
 export default function LandingPage() {
@@ -426,28 +426,28 @@ export default function LandingPage() {
 							<h4 className="font-semibold mb-4 text-foreground">Légal</h4>
 							<ul className="space-y-2 text-sm text-muted-foreground">
 								<li>
-									<a
-										href="/legal/mentions-legales"
+									<Link
+										to="/legal/mentions-legales"
 										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
 									>
 										Mentions légales
-									</a>
+									</Link>
 								</li>
 								<li>
-									<a
-										href="/legal/cgu"
+									<Link
+										to="/legal/cgu"
 										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
 									>
 										CGU
-									</a>
+									</Link>
 								</li>
 								<li>
-									<a
-										href="/legal/politique-de-confidentialite"
+									<Link
+										to="/legal/politique-de-confidentialite"
 										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors"
 									>
 										Politique de confidentialité
-									</a>
+									</Link>
 								</li>
 							</ul>
 						</div>
