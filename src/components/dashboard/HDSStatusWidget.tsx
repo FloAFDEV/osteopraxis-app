@@ -37,7 +37,7 @@ export const HDSStatusWidget: React.FC = () => {
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Shield className="w-5 h-5" />
-						Stockage HDS
+						Stockage local
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -55,7 +55,7 @@ export const HDSStatusWidget: React.FC = () => {
 				icon: <AlertCircle className="w-5 h-5 text-amber-500" />,
 				title: "Non configuré",
 				description:
-					"Configurez le stockage sécurisé pour vos données HDS",
+					"Configurez le stockage sécurisé pour vos données sensibles",
 				badgeVariant: "secondary" as const,
 				badgeText: "Action requise",
 				actionText: "Configurer",
@@ -78,7 +78,7 @@ export const HDSStatusWidget: React.FC = () => {
 		return {
 			icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
 			title: "Actif",
-			description: "Vos données HDS sont sécurisées localement",
+			description: "Vos données sont chiffrées et stockées localement",
 			badgeVariant: "default" as const,
 			badgeText: "Opérationnel",
 			actionText: "Gérer",

@@ -48,7 +48,7 @@ export default function LandingPage() {
 					name="description"
 					content="Gérez votre cabinet d'ostéopathie simplement. Patients, rendez-vous, facturation. Licence à vie 249€, sans abonnement. Données sécurisées, conforme RGPD. Démo gratuite."
 				/>
-				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, HDS" />
+				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, stockage local" />
 				<link rel="canonical" href="https://osteopraxis.fr" />
 
 				{/* OpenGraph */}
@@ -246,7 +246,7 @@ export default function LandingPage() {
 									<li className="flex items-start gap-3">
 										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Données hébergées en France</strong> (HDS)
+											<strong className="text-foreground">Données 100% locales</strong> sur votre appareil
 										</span>
 									</li>
 									<li className="flex items-start gap-3">

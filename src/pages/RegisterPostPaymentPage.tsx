@@ -190,7 +190,7 @@ const RegisterPostPaymentPage = () => {
 							<div className="mt-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
 								<Lock className="h-4 w-4" />
 								<span>
-									Vos données sont sécurisées et conformes HDS
+									Vos données restent sur votre appareil
 								</span>
 							</div>
 						</CardContent>

@@ -59,15 +59,13 @@ export const HDSStorageFailureScreen: React.FC<
 						<AlertTriangle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
 						<AlertDescription className="text-blue-900 dark:text-blue-100">
 							<strong className="block mb-2">
-								Conformité réglementaire
+								Protection de vos données
 							</strong>
-							Les données de santé doivent être hébergées selon
-							les normes HDS :
+							OstéoPraxis utilise un stockage local sécurisé :
 							<ul className="list-disc ml-6 mt-2 space-y-1">
 								<li>Stockage local chiffré (AES-256-GCM)</li>
 								<li>
-									Aucun transit vers le cloud pour les données
-									sensibles
+									Aucune donnée transmise vers un serveur externe
 								</li>
 								<li>Contrôle total sur vos données</li>
 							</ul>
