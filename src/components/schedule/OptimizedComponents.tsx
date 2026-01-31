@@ -6,7 +6,7 @@ import { Appointment, Patient } from "@/types";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
-import { Users, ExternalLink, User, X, Trash2, FileText } from "lucide-react";
+import { Users, ExternalLink, User, X, Trash2, FileText, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Composant optimisé pour les événements Google Calendar
@@ -66,8 +66,8 @@ export const GoogleEventCard = memo(
 							{event.summary}
 						</h3>
 						{event.location && (
-							<p className="text-sm text-blue-700 truncate">
-								📍 {event.location}
+							<p className="text-sm text-blue-700 truncate flex items-center gap-1">
+								<MapPin className="h-3 w-3 flex-shrink-0" /> {event.location}
 							</p>
 						)}
 						{event.matched_patient_name && (

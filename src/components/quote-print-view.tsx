@@ -43,7 +43,7 @@ export const QuotePrintView = forwardRef<HTMLDivElement, QuotePrintViewProps>(
 					<>
 						{/* Bandeau rouge en haut */}
 						<div className="absolute top-0 left-0 right-0 bg-red-600 text-white text-center py-2 font-bold text-sm z-20">
-							⚠️ DEVIS DE DÉMONSTRATION - NON UTILISABLE À DES
+							DEVIS DE DÉMONSTRATION - NON UTILISABLE À DES
 							FINS OFFICIELLES
 						</div>
 

@@ -46,8 +46,8 @@ export const DemoSessionTimer = () => {
 						</div>
 
 						{isLowTime && (
-							<div className="text-sm text-orange-600">
-								⚠️ Session bientôt expirée
+							<div className="text-sm text-orange-600 flex items-center gap-1">
+								<AlertTriangle className="h-3 w-3" /> Session bientôt expirée
 							</div>
 						)}
 

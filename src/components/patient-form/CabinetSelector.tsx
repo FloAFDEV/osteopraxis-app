@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Building, Info, Plus, ArrowRight, Presentation } from "lucide-react";
+import { Building, Info, Plus, ArrowRight, Presentation, MapPin, Lock } from "lucide-react";
 import { isDemoSession } from "@/utils/demo-detection";
 import { Cabinet } from "@/types";
 import {
@@ -158,13 +158,13 @@ export const CabinetSelector = ({
 							)}
 						</div>
 						{selectedCabinet.address && (
-							<span className="block text-sm text-muted-foreground mt-1">
-								📍 {selectedCabinet.address}
+							<span className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+								<MapPin className="h-3 w-3" /> {selectedCabinet.address}
 							</span>
 						)}
 						{isDemoMode && (
-							<p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium">
-								🔒 Cabinet fixe en mode démo (non modifiable)
+							<p className="text-sm text-blue-600 dark:text-blue-400 mt-2 font-medium flex items-center gap-1">
+								<Lock className="h-3 w-3" /> Cabinet fixe en mode démo (non modifiable)
 							</p>
 						)}
 					</AlertDescription>

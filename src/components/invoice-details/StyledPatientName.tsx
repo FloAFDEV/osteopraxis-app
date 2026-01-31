@@ -22,12 +22,12 @@ export const StyledPatientName = ({
               : "text-gray-600 dark:text-gray-300"
           }`}
         >
-          <span>
+          <span className="text-xs px-1.5 py-0.5 rounded bg-current/10">
             {patient.gender === "Femme"
-              ? "♀️"
+              ? "F"
               : patient.gender === "Homme"
-              ? "♂️"
-              : "⚧️"}
+              ? "M"
+              : ""}
           </span>
           <span>
             {getPatientDisplayName(patient)}

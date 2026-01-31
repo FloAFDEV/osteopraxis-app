@@ -11,7 +11,7 @@ import { PatientRelationship, RELATIONSHIP_TYPES, CreatePatientRelationshipPaylo
 import { Patient } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "sonner";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Lightbulb } from "lucide-react";
 
 interface PatientRelationshipsTabProps {
   form: UseFormReturn<PatientFormValues>;
@@ -210,8 +210,8 @@ export function PatientRelationshipsTab({ form, patientId, availablePatients }: 
 
       {!patientId && (
         <div className="p-4 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            💡 Les relations familiales seront disponibles après l'enregistrement du patient.
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 flex-shrink-0" /> Les relations familiales seront disponibles après l'enregistrement du patient.
           </p>
         </div>
       )}

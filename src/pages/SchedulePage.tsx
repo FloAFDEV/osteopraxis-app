@@ -50,6 +50,7 @@ import {
 	X,
 	ExternalLink,
 	Users,
+	MapPin,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -894,8 +895,8 @@ const DaySchedule = ({
 											</h3>
 										</div>
 										{googleEvent.location && (
-											<p className="text-base lg:text-lg xl:text-xl text-purple-700 dark:text-purple-300 ml-2 truncate font-medium">
-												📍 {googleEvent.location}
+											<p className="text-base lg:text-lg xl:text-xl text-purple-700 dark:text-purple-300 ml-2 truncate font-medium flex items-center gap-1">
+												<MapPin className="h-4 w-4 flex-shrink-0" /> {googleEvent.location}
 											</p>
 										)}
 										{googleEvent.matched_patient_name && (

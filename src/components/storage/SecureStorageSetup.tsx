@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Shield, FolderOpen, Key, AlertTriangle, CheckCircle, Info, Monitor } from 'lucide-react';
+import { Shield, FolderOpen, Key, AlertTriangle, CheckCircle, Info, Monitor, Lightbulb } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { getExecutionContext } from '@/utils/iframe-detection';
@@ -203,7 +203,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
               <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
                 <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertDescription className="text-red-800 dark:text-red-200">
-                  <p className="font-bold mb-2">⚠️ AVERTISSEMENT CRITIQUE</p>
+                  <p className="font-bold mb-2 flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> AVERTISSEMENT CRITIQUE</p>
                   <ul className="space-y-1 text-sm">
                     <li>• Ce mot de passe est <strong>irremplaçable et irrécupérable</strong></li>
                     <li>• En cas d'oubli : <strong>perte définitive de TOUTES vos données</strong></li>
@@ -216,7 +216,7 @@ export const SecureStorageSetup: React.FC<SecureStorageSetupProps> = ({ onComple
               <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
                 <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 <AlertDescription className="text-blue-800 dark:text-blue-200">
-                  <p className="font-medium mb-1">💡 Bonnes pratiques :</p>
+                  <p className="font-medium mb-1 flex items-center gap-1"><Lightbulb className="h-4 w-4" /> Bonnes pratiques :</p>
                   <ul className="space-y-1 text-sm">
                     <li>• Utilisez un <strong>gestionnaire de mots de passe</strong> (Bitwarden, 1Password, etc.)</li>
                     <li>• <strong>Exportez régulièrement</strong> vos données (recommandé : 1x/mois)</li>

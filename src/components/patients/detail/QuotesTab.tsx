@@ -69,7 +69,7 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 
 	const handleCreateQuote = () => {
 		if (isDemoMode) {
-			toast.info("📋 Fonctionnalité limitée en mode démo", {
+			toast.info("Fonctionnalité limitée en mode démo", {
 				description: "La création de devis génère des documents factices non exploitables"
 			});
 		}
@@ -167,8 +167,9 @@ export function QuotesTab({ patient }: QuotesTabProps) {
 
 			{isDemoMode && (
 				<div className="mx-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-md">
-					<p className="text-sm text-orange-700 dark:text-orange-300">
-						⚠️ <strong>Mode démo :</strong> Les devis créés sont fictifs et non exploitables en dehors de la démonstration.
+					<p className="text-sm text-orange-700 dark:text-orange-300 flex items-start gap-2">
+						<AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+						<span><strong>Mode démo :</strong> Les devis créés sont fictifs et non exploitables en dehors de la démonstration.</span>
 					</p>
 				</div>
 			)}

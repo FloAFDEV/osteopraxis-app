@@ -31,6 +31,8 @@ import {
 	Calendar,
 	LayoutDashboard,
 	Settings,
+	Lock,
+	Lightbulb,
 } from "lucide-react";
 
 const HelpPage = () => {
@@ -627,8 +629,9 @@ const HelpPage = () => {
 						</p>
 						
 						<div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
-							<h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-								🔒 Sécurité et déconnexion automatique
+							<h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
+								<Lock className="h-4 w-4" />
+								Sécurité et déconnexion automatique
 							</h4>
 							<p className="text-sm text-blue-700 dark:text-blue-300">
 								Pour votre sécurité, l'application vous déconnecte automatiquement après <strong>30 minutes d'inactivité</strong>. 
@@ -639,9 +642,10 @@ const HelpPage = () => {
 						<div className="flex gap-4">
 							<Badge
 								variant="outline"
-								className="text-blue-600 border-blue-300"
+								className="text-blue-600 border-blue-300 flex items-center gap-1"
 							>
-								💡 Astuce : Utilisez les boutons "?" dans
+								<Lightbulb className="h-3 w-3" />
+								Astuce : Utilisez les boutons "?" dans
 								l'interface pour des aides contextuelles
 							</Badge>
 						</div>

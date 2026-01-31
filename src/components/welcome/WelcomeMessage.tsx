@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, Plus, Users, Calendar } from 'lucide-react';
+import { Building, Plus, Users, Calendar, Building2, CheckCircle2, Lightbulb, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
@@ -25,8 +25,9 @@ export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode 
         <Building className="h-4 w-4 text-purple-600" />
         <AlertDescription className="text-purple-800 dark:text-purple-200">
           <div className="space-y-3">
-            <div>
-              <strong>🎭 Bienvenue en mode démo !</strong>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-purple-600" />
+              <strong>Bienvenue en mode démo !</strong>
             </div>
             <p className="text-sm">
               Explorez toutes les fonctionnalités de OstéoPraxis avec des données fictives. 
@@ -59,8 +60,9 @@ export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode 
             
             {!hasCabinets && (
               <div className="space-y-2">
-                <p className="text-sm">
-                  🏢 <strong>Étape 1 :</strong> Créez votre premier cabinet pour commencer à gérer vos patients et rendez-vous.
+                <p className="text-sm flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  <span><strong>Étape 1 :</strong> Créez votre premier cabinet pour commencer à gérer vos patients et rendez-vous.</span>
                 </p>
                 <Button asChild size="sm" className="w-fit">
                   <Link to="/cabinets/new" className="flex items-center gap-2">
@@ -73,11 +75,13 @@ export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode 
             
             {hasCabinets && !hasPatients && (
               <div className="space-y-2">
-                <p className="text-sm">
-                  ✅ <strong>Cabinet configuré !</strong> 
+                <p className="text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <strong>Cabinet configuré !</strong>
                 </p>
-                <p className="text-sm">
-                  👥 <strong>Étape 2 :</strong> Ajoutez vos premiers patients pour commencer à utiliser toutes les fonctionnalités.
+                <p className="text-sm flex items-center gap-2">
+                  <Users className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  <span><strong>Étape 2 :</strong> Ajoutez vos premiers patients pour commencer à utiliser toutes les fonctionnalités.</span>
                 </p>
                 <Button asChild size="sm" className="w-fit">
                   <Link to="/patients/new" className="flex items-center gap-2">
@@ -96,8 +100,9 @@ export function WelcomeMessage({ hasCabinets, hasPatients, userName, isDemoMode 
         <Calendar className="h-4 w-4 text-green-600" />
         <AlertDescription className="text-green-800 dark:text-green-200">
           <div className="space-y-2">
-            <p className="text-sm">
-              <strong>💡 Une fois configuré, vous pourrez :</strong>
+            <p className="text-sm flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <strong>Une fois configuré, vous pourrez :</strong>
             </p>
             <ul className="text-sm space-y-1 ml-4">
               <li>• Gérer vos patients et leurs dossiers</li>

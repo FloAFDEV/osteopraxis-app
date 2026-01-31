@@ -9,7 +9,7 @@ import {
 } from "@/types/appointment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInYears, parseISO } from "date-fns";
-import { Baby, CalendarIcon, User } from "lucide-react";
+import { Baby, CalendarIcon, User, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -537,12 +537,13 @@ export function AppointmentForm({
 											disabled={isSubmitting}
 										/>
 									</FormControl>
-									<p className="text-sm text-muted-foreground mt-1">
-										ℹ️ Lors de la clôture de la séance
+									<p className="text-sm text-muted-foreground mt-1 flex items-start gap-1">
+										<Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+										<span>Lors de la clôture de la séance
 										(bouton « Clôturer la séance »), l'heure
 										réelle de fin sera automatiquement
 										enregistrée selon l'heure à laquelle
-										vous validez le formulaire.
+										vous validez le formulaire.</span>
 									</p>
 									<FormMessage />
 								</FormItem>

@@ -225,7 +225,7 @@ const NewPatientPage = () => {
 							<strong>Cabinet de rattachement :</strong> {selectedCabinet.name}
 							{selectedCabinet.address && (
 								<span className="block text-sm text-muted-foreground mt-1">
-									📍 {selectedCabinet.address}
+									<MapPin className="h-4 w-4 inline-block mr-1" />{selectedCabinet.address}
 								</span>
 							)}
 						</AlertDescription>

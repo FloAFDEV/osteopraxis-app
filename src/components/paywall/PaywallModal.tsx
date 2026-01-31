@@ -8,7 +8,7 @@ import {
 	DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Clock, Lock, Crown, Zap } from "lucide-react";
+import { Clock, Lock, Crown, Zap, XCircle, CheckCircle2 } from "lucide-react";
 import type { PaywallReason } from "@/hooks/useDemoSession";
 
 interface PaywallModalProps {
@@ -147,13 +147,13 @@ export function PaywallModal({
 								<span className="text-gray-500">
 									Sauvegarde
 								</span>
-								<span className="font-medium">❌ → ✅</span>
+								<span className="font-medium flex items-center gap-1"><XCircle className="h-3 w-3 text-red-500" /> → <CheckCircle2 className="h-3 w-3 text-green-500" /></span>
 							</div>
 							<div className="flex justify-between text-sm">
 								<span className="text-gray-500">
 									Export PDF
 								</span>
-								<span className="font-medium">❌ → ✅</span>
+								<span className="font-medium flex items-center gap-1"><XCircle className="h-3 w-3 text-red-500" /> → <CheckCircle2 className="h-3 w-3 text-green-500" /></span>
 							</div>
 						</div>
 					</div>

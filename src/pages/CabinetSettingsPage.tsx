@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Building, Phone, MapPin, Save, Mail, Image, FileImage } from "lucide-react";
+import { Building, Phone, MapPin, Save, Mail, Image, FileImage, FileText, Lightbulb } from "lucide-react";
 import { api } from "@/services/api";
 import { Layout } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
@@ -103,14 +103,16 @@ const CabinetSettingsPage = () => {
             {isDemoMode ? "Informations du cabinet (mode démo)" : "Gérez les informations de votre cabinet d'ostéopathie"}
           </p>
           {isDemoMode ? (
-            <p className="text-sm text-muted-foreground mt-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-              📝 <strong>Mode démo :</strong> Les paramètres du cabinet sont en lecture seule. 
-              Connectez-vous pour modifier vos informations.
+            <p className="text-sm text-muted-foreground mt-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 flex items-start gap-2">
+              <FileText className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <span><strong>Mode démo :</strong> Les paramètres du cabinet sont en lecture seule.
+              Connectez-vous pour modifier vos informations.</span>
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-              💡 <strong>Astuce :</strong> Les informations professionnelles et de facturation se trouvent dans 
-              <strong> Paramètres → Profil & Facturation</strong>.
+            <p className="text-sm text-muted-foreground mt-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-start gap-2">
+              <Lightbulb className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+              <span><strong>Astuce :</strong> Les informations professionnelles et de facturation se trouvent dans
+              <strong> Paramètres → Profil & Facturation</strong>.</span>
             </p>
           )}
         </div>

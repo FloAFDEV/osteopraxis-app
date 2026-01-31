@@ -17,6 +17,9 @@ import {
 	AlertTriangle,
 	ArrowRight,
 	X,
+	PartyPopper,
+	Lock,
+	Lightbulb,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -55,8 +58,8 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
 						<Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30">
 							<Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
 							<AlertDescription className="text-green-800 dark:text-green-200">
-								<p className="font-semibold mb-2">
-									🎉 Première connexion
+								<p className="font-semibold mb-2 flex items-center gap-2">
+									<PartyPopper className="h-4 w-4" /> Première connexion
 								</p>
 								<p className="text-sm">
 									Pour garantir la{" "}
@@ -74,8 +77,8 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
 					<Alert className="border-primary/20 bg-primary/5">
 						<Shield className="h-5 w-5 text-primary" />
 						<AlertDescription>
-							<p className="font-semibold mb-2">
-								🔒 Protection maximale de vos données médicales
+							<p className="font-semibold mb-2 flex items-center gap-2">
+								<Lock className="h-4 w-4" /> Protection maximale de vos données médicales
 							</p>
 							<p className="text-sm">
 								OstéoPraxis respecte la réglementation{" "}
@@ -228,8 +231,8 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
 						</Button>
 					</div>
 
-					<p className="text-sm text-center text-muted-foreground">
-						💡 <strong>Fortement recommandé</strong> pour une
+					<p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-2">
+						<Lightbulb className="h-4 w-4" /> <strong>Fortement recommandé</strong> pour une
 						utilisation professionnelle conforme HDS
 					</p>
 				</CardContent>

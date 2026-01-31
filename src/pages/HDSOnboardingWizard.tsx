@@ -12,6 +12,7 @@ import {
 	CheckCircle,
 	ArrowRight,
 	ArrowLeft,
+	Lightbulb,
 } from "lucide-react";
 import {
 	Card,
@@ -413,8 +414,8 @@ export default function HDSOnboardingWizard() {
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
 
-								<p className="text-sm text-center text-muted-foreground">
-									💡 Astuce : Pensez à exporter vos données
+								<p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-1">
+									<Lightbulb className="h-4 w-4" /> Astuce : Pensez à exporter vos données
 									régulièrement depuis les paramètres
 								</p>
 							</CardContent>

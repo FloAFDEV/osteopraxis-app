@@ -20,6 +20,10 @@ import {
 	CheckCircle,
 	Shield,
 	FileWarning,
+	Target,
+	Lightbulb,
+	FileText,
+	Lock,
 } from "lucide-react";
 import { hdsSecureManager } from "@/services/hds-secure-storage/hds-secure-manager";
 import { toast } from "sonner";
@@ -84,8 +88,8 @@ export const FirstBackupPrompt: React.FC<FirstBackupPromptProps> = ({
 			>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-xl">
-						<Shield className="w-6 h-6 text-primary" />
-						🎯 ÉTAPE CRUCIALE : Créez votre première sauvegarde
+						<Target className="w-6 h-6 text-primary" />
+						ÉTAPE CRUCIALE : Créez votre première sauvegarde
 					</DialogTitle>
 					<DialogDescription>
 						Cette sauvegarde est votre assurance en cas d'oubli du
@@ -98,8 +102,8 @@ export const FirstBackupPrompt: React.FC<FirstBackupPromptProps> = ({
 					<Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
 						<AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
 						<AlertDescription className="text-red-800 dark:text-red-200">
-							<p className="font-bold text-base mb-2">
-								⚠️ Sans cette sauvegarde :
+							<p className="font-bold text-base mb-2 flex items-center gap-2">
+								<AlertTriangle className="h-5 w-5" /> Sans cette sauvegarde :
 							</p>
 							<ul className="space-y-1 text-sm">
 								<li>
@@ -164,8 +168,8 @@ export const FirstBackupPrompt: React.FC<FirstBackupPromptProps> = ({
 							<div className="flex items-start gap-4">
 								<CheckCircle className="w-12 h-12 text-green-600 flex-shrink-0" />
 								<div className="flex-1">
-									<h3 className="font-semibold text-lg text-green-700 dark:text-green-300 mb-2">
-										✅ Sauvegarde créée avec succès !
+									<h3 className="font-semibold text-lg text-green-700 dark:text-green-300 mb-2 flex items-center gap-2">
+										<CheckCircle className="h-5 w-5" /> Sauvegarde créée avec succès !
 									</h3>
 									<p className="text-sm text-green-600 dark:text-green-400">
 										Votre fichier .phds a été téléchargé.
@@ -181,8 +185,8 @@ export const FirstBackupPrompt: React.FC<FirstBackupPromptProps> = ({
 					<Alert>
 						<Shield className="h-4 w-4" />
 						<AlertDescription>
-							<p className="font-medium mb-2">
-								💡 À propos de ce fichier .phds :
+							<p className="font-medium mb-2 flex items-center gap-2">
+								<Lightbulb className="h-4 w-4" /> À propos de ce fichier .phds :
 							</p>
 							<ul className="space-y-1 text-sm">
 								<li>
@@ -221,12 +225,12 @@ export const FirstBackupPrompt: React.FC<FirstBackupPromptProps> = ({
 
 					{/* Rappel final */}
 					<div className="text-sm text-center text-muted-foreground space-y-1">
-						<p>
-							📋 Recommandation : Créez une nouvelle sauvegarde
+						<p className="flex items-center justify-center gap-1">
+							<FileText className="h-3 w-3" /> Recommandation : Créez une nouvelle sauvegarde
 							chaque mois
 						</p>
-						<p>
-							🔒 Ce fichier est votre seul moyen de récupération
+						<p className="flex items-center justify-center gap-1">
+							<Lock className="h-3 w-3" /> Ce fichier est votre seul moyen de récupération
 							en cas de problème
 						</p>
 					</div>

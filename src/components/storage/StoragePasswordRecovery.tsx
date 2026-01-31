@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card } from '@/components/ui/card';
-import { AlertTriangle, Upload, Shield, Key, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertTriangle, Upload, Shield, Key, RefreshCw, Trash2, Lightbulb, CheckCircle } from 'lucide-react';
 import { hdsSecureManager } from '@/services/hds-secure-storage/hds-secure-manager';
 import { toast } from 'sonner';
 
@@ -211,8 +211,8 @@ export const StoragePasswordRecovery: React.FC<StoragePasswordRecoveryProps> = (
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2 text-destructive">Je n'ai pas de sauvegarde</h3>
-                    <p className="text-muted-foreground text-sm">
-                      ⚠️ Supprimez toutes les données et recommencez (irréversible)
+                    <p className="text-muted-foreground text-sm flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" /> Supprimez toutes les données et recommencez (irréversible)
                     </p>
                   </div>
                 </div>
@@ -220,8 +220,8 @@ export const StoragePasswordRecovery: React.FC<StoragePasswordRecoveryProps> = (
 
               <Alert>
                 <Shield className="h-4 w-4" />
-                <AlertDescription>
-                  💡 Recommandation : Si vous avez une sauvegarde .phds récente, utilisez la première option pour récupérer vos données.
+                <AlertDescription className="flex items-start gap-1">
+                  <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" /> Recommandation : Si vous avez une sauvegarde .phds récente, utilisez la première option pour récupérer vos données.
                 </AlertDescription>
               </Alert>
             </div>
@@ -240,8 +240,8 @@ export const StoragePasswordRecovery: React.FC<StoragePasswordRecoveryProps> = (
                   className="mt-2"
                 />
                 {backupFile && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    ✅ Fichier sélectionné : {backupFile.name}
+                  <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3 text-green-500" /> Fichier sélectionné : {backupFile.name}
                   </p>
                 )}
               </div>
