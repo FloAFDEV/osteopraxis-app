@@ -176,7 +176,7 @@ export const DemoGuide: React.FC = () => {
 						<div className="text-sm text-cyan-700 dark:text-cyan-200">
 							<strong>Conseil :</strong> Les données créées en
 							mode démo sont temporaires et seront supprimées
-							après 1 heure. Parfait pour tester sans risque !
+							après 3 heures. Parfait pour tester sans risque !
 						</div>
 					</div>
 				</div>

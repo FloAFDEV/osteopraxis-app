@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { seedDemoData } from '@/services/demo-seed-data';
 import { DemoStorage } from '@/services/demo-storage';
+import { toast } from 'sonner';
 
-const DEMO_DURATION_MS = 1 * 60 * 60 * 1000; // 60 minutes (1 heure)
-const DEMO_MAX_ATTEMPTS = 5;
-const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
+// Configuration de la session démo
+const DEMO_DURATION_MS = 3 * 60 * 60 * 1000; // 3 heures
+const DEMO_MAX_ATTEMPTS = 5; // 5 essais maximum par période
+const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // Réinitialisation tous les 30 jours (≈ 1 mois)
 const STORAGE_KEY = 'demo_session';
 const ATTEMPTS_KEY = 'demo_attempts_count';
 const LAST_RESET_KEY = 'demo_attempts_last_reset';
@@ -197,6 +199,10 @@ export function useDemoSession() {
       const remaining = session.endTime - now;
 
       if (remaining <= 0) {
+        toast.info("Votre session démo a expiré", {
+          description: "Merci d'avoir testé OsteoPraxis ! Vous pouvez relancer une nouvelle démo si vous avez encore des essais disponibles.",
+          duration: 8000
+        });
         endDemo();
       } else {
         setRemainingMs(remaining);
@@ -232,7 +238,7 @@ export function useDemoSession() {
     demoUserId,
     demoCabinetId,
     demoCabinetName,
-    // Informations sur les essais (5 essais de 1h sur 30 jours)
+    // Informations sur les essais (5 essais de 3h sur 30 jours)
     attemptsInfo: {
       used: isDevMode() ? 0 : (parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10)),
       max: isDevMode() ? 999 : DEMO_MAX_ATTEMPTS,
