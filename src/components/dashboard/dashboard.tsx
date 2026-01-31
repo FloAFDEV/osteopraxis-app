@@ -7,6 +7,7 @@ import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useStorageMode } from "@/hooks/useStorageMode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Calendar,
 	UserPlus,
@@ -16,6 +17,8 @@ import {
 	Receipt,
 	BarChart3,
 	ChevronRight,
+	Sparkles,
+	ArrowRight,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/services/api";
@@ -130,6 +133,30 @@ export function Dashboard() {
 		<div className="space-y-4 p-4">
 			{/* Header Image Banner */}
 			<DashboardHeader />
+
+			{/* Guide de bienvenue pour la démo */}
+			{isDemoMode && recentPatients.length === 0 && (
+				<Alert className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border-purple-200 dark:border-purple-800">
+					<Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+					<AlertDescription className="text-purple-900 dark:text-purple-100">
+						<p className="font-semibold text-base mb-2">
+							Bienvenue dans la démo OsteoPraxis !
+						</p>
+						<p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+							Vous avez 3 heures pour explorer. Commencez par créer votre premier patient.
+						</p>
+						<Button
+							size="sm"
+							onClick={() => navigate("/patients/new")}
+							className="bg-purple-600 hover:bg-purple-700 text-white"
+						>
+							<UserPlus className="h-4 w-4 mr-2" />
+							Créer mon premier patient
+							<ArrowRight className="h-4 w-4 ml-2" />
+						</Button>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			{/* Rappel de sauvegarde (seulement en mode inscrit, pas en démo) */}
 			{!isDemoMode && <BackupReminderBanner />}

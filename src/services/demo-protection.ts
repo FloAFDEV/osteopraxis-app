@@ -4,7 +4,7 @@
  * Ce module assure que le mode démo reste strictement isolé :
  * - Aucun accès Supabase
  * - Aucun accès aux cabinets réels
- * - Stockage limité à sessionStorage (1 heure)
+ * - Stockage limité à sessionStorage (3 heures)
  */
 
 import { isDemoSession } from '@/utils/demo-detection';
@@ -55,7 +55,7 @@ export const DEMO_CABINET_INFO = {
   description: "Ce cabinet est fictif et conçu uniquement pour tester l'application",
   limitations: [
     "Aucune donnée réelle n'est stockée",
-    "Les données disparaissent après 1 heure",
+    "Les données disparaissent après 3 heures",
     "Un seul cabinet est disponible en mode démo",
     "Aucune modification du cabinet n'est possible"
   ]

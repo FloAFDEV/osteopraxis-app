@@ -30,7 +30,7 @@ const PAYWALL_CONFIG: Record<
 	timer_expired: {
 		title: "Temps écoulé",
 		message:
-			"Votre session démo de 1 heure est terminée. Créez votre compte pour continuer sans limite.",
+			"Votre session démo de 3 heures est terminée. Créez votre compte pour continuer sans limite.",
 		icon: <Clock className="h-12 w-12 text-orange-500" />,
 		blocking: true,
 	},
