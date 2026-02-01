@@ -28,7 +28,7 @@ export const PatientOwnershipBadge: React.FC<PatientOwnershipBadgeProps> = ({
 		return (
 			<Badge
 				variant={variant}
-				className="text-sm bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200"
+				className="text-sm bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700 dark:hover:bg-blue-800/50"
 			>
 				<User className="w-3 h-3 mr-1" />
 				Mon patient
@@ -40,7 +40,7 @@ export const PatientOwnershipBadge: React.FC<PatientOwnershipBadgeProps> = ({
 		return (
 			<Badge
 				variant={variant}
-				className="text-sm bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+				className="text-sm bg-green-100 text-green-800 border-green-200 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700 dark:hover:bg-green-800/50"
 			>
 				<Users className="w-3 h-3 mr-1" />
 				Patient du cabinet
