@@ -44,18 +44,19 @@ export const InvoiceDetails = ({
 
 	const getPaymentMethod = (method?: string) => {
 		if (!method) return "Non spécifié";
-		switch (method) {
-			case "CB":
-				return "Carte Bancaire";
-			case "ESPECES":
-				return "Espèces";
-			case "CHEQUE":
-				return "Chèque";
-			case "VIREMENT":
-				return "Virement bancaire";
-			default:
-				return method;
-		}
+		const translations: Record<string, string> = {
+			// Français
+			CB: "Carte Bancaire",
+			ESPECES: "Espèces",
+			CHEQUE: "Chèque",
+			VIREMENT: "Virement bancaire",
+			// Anglais (mode démo)
+			card: "Carte Bancaire",
+			cash: "Espèces",
+			check: "Chèque",
+			transfer: "Virement bancaire",
+		};
+		return translations[method] || method;
 	};
 
 	return (
