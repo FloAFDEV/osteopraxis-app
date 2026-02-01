@@ -11,7 +11,7 @@ export interface PatientFormValues {
   height?: number | null;
   weight?: number | null;
   bmi?: number | null;
-  cabinetId?: number | null;
+  cabinetId?: number | string | null;
   maritalStatus?: string | null;
   occupation?: string | null;
   hasChildren?: string | null;
@@ -126,6 +126,6 @@ export interface PatientFormProps {
   onSubmit?: (data: PatientFormValues) => Promise<void>;
   onSave?: (data: PatientFormValues) => Promise<void>;
   emailRequired?: boolean;
-  selectedCabinetId?: number | null;
+  selectedCabinetId?: number | string | null;
   isLoading?: boolean;
 }

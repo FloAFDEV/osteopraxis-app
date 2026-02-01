@@ -49,7 +49,7 @@ const getPatientSchema = (emailRequired: boolean = false) =>
 		currentTreatment: z.string().optional().nullable(),
 		handedness: z.string().optional().nullable(),
 		familyStatus: z.string().optional().nullable(),
-		cabinetId: z.coerce.number().nullable().optional(),
+		cabinetId: z.union([z.number(), z.string()]).nullable().optional(),
 		complementaryExams: z.string().optional().nullable(),
 		generalSymptoms: z.string().optional().nullable(),
 		pregnancyHistory: z.string().optional().nullable(),
