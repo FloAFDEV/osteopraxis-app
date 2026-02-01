@@ -1,45 +1,59 @@
 import React from "react";
 import { HelpButton } from "@/components/ui/help-button";
+import { Calendar, Clock, CheckCircle2 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const AppointmentsHeader = () => {
-	return (
-		<div className="relative w-full rounded-xl overflow-hidden shadow-sm border border-border mb-6">
-			{/* Fond subtil avec gradient discret */}
-			<div
-				className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"
-				aria-hidden="true"
-			/>
+	const today = format(new Date(), "EEEE d MMMM yyyy", { locale: fr });
 
-			{/* Contenu simplifié */}
-			<div className="relative z-10 flex items-center gap-3 px-5 py-6">
-				<div className="rounded-lg bg-primary/10 p-3 flex items-center justify-center">
-					<svg
-						className="w-6 h-6 text-primary"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={2}
-							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					</svg>
-				</div>
-				<div>
-					<div className="flex items-center gap-2 mb-1">
-						<h1 className="text-xl font-semibold text-foreground">
-							Mes Séances
-						</h1>
-						<HelpButton
-							content="Gérez toutes vos séances : passées, présentes et futures."
-							className="text-muted-foreground hover:text-foreground"
-						/>
+	return (
+		<div className="relative w-full overflow-hidden rounded-xl shadow-md mb-6">
+			{/* Image de fond avec overlay */}
+			<div className="relative w-full h-36 md:h-44">
+				<img
+					src="/images/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png"
+					alt="Cabinet d'ostéopathie"
+					className="w-full h-full object-cover"
+					loading="lazy"
+				/>
+				<div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/60 to-transparent" />
+
+				{/* Contenu */}
+				<div className="absolute inset-0 flex items-center">
+					<div className="px-6 md:px-8">
+						<div className="flex items-center gap-3 mb-2">
+							<div className="p-2.5 bg-white/15 backdrop-blur-sm rounded-xl">
+								<Calendar className="h-6 w-6 text-white" />
+							</div>
+							<div>
+								<div className="flex items-center gap-2">
+									<h1 className="text-xl md:text-2xl font-bold text-white">
+										Mes Séances
+									</h1>
+									<HelpButton
+										content="Gérez toutes vos séances : passées, présentes et futures. Modifiez les statuts, créez des factures et suivez votre activité."
+										className="text-white/70 hover:text-white"
+									/>
+								</div>
+								<p className="text-white/80 text-sm capitalize mt-0.5">
+									{today}
+								</p>
+							</div>
+						</div>
+
+						{/* Stats rapides */}
+						<div className="flex items-center gap-4 mt-3">
+							<div className="flex items-center gap-1.5 text-white/90 text-xs">
+								<Clock className="h-3.5 w-3.5" />
+								<span>Planification</span>
+							</div>
+							<div className="flex items-center gap-1.5 text-white/90 text-xs">
+								<CheckCircle2 className="h-3.5 w-3.5" />
+								<span>Suivi</span>
+							</div>
+						</div>
 					</div>
-					<p className="text-sm text-muted-foreground">
-						Organisez et suivez vos rendez-vous
-					</p>
 				</div>
 			</div>
 		</div>
