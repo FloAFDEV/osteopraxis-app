@@ -21,45 +21,55 @@ export function DashboardHeaderCompact() {
 	}
 
 	return (
-		<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-			{/* Left: Greeting */}
-			<div>
-				<h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-					{greeting}, {userName}
-				</h1>
-				<p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-					{today}
-				</p>
+		<div className="mb-6">
+			{/* Image banner compacte */}
+			<div className="relative w-full h-32 md:h-40 overflow-hidden rounded-xl shadow-md mb-4">
+				<img
+					src="/images/3b5eb6d0-bf13-4f00-98c8-6cc25a7e5c4f.png"
+					alt="Cabinet d'ostéopathie"
+					className="w-full h-full object-cover"
+					loading="lazy"
+				/>
+				<div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/50 to-transparent flex items-center">
+					<div className="px-5 md:px-8">
+						<h1 className="text-xl md:text-2xl text-white font-semibold">
+							{greeting}, {userName}
+						</h1>
+						<p className="text-white/80 text-sm capitalize mt-0.5">
+							{today}
+						</p>
+					</div>
+				</div>
 			</div>
 
-			{/* Right: Action buttons */}
-			<div className="flex items-center gap-2">
+			{/* Actions rapides */}
+			<div className="flex flex-wrap items-center gap-2">
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={() => navigate("/patients/new")}
-					className="text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+					className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 shadow-sm"
 				>
-					<UserPlus className="h-4 w-4 mr-1.5" />
-					Patient
+					<UserPlus className="h-4 w-4 mr-1.5 text-blue-600 dark:text-blue-400" />
+					Nouveau patient
 				</Button>
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={() => navigate("/appointments/new")}
-					className="text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+					className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 shadow-sm"
 				>
-					<Calendar className="h-4 w-4 mr-1.5" />
-					Séance
+					<Calendar className="h-4 w-4 mr-1.5 text-purple-600 dark:text-purple-400" />
+					Nouvelle séance
 				</Button>
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={() => navigate("/invoices/new")}
-					className="text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+					className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 shadow-sm"
 				>
-					<FileText className="h-4 w-4 mr-1.5" />
-					Facture
+					<FileText className="h-4 w-4 mr-1.5 text-emerald-600 dark:text-emerald-400" />
+					Nouvelle facture
 				</Button>
 			</div>
 		</div>
