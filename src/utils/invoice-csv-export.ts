@@ -9,10 +9,16 @@ const statusTranslations: Record<string, string> = {
 };
 
 const paymentMethodTranslations: Record<string, string> = {
+	// Français
 	CB: "Carte Bancaire",
 	ESPECES: "Espèces",
 	CHEQUE: "Chèque",
 	VIREMENT: "Virement",
+	// Anglais (mode démo)
+	card: "Carte Bancaire",
+	cash: "Espèces",
+	check: "Chèque",
+	transfer: "Virement",
 };
 
 interface ExportOptions {

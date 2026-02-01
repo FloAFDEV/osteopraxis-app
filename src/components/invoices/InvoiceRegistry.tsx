@@ -51,10 +51,16 @@ const statusConfig = {
 };
 
 const paymentMethodLabels: Record<string, string> = {
+	// Français
 	CB: "CB",
 	ESPECES: "Espèces",
 	CHEQUE: "Chèque",
 	VIREMENT: "Virement",
+	// Anglais (mode démo)
+	card: "CB",
+	cash: "Espèces",
+	check: "Chèque",
+	transfer: "Virement",
 };
 
 export function InvoiceRegistry({
