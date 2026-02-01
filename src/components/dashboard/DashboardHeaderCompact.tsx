@@ -1,4 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useStorageMode } from "@/hooks/useStorageMode";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/services/api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { UserPlus, Calendar, FileText } from "lucide-react";
@@ -7,11 +10,35 @@ import { Button } from "@/components/ui/button";
 
 export function DashboardHeaderCompact() {
 	const { user } = useAuth();
+	const { isDemoMode } = useStorageMode();
 	const navigate = useNavigate();
+
+	// Récupérer le nom de l'ostéopathe en mode connecté
+	const { data: osteopath } = useQuery({
+		queryKey: ["osteopath", user?.osteopathId],
+		queryFn: () => user?.osteopathId ? api.getOsteopathById(user.osteopathId) : null,
+		enabled: !isDemoMode && !!user?.osteopathId,
+	});
 
 	const today = format(new Date(), "EEEE d MMMM yyyy", { locale: fr });
 	const greeting = getGreeting();
-	const userName = user?.firstName || "Docteur";
+
+	// Déterminer le nom à afficher
+	const getUserName = () => {
+		if (isDemoMode) {
+			return "Dr. Utilisateur Démo";
+		}
+		if (osteopath?.name) {
+			return osteopath.name;
+		}
+		if (user?.firstName && user?.lastName) {
+			return `${user.firstName} ${user.lastName}`;
+		}
+		if (user?.firstName) {
+			return user.firstName;
+		}
+		return "Docteur";
+	};
 
 	function getGreeting() {
 		const hour = new Date().getHours();
@@ -33,7 +60,7 @@ export function DashboardHeaderCompact() {
 				<div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/50 to-transparent flex items-center">
 					<div className="px-5 md:px-8">
 						<h1 className="text-xl md:text-2xl text-white font-semibold">
-							{greeting}, {userName}
+							{greeting}, {getUserName()}
 						</h1>
 						<p className="text-white/80 text-sm capitalize mt-0.5">
 							{today}
