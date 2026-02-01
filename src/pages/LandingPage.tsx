@@ -25,12 +25,12 @@ export default function LandingPage() {
 
 	useEffect(() => {
 		if (!loading && user) {
-			navigate('/dashboard');
+			navigate("/dashboard");
 		}
 	}, [user, loading, navigate]);
 
 	const handleGetStarted = () => {
-		navigate('/register');
+		navigate("/register");
 	};
 
 	if (loading) {
@@ -44,43 +44,63 @@ export default function LandingPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			<Helmet>
-				<title>OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie</title>
+				<title>
+					OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence
+					à vie
+				</title>
 				<meta
 					name="description"
 					content="Gérez votre cabinet d'ostéopathie simplement. Patients, rendez-vous, facturation. Licence à vie 249€, sans abonnement. Données sécurisées, conforme RGPD. Démo gratuite."
 				/>
-				<meta name="keywords" content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, stockage local" />
+				<meta
+					name="keywords"
+					content="logiciel ostéopathe, gestion cabinet ostéopathie, facturation ostéopathe, RGPD, logiciel médical, stockage local"
+				/>
 				<link rel="canonical" href="https://osteopraxis.fr" />
 
 				{/* OpenGraph */}
 				<meta property="og:type" content="website" />
-				<meta property="og:title" content="OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie" />
-				<meta property="og:description" content="Gérez votre cabinet d'ostéopathie simplement. Licence à vie, sans abonnement. Démo gratuite." />
+				<meta
+					property="og:title"
+					content="OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie"
+				/>
+				<meta
+					property="og:description"
+					content="Gérez votre cabinet d'ostéopathie simplement. Licence à vie, sans abonnement. Démo gratuite."
+				/>
 				<meta property="og:url" content="https://osteopraxis.fr" />
 				<meta property="og:site_name" content="OstéoPraxis" />
 				<meta property="og:locale" content="fr_FR" />
 
 				{/* Twitter Card */}
 				<meta name="twitter:card" content="summary_large_image" />
-				<meta name="twitter:title" content="OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie" />
-				<meta name="twitter:description" content="Gérez votre cabinet d'ostéopathie simplement. Licence à vie, sans abonnement." />
+				<meta
+					name="twitter:title"
+					content="OstéoPraxis - Logiciel de gestion pour ostéopathes | Licence à vie"
+				/>
+				<meta
+					name="twitter:description"
+					content="Gérez votre cabinet d'ostéopathie simplement. Licence à vie, sans abonnement."
+				/>
 
 				{/* JSON-LD Schema */}
 				<script type="application/ld+json">
 					{JSON.stringify({
 						"@context": "https://schema.org",
 						"@type": "SoftwareApplication",
-						"name": "OstéoPraxis",
-						"applicationCategory": "BusinessApplication",
-						"operatingSystem": "Web Browser",
-						"description": "Logiciel de gestion pour cabinets d'ostéopathie - Projet en développement",
-						"offers": {
+						name: "OstéoPraxis",
+						applicationCategory: "BusinessApplication",
+						operatingSystem: "Web Browser",
+						description:
+							"Logiciel de gestion pour cabinets d'ostéopathie - Projet en développement",
+						offers: {
 							"@type": "Offer",
-							"price": "249",
-							"priceCurrency": "EUR",
-							"availability": "https://schema.org/PreOrder",
-							"description": "Licence à vie, paiement unique - Bientôt disponible"
-						}
+							price: "249",
+							priceCurrency: "EUR",
+							availability: "https://schema.org/PreOrder",
+							description:
+								"Licence à vie, paiement unique - Bientôt disponible",
+						},
 					})}
 				</script>
 			</Helmet>
@@ -91,7 +111,10 @@ export default function LandingPage() {
 						<h1 className="text-2xl font-bold text-foreground">
 							OstéoPraxis
 						</h1>
-						<nav className="flex items-center gap-4" aria-label="Navigation principale">
+						<nav
+							className="flex items-center gap-4"
+							aria-label="Navigation principale"
+						>
 							<ThemeToggle />
 							<Button
 								onClick={startDemo}
@@ -111,7 +134,10 @@ export default function LandingPage() {
 					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
 						<div className="text-center">
 							<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 motion-safe:animate-fade-in">
-								<Sparkles className="h-4 w-4" aria-hidden="true" />
+								<Sparkles
+									className="h-4 w-4"
+									aria-hidden="true"
+								/>
 								<span>Licence à vie — Lancement bientôt</span>
 							</div>
 
@@ -120,9 +146,11 @@ export default function LandingPage() {
 							</h2>
 
 							<p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto motion-safe:animate-fade-in">
-								Outil simple pour gérer vos patients, rendez-vous et factures.
+								Outil simple pour gérer vos patients,
+								rendez-vous et factures.
 								<span className="block mt-2 text-primary font-semibold">
-									Sans abonnement • Données locales • Conforme RGPD
+									Sans abonnement • Données locales • Conforme
+									RGPD
 								</span>
 							</p>
 
@@ -141,14 +169,18 @@ export default function LandingPage() {
 									className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 								>
 									<a href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis&body=Bonjour,%0A%0AJe%20souhaite%20être%20informé(e)%20du%20lancement%20d'OstéoPraxis.%0A%0AMerci%20!">
-										<Bell className="mr-2 h-5 w-5" aria-hidden="true" />
+										<Bell
+											className="mr-2 h-5 w-5"
+											aria-hidden="true"
+										/>
 										Rejoindre la liste d'attente
 									</a>
 								</Button>
 							</div>
 
 							<p className="text-sm text-muted-foreground mt-4">
-								Accès immédiat • 3 heures de test • Aucune inscription
+								Accès immédiat • 3 heures de test • Aucune
+								inscription
 							</p>
 						</div>
 					</div>
@@ -161,7 +193,8 @@ export default function LandingPage() {
 							Ce que vous pouvez tester
 						</h3>
 						<p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-							Découvrez les fonctionnalités essentielles pour gérer votre cabinet en toute simplicité
+							Découvrez les fonctionnalités essentielles pour
+							gérer votre cabinet en toute simplicité
 						</p>
 
 						<div className="grid md:grid-cols-3 gap-8">
@@ -169,7 +202,10 @@ export default function LandingPage() {
 							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
 								{/* Preview */}
 								<div className="p-4 bg-muted/30">
-									<FeaturePreview type="calendar" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
+									<FeaturePreview
+										type="calendar"
+										className="w-full h-48 group-hover:scale-[1.02] transition-transform"
+									/>
 								</div>
 								{/* Content */}
 								<div className="p-5 flex-1 flex flex-col">
@@ -179,12 +215,19 @@ export default function LandingPage() {
 									</div>
 									<div className="flex items-center gap-3 mb-2">
 										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-											<Calendar className="h-5 w-5 text-primary" aria-hidden="true" />
+											<Calendar
+												className="h-5 w-5 text-primary"
+												aria-hidden="true"
+											/>
 										</div>
-										<h4 className="font-semibold text-lg">Gestion des rendez-vous</h4>
+										<h4 className="font-semibold text-lg">
+											Gestion des rendez-vous
+										</h4>
 									</div>
 									<p className="text-muted-foreground text-sm flex-1">
-										Planifiez et organisez vos consultations avec un calendrier intuitif. Visualisez votre planning en un coup d'œil.
+										Planifiez et organisez vos consultations
+										avec un calendrier intuitif. Visualisez
+										votre planning en un coup d'œil.
 									</p>
 								</div>
 							</div>
@@ -193,7 +236,10 @@ export default function LandingPage() {
 							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
 								{/* Preview */}
 								<div className="p-4 bg-muted/30">
-									<FeaturePreview type="patient" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
+									<FeaturePreview
+										type="patient"
+										className="w-full h-48 group-hover:scale-[1.02] transition-transform"
+									/>
 								</div>
 								{/* Content */}
 								<div className="p-5 flex-1 flex flex-col">
@@ -203,12 +249,19 @@ export default function LandingPage() {
 									</div>
 									<div className="flex items-center gap-3 mb-2">
 										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-											<Users className="h-5 w-5 text-primary" aria-hidden="true" />
+											<Users
+												className="h-5 w-5 text-primary"
+												aria-hidden="true"
+											/>
 										</div>
-										<h4 className="font-semibold text-lg">Dossiers patients</h4>
+										<h4 className="font-semibold text-lg">
+											Dossiers patients
+										</h4>
 									</div>
 									<p className="text-muted-foreground text-sm flex-1">
-										Créez et gérez les fiches de vos patients avec leurs informations médicales complètes, en toute sécurité.
+										Créez et gérez les fiches de vos
+										patients avec leurs informations
+										médicales complètes, en toute sécurité.
 									</p>
 								</div>
 							</div>
@@ -217,7 +270,10 @@ export default function LandingPage() {
 							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
 								{/* Preview */}
 								<div className="p-4 bg-muted/30">
-									<FeaturePreview type="invoice" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
+									<FeaturePreview
+										type="invoice"
+										className="w-full h-48 group-hover:scale-[1.02] transition-transform"
+									/>
 								</div>
 								{/* Content */}
 								<div className="p-5 flex-1 flex flex-col">
@@ -227,12 +283,19 @@ export default function LandingPage() {
 									</div>
 									<div className="flex items-center gap-3 mb-2">
 										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-											<FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+											<FileText
+												className="h-5 w-5 text-primary"
+												aria-hidden="true"
+											/>
 										</div>
-										<h4 className="font-semibold text-lg">Facturation</h4>
+										<h4 className="font-semibold text-lg">
+											Facturation
+										</h4>
 									</div>
 									<p className="text-muted-foreground text-sm flex-1">
-										Générez vos factures en quelques clics et suivez vos paiements. Export PDF automatique.
+										Générez vos factures en quelques clics
+										et suivez vos paiements. Export PDF
+										automatique.
 									</p>
 								</div>
 							</div>
@@ -245,7 +308,7 @@ export default function LandingPage() {
 								size="lg"
 								className="text-lg px-8 py-6 transition-all hover:scale-105"
 							>
-								Tester gratuitement pendant 60 minutes
+								Tester gratuitement pendant 3 heures
 							</Button>
 						</div>
 					</div>
@@ -267,16 +330,25 @@ export default function LandingPage() {
 							<div className="relative bg-background border-2 border-primary rounded-2xl p-8 sm:p-10 shadow-xl">
 								{/* Badge "Bientôt disponible" */}
 								<div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-500 text-white text-sm font-semibold rounded-full flex items-center gap-2">
-									<Construction className="h-4 w-4" aria-hidden="true" />
+									<Construction
+										className="h-4 w-4"
+										aria-hidden="true"
+									/>
 									Bientôt disponible
 								</div>
 
 								<div className="text-center mb-8">
 									<div className="flex items-baseline justify-center gap-2 mb-2">
-										<span className="text-5xl sm:text-6xl font-bold text-foreground">249€</span>
-										<span className="text-xl text-muted-foreground">TTC</span>
+										<span className="text-5xl sm:text-6xl font-bold text-foreground">
+											249€
+										</span>
+										<span className="text-xl text-muted-foreground">
+											TTC
+										</span>
 									</div>
-									<p className="text-lg font-medium text-primary">Licence à vie</p>
+									<p className="text-lg font-medium text-primary">
+										Licence à vie
+									</p>
 									<p className="text-muted-foreground text-sm mt-1">
 										Une seule fois, pour toujours
 									</p>
@@ -284,33 +356,63 @@ export default function LandingPage() {
 
 								<ul className="space-y-4 mb-8" role="list">
 									<li className="flex items-start gap-3">
-										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+										<Check
+											className="h-5 w-5 text-primary flex-shrink-0 mt-0.5"
+											aria-hidden="true"
+										/>
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Accès complet</strong> à toutes les fonctionnalités
+											<strong className="text-foreground">
+												Accès complet
+											</strong>{" "}
+											à toutes les fonctionnalités
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
-										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+										<Check
+											className="h-5 w-5 text-primary flex-shrink-0 mt-0.5"
+											aria-hidden="true"
+										/>
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Mises à jour incluses</strong> à vie
+											<strong className="text-foreground">
+												Mises à jour incluses
+											</strong>{" "}
+											à vie
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
-										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+										<Check
+											className="h-5 w-5 text-primary flex-shrink-0 mt-0.5"
+											aria-hidden="true"
+										/>
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Données 100% locales</strong> sur votre appareil
+											<strong className="text-foreground">
+												Données 100% locales
+											</strong>{" "}
+											sur votre appareil
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
-										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+										<Check
+											className="h-5 w-5 text-primary flex-shrink-0 mt-0.5"
+											aria-hidden="true"
+										/>
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Export et sauvegarde</strong> de vos données
+											<strong className="text-foreground">
+												Export et sauvegarde
+											</strong>{" "}
+											de vos données
 										</span>
 									</li>
 									<li className="flex items-start gap-3">
-										<Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+										<Check
+											className="h-5 w-5 text-primary flex-shrink-0 mt-0.5"
+											aria-hidden="true"
+										/>
 										<span className="text-muted-foreground">
-											<strong className="text-foreground">Sans abonnement</strong>, sans frais cachés
+											<strong className="text-foreground">
+												Sans abonnement
+											</strong>
+											, sans frais cachés
 										</span>
 									</li>
 								</ul>
@@ -321,7 +423,8 @@ export default function LandingPage() {
 										Le paiement sera bientôt disponible
 									</p>
 									<p className="text-xs text-amber-700 dark:text-amber-300 text-center mt-1">
-										Aucun paiement n'est demandé pour le moment
+										Aucun paiement n'est demandé pour le
+										moment
 									</p>
 								</div>
 
@@ -329,12 +432,16 @@ export default function LandingPage() {
 									href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis&body=Bonjour,%0A%0AJe%20souhaite%20être%20informé(e)%20du%20lancement%20d'OstéoPraxis.%0A%0AMerci%20!"
 									className="flex items-center justify-center gap-2 w-full text-lg py-4 px-6 bg-primary text-primary-foreground rounded-lg font-medium transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 								>
-									<Bell className="h-5 w-5" aria-hidden="true" />
+									<Bell
+										className="h-5 w-5"
+										aria-hidden="true"
+									/>
 									Être informé du lancement
 								</a>
 
 								<p className="text-center text-xs text-muted-foreground mt-4">
-									Prix indicatif susceptible d'évoluer avant le lancement commercial.
+									Prix indicatif susceptible d'évoluer avant
+									le lancement commercial.
 								</p>
 							</div>
 						</div>
@@ -362,31 +469,49 @@ export default function LandingPage() {
 						<div className="grid md:grid-cols-3 gap-8">
 							<div className="flex flex-col items-center text-center p-6">
 								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Shield className="h-6 w-6 text-primary" aria-hidden="true" />
+									<Shield
+										className="h-6 w-6 text-primary"
+										aria-hidden="true"
+									/>
 								</div>
-								<h4 className="font-semibold mb-2">Sécurité maximale</h4>
+								<h4 className="font-semibold mb-2">
+									Sécurité maximale
+								</h4>
 								<p className="text-muted-foreground text-sm">
-									Données stockées localement sur votre ordinateur, conformité RGPD garantie
+									Données stockées localement sur votre
+									ordinateur, conformité RGPD garantie
 								</p>
 							</div>
 
 							<div className="flex flex-col items-center text-center p-6">
 								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Zap className="h-6 w-6 text-primary" aria-hidden="true" />
+									<Zap
+										className="h-6 w-6 text-primary"
+										aria-hidden="true"
+									/>
 								</div>
-								<h4 className="font-semibold mb-2">Ultra rapide</h4>
+								<h4 className="font-semibold mb-2">
+									Ultra rapide
+								</h4>
 								<p className="text-muted-foreground text-sm">
-									Interface simple et rapide, fonctionne sans connexion internet
+									Interface simple et rapide, fonctionne sans
+									connexion internet
 								</p>
 							</div>
 
 							<div className="flex flex-col items-center text-center p-6">
 								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Sparkles className="h-6 w-6 text-primary" aria-hidden="true" />
+									<Sparkles
+										className="h-6 w-6 text-primary"
+										aria-hidden="true"
+									/>
 								</div>
-								<h4 className="font-semibold mb-2">Sans surprise</h4>
+								<h4 className="font-semibold mb-2">
+									Sans surprise
+								</h4>
 								<p className="text-muted-foreground text-sm">
-									Licence à vie unique, aucun abonnement caché ou frais supplémentaires
+									Licence à vie unique, aucun abonnement caché
+									ou frais supplémentaires
 								</p>
 							</div>
 						</div>
@@ -401,7 +526,8 @@ export default function LandingPage() {
 						</h3>
 						<p className="text-muted-foreground mb-8 text-lg max-w-2xl mx-auto">
 							Essayez toutes les fonctionnalités pendant 3 heures,
-							sans inscription et sans engagement
+							jusqu’à 5 fois par mois, sans inscription ni
+							engagement.
 						</p>
 						<div className="flex flex-col sm:flex-row items-center justify-center gap-4">
 							<Button
@@ -418,7 +544,10 @@ export default function LandingPage() {
 								className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 							>
 								<a href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis&body=Bonjour,%0A%0AJe%20souhaite%20être%20informé(e)%20du%20lancement%20d'OstéoPraxis.%0A%0AMerci%20!">
-									<Bell className="mr-2 h-5 w-5" aria-hidden="true" />
+									<Bell
+										className="mr-2 h-5 w-5"
+										aria-hidden="true"
+									/>
 									Être informé du lancement
 								</a>
 							</Button>
@@ -435,31 +564,45 @@ export default function LandingPage() {
 					{/* Micro-copy de réassurance */}
 					<div className="flex flex-wrap justify-center gap-6 mb-10 pb-8 border-b border-border">
 						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Lock className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+							<Lock
+								className="h-4 w-4 text-emerald-600"
+								aria-hidden="true"
+							/>
 							<span>Données protégées (RGPD)</span>
 						</div>
 						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Shield className="h-4 w-4 text-blue-600" aria-hidden="true" />
+							<Shield
+								className="h-4 w-4 text-blue-600"
+								aria-hidden="true"
+							/>
 							<span>Aucun paiement requis</span>
 						</div>
 						<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<Construction className="h-4 w-4 text-amber-600" aria-hidden="true" />
+							<Construction
+								className="h-4 w-4 text-amber-600"
+								aria-hidden="true"
+							/>
 							<span>Projet en développement</span>
 						</div>
 					</div>
 
 					<div className="grid md:grid-cols-3 gap-8 mb-8">
 						<div>
-							<h4 className="font-semibold mb-4 text-foreground">OstéoPraxis</h4>
+							<h4 className="font-semibold mb-4 text-foreground">
+								OstéoPraxis
+							</h4>
 							<p className="text-sm text-muted-foreground">
-								Logiciel de gestion pour cabinets d'ostéopathie. Simple, sécurisé, conforme RGPD.
+								Logiciel de gestion pour cabinets d'ostéopathie.
+								Simple, sécurisé, conforme RGPD.
 							</p>
 							<p className="text-xs text-muted-foreground mt-2">
 								Projet en cours de création
 							</p>
 						</div>
 						<div>
-							<h4 className="font-semibold mb-4 text-foreground">Produit</h4>
+							<h4 className="font-semibold mb-4 text-foreground">
+								Produit
+							</h4>
 							<ul className="space-y-2 text-sm text-muted-foreground">
 								<li>
 									<button
@@ -474,14 +617,19 @@ export default function LandingPage() {
 										href="mailto:music.music1.music@gmail.com?subject=Liste%20d'attente%20OstéoPraxis"
 										className="hover:text-primary focus:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded transition-colors flex items-center gap-1"
 									>
-										<Mail className="h-3 w-3" aria-hidden="true" />
+										<Mail
+											className="h-3 w-3"
+											aria-hidden="true"
+										/>
 										Rejoindre la liste d'attente
 									</a>
 								</li>
 							</ul>
 						</div>
 						<div>
-							<h4 className="font-semibold mb-4 text-foreground">Légal</h4>
+							<h4 className="font-semibold mb-4 text-foreground">
+								Légal
+							</h4>
 							<ul className="space-y-2 text-sm text-muted-foreground">
 								<li>
 									<Link
@@ -511,7 +659,10 @@ export default function LandingPage() {
 						</div>
 					</div>
 					<div className="text-center text-sm text-muted-foreground pt-8 border-t border-border">
-						<p>&copy; 2026 OstéoPraxis · Projet en cours de création · Aucun paiement requis · France</p>
+						<p>
+							&copy; 2026 OstéoPraxis · Projet en cours de
+							création · Aucun paiement requis · France
+						</p>
 					</div>
 				</div>
 			</footer>

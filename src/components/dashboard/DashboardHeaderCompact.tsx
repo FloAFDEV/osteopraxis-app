@@ -16,7 +16,8 @@ export function DashboardHeaderCompact() {
 	// Récupérer le nom de l'ostéopathe en mode connecté
 	const { data: osteopath } = useQuery({
 		queryKey: ["osteopath", user?.osteopathId],
-		queryFn: () => user?.osteopathId ? api.getOsteopathById(user.osteopathId) : null,
+		queryFn: () =>
+			user?.osteopathId ? api.getOsteopathById(user.osteopathId) : null,
 		enabled: !isDemoMode && !!user?.osteopathId,
 	});
 
@@ -26,7 +27,7 @@ export function DashboardHeaderCompact() {
 	// Déterminer le nom à afficher
 	const getUserName = () => {
 		if (isDemoMode) {
-			return "Dr. Utilisateur Démo";
+			return "Utilisateur Démo";
 		}
 		if (osteopath?.name) {
 			return osteopath.name;
@@ -37,7 +38,7 @@ export function DashboardHeaderCompact() {
 		if (user?.firstName) {
 			return user.firstName;
 		}
-		return "Docteur";
+		return "Praticien";
 	};
 
 	function getGreeting() {
