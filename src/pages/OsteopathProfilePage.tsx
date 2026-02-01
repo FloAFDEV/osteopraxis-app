@@ -11,6 +11,8 @@ import {
 	ArrowRight,
 	Plus,
 	AlertTriangle,
+	Phone,
+	Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -436,19 +438,15 @@ const OsteopathProfilePage = () => {
 													<div className="flex justify-between items-center">
 														<div className="text-sm text-muted-foreground">
 															{cabinet.phone && (
-																<p>
-																	📞{" "}
-																	{
-																		cabinet.phone
-																	}
+																<p className="flex items-center gap-1">
+																	<Phone className="h-3 w-3" />
+																	{cabinet.phone}
 																</p>
 															)}
 															{cabinet.email && (
-																<p>
-																	✉️{" "}
-																	{
-																		cabinet.email
-																	}
+																<p className="flex items-center gap-1">
+																	<Mail className="h-3 w-3" />
+																	{cabinet.email}
 																</p>
 															)}
 														</div>

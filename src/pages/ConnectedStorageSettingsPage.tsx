@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/ui/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Settings, Download, Upload, Shield, AlertTriangle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Settings, Download, Upload, Shield, AlertTriangle, Trash2, Lock } from 'lucide-react';
 import { StorageStatusDisplay } from '@/components/storage/StorageStatusDisplay';
 import { HDSComplianceIndicator } from '@/components/hds/HDSComplianceIndicator';
 import { SecureStorageSetup } from '@/components/storage/SecureStorageSetup';
@@ -241,8 +241,8 @@ const ConnectedStorageSettingsPage: React.FC = () => {
                     <Shield className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">
-                      🔒 Activez le stockage HDS sécurisé
+                    <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                      <Lock className="h-5 w-5" /> Activez le stockage HDS sécurisé
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Pour garantir la conformité HDS et protéger vos données sensibles (patients, rendez-vous, factures), 
@@ -464,7 +464,7 @@ const ConnectedStorageSettingsPage: React.FC = () => {
           <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800 dark:text-red-200 space-y-2">
-              <p className="font-bold">⚠️ AVERTISSEMENT CRITIQUE</p>
+              <p className="font-bold flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> AVERTISSEMENT CRITIQUE</p>
               <p className="text-sm">Cette action va :</p>
               <ul className="text-sm list-disc list-inside space-y-1">
                 <li>Supprimer <strong>définitivement</strong> toutes vos données HDS locales</li>

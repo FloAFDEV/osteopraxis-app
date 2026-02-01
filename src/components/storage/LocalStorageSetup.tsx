@@ -13,6 +13,7 @@ import {
 	AlertTriangle,
 	CheckCircle,
 	Database,
+	Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -288,8 +289,8 @@ export const LocalStorageSetup: React.FC<LocalStorageSetupProps> = ({
 										? "Activé"
 										: "Désactivé"}
 									<br />
-									<span className="text-sm mt-2 block">
-										💡 Estimation : ~5-10KB par patient,
+									<span className="text-sm mt-2 flex items-center gap-1">
+										<Lightbulb className="h-3 w-3" /> Estimation : ~5-10KB par patient,
 										~50KB par export comptable
 									</span>
 								</>

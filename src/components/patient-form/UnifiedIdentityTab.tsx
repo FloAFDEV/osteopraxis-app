@@ -18,13 +18,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { UseFormReturn } from "react-hook-form";
 import { PatientFormValues } from "./types";
 import { useState, useEffect } from "react";
 import { Cabinet, Patient } from "@/types";
 import { useCabinets } from "@/hooks/useCabinets";
 import { Separator } from "@/components/ui/separator";
-import { User, MapPin, Hospital, Users, Briefcase } from "lucide-react";
+import { User, MapPin, Hospital, Users, Briefcase, ChevronDown, CheckCircle2 } from "lucide-react";
 import { PatientPhotoUpload } from "@/components/patients/PatientPhotoUpload";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
@@ -46,6 +51,7 @@ export const UnifiedIdentityTab = ({
 }: UnifiedIdentityTabProps) => {
 	const { data: availableCabinets = [], isLoading: cabinetsLoading } =
 		useCabinets();
+	const [showOptionalFields, setShowOptionalFields] = useState(!!patient);
 
 	useEffect(() => {
 		// UX intelligente pour cabinet unique
@@ -61,30 +67,25 @@ export const UnifiedIdentityTab = ({
 	return (
 		<Card>
 			<CardContent className="space-y-6 mt-6">
-				{/* Section 1: Informations personnelles */}
+				{/* Message de rassurance - Création rapide */}
+				{!patient && (
+					<Alert className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800">
+						<CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+						<AlertDescription className="text-sm text-emerald-800 dark:text-emerald-200">
+							<strong>Création rapide</strong> — Seuls le nom et le prénom sont requis.
+							Vous pourrez compléter la fiche plus tard.
+						</AlertDescription>
+					</Alert>
+				)}
+
+				{/* Section 1: Champs obligatoires (Nom + Prénom) */}
 				<div className="space-y-4">
 					<div className="flex items-center gap-2">
 						<User className="h-5 w-5 text-primary" />
 						<CardTitle className="text-lg">
-							Informations personnelles
+							Informations essentielles
 						</CardTitle>
 					</div>
-
-					{/* Photo patient */}
-					{patient && patient.id ? (
-						<PatientPhotoUpload
-							patientId={patient.id}
-							patientName={`${patient.firstName} ${patient.lastName}`}
-						/>
-					) : (
-						<Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-							<Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-							<AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
-								<strong>Photo de profil</strong> - Vous pourrez
-								ajouter une photo après la création du patient.
-							</AlertDescription>
-						</Alert>
-					)}
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<FormField
@@ -130,52 +131,84 @@ export const UnifiedIdentityTab = ({
 							)}
 						/>
 					</div>
-
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<FormField
-							control={form.control}
-							name="gender"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Genre</FormLabel>
-									<FormControl>
-										<TranslatedSelect
-											value={field.value}
-											onValueChange={field.onChange}
-											enumType="Gender"
-											placeholder="Sélectionner le genre"
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="birthDate"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Date de naissance</FormLabel>
-									<FormControl>
-										<Input
-											type="date"
-											value={field.value || ""}
-											onChange={(e) =>
-												field.onChange(
-													e.target.value || null,
-												)
-											}
-											placeholder="JJ/MM/AAAA"
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</div>
 				</div>
 
-				<Separator />
+				{/* Section optionnelle - Collapsible */}
+				<Collapsible open={showOptionalFields} onOpenChange={setShowOptionalFields}>
+					<CollapsibleTrigger asChild>
+						<button
+							type="button"
+							className="flex items-center justify-between w-full p-4 rounded-lg border border-dashed hover:border-primary/50 hover:bg-muted/30 transition-colors"
+						>
+							<span className="text-sm font-medium text-muted-foreground">
+								{showOptionalFields ? "Masquer les informations complémentaires" : "Ajouter des informations complémentaires (optionnel)"}
+							</span>
+							<ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showOptionalFields ? "rotate-180" : ""}`} />
+						</button>
+					</CollapsibleTrigger>
+
+					<CollapsibleContent className="space-y-6 mt-4">
+						{/* Photo patient */}
+						{patient && patient.id ? (
+							<PatientPhotoUpload
+								patientId={patient.id}
+								patientName={`${patient.firstName} ${patient.lastName}`}
+							/>
+						) : (
+							<Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+								<Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+								<AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+									<strong>Photo de profil</strong> — Vous pourrez
+									ajouter une photo après la création du patient.
+								</AlertDescription>
+							</Alert>
+						)}
+
+						{/* Genre et date de naissance */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="gender"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Genre</FormLabel>
+										<FormControl>
+											<TranslatedSelect
+												value={field.value}
+												onValueChange={field.onChange}
+												enumType="Gender"
+												placeholder="Sélectionner le genre"
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="birthDate"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Date de naissance</FormLabel>
+										<FormControl>
+											<Input
+												type="date"
+												value={field.value || ""}
+												onChange={(e) =>
+													field.onChange(
+														e.target.value || null,
+													)
+												}
+												placeholder="JJ/MM/AAAA"
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						<Separator />
 
 				{/* Section 2: Adresse et contact */}
 				<div className="space-y-4">
@@ -539,6 +572,8 @@ export const UnifiedIdentityTab = ({
 						/>
 					</div>
 				</div>
+					</CollapsibleContent>
+				</Collapsible>
 			</CardContent>
 		</Card>
 	);

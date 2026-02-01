@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { seedDemoData } from '@/services/demo-seed-data';
 import { DemoStorage } from '@/services/demo-storage';
@@ -23,12 +23,16 @@ interface DemoSessionData {
   cabinetName: string;
 }
 
+// Seuil d'avertissement avant expiration (10 minutes)
+const WARNING_THRESHOLD_MS = 10 * 60 * 1000;
+
 export function useDemoSession() {
   const [isDemoActive, setIsDemoActive] = useState(false);
   const [remainingMs, setRemainingMs] = useState(0);
   const [demoUserId, setDemoUserId] = useState<string | null>(null);
   const [demoCabinetId, setDemoCabinetId] = useState<string | null>(null);
   const [demoCabinetName, setDemoCabinetName] = useState<string | null>(null);
+  const warningShownRef = useRef(false);
 
   // Mode développeur automatique (localhost ou dev environment)
   const isDevMode = useCallback((): boolean => {
@@ -200,11 +204,20 @@ export function useDemoSession() {
 
       if (remaining <= 0) {
         toast.info("Votre session démo a expiré", {
-          description: "Merci d'avoir testé OsteoPraxis ! Vous pouvez relancer une nouvelle démo si vous avez encore des essais disponibles.",
+          description: "Merci d'avoir testé OsteoPraxis ! Les données de démonstration ont été effacées. Vous pouvez relancer une nouvelle démo si vous avez encore des essais disponibles.",
           duration: 8000
         });
         endDemo();
       } else {
+        // Avertissement 10 minutes avant expiration
+        if (remaining <= WARNING_THRESHOLD_MS && !warningShownRef.current) {
+          warningShownRef.current = true;
+          const minutesLeft = Math.ceil(remaining / 60000);
+          toast.warning(`Votre session démo expire dans ${minutesLeft} minutes`, {
+            description: "Les données de démonstration seront effacées à la fin de la session.",
+            duration: 10000
+          });
+        }
         setRemainingMs(remaining);
       }
     }, 1000);

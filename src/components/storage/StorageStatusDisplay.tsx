@@ -14,10 +14,13 @@ import {
 	HardDrive,
 	Cloud,
 	Lock,
+	LockOpen,
 	CheckCircle,
 	AlertCircle,
 	Info,
 	User,
+	XCircle,
+	AlertTriangle,
 } from "lucide-react";
 import { useHybridStorage } from "@/hooks/useHybridStorage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,8 +66,8 @@ export const StorageStatusDisplay: React.FC = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
-							<p className="text-sm text-amber-800 dark:text-amber-200">
-								⚠️ Vous êtes en mode démonstration. Aucune
+							<p className="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-1">
+								<AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" /> Vous êtes en mode démonstration. Aucune
 								donnée ne sera enregistrée en stockage local.
 							</p>
 							<p className="text-sm text-amber-700 dark:text-amber-300">
@@ -107,10 +110,10 @@ export const StorageStatusDisplay: React.FC = () => {
 										: "Inactif"}
 								</Badge>
 							</div>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-sm text-muted-foreground flex items-center gap-1">
 								{status?.physicalStorageAvailable
-									? "✅ Données sensibles stockées localement"
-									: "❌ Stockage local indisponible"}
+									? <><CheckCircle className="h-3 w-3 text-green-500" /> Données sensibles stockées localement (conforme HDS)</>
+									: <><XCircle className="h-3 w-3 text-red-500" /> Stockage local indisponible - Conformité HDS compromise</>}
 							</p>
 						</div>
 
@@ -132,10 +135,10 @@ export const StorageStatusDisplay: React.FC = () => {
 										: "Verrouillé"}
 								</Badge>
 							</div>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-sm text-muted-foreground flex items-center gap-1">
 								{status?.isUnlocked
-									? "🔓 Accès sécurisé autorisé (AES-256)"
-									: "🔒 Authentification requise"}
+									? <><LockOpen className="h-3 w-3" /> Accès sécurisé autorisé (AES-256)</>
+									: <><Lock className="h-3 w-3" /> Authentification requise</>}
 							</p>
 						</div>
 					</div>
@@ -153,8 +156,8 @@ export const StorageStatusDisplay: React.FC = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
-							<p className="text-sm text-destructive">
-								⚠️ Le stockage local est requis pour la
+							<p className="text-sm text-destructive flex items-start gap-1">
+								<AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" /> Le stockage local est requis pour la
 								conformité à la réglementation française sur les
 								données de santé (HDS).
 							</p>

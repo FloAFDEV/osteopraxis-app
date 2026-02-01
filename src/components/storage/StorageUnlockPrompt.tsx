@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Shield, AlertTriangle } from "lucide-react";
+import { Lock, Shield, AlertTriangle, Lightbulb, FileText } from "lucide-react";
 import { hdsSecureManager } from "@/services/hds-secure-storage/hds-secure-manager";
 import { toast } from "sonner";
 
@@ -188,8 +188,8 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
 								>
 									Mot de passe oublié ?
 								</Button>
-								<p className="text-sm text-center text-muted-foreground">
-									💡 Récupérez vos données via une sauvegarde
+								<p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-1">
+									<Lightbulb className="h-3 w-3" /> Récupérez vos données via une sauvegarde
 									.phds
 								</p>
 							</div>
@@ -209,11 +209,11 @@ export const StorageUnlockPrompt: React.FC<StorageUnlockPromptProps> = ({
 
 					{/* Information de sécurité */}
 					<div className="text-sm text-center text-muted-foreground space-y-1">
-						<p>
-							🔒 Vos données sont chiffrées localement avec
+						<p className="flex items-center justify-center gap-1">
+							<Lock className="h-3 w-3" /> Vos données sont chiffrées localement avec
 							AES-256-GCM
 						</p>
-						<p>📋 Données stockées localement, jamais transmises</p>
+						<p className="flex items-center justify-center gap-1"><FileText className="h-3 w-3" /> Conforme aux exigences HDS françaises</p>
 					</div>
 				</CardContent>
 			</Card>

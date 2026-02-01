@@ -15,6 +15,7 @@ import {
 	HelpCircle,
 	ChevronRight,
 	Shield,
+	Lightbulb,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UsageMetricsSection } from "@/components/plans/UsageMetricsSection";
@@ -146,8 +147,9 @@ const SettingsPage = () => {
 					{!isDemoMode && (
 						<Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">
 							<CardHeader>
-								<CardTitle className="text-amber-800 dark:text-amber-200">
-									💡 Conseil
+								<CardTitle className="text-amber-800 dark:text-amber-200 flex items-center gap-2">
+									<Lightbulb className="h-5 w-5" />
+									Conseil
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="text-amber-700 dark:text-amber-300">

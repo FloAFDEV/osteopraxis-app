@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useOptimization } from "@/contexts/OptimizationContext";
-import { Activity, Clock, Database, Zap } from "lucide-react";
+import { Activity, Clock, Database, Zap, Lightbulb, Rocket } from "lucide-react";
 
 /**
  * Composant pour monitorer les performances de l'application
@@ -125,8 +125,8 @@ export const PerformanceMonitor = ({
 
 				{/* Tips */}
 				<div className="text-muted-foreground text-sm pt-2 border-t">
-					<p>💡 Ctrl+Shift+P pour toggle</p>
-					<p>🚀 Cache optimisé pour les performances</p>
+					<p className="flex items-center gap-1"><Lightbulb className="h-3 w-3" /> Ctrl+Shift+P pour toggle</p>
+					<p className="flex items-center gap-1"><Rocket className="h-3 w-3" /> Cache optimisé pour les performances</p>
 				</div>
 			</CardContent>
 		</Card>

@@ -76,7 +76,7 @@ const getPaymentStatusLabel = (status?: string) => {
 				<>
 					{/* Bandeau rouge en haut */}
 					<div className="absolute top-0 left-0 right-0 bg-red-600 text-white text-center py-3 font-bold text-lg z-50 print:block">
-						⚠️ DOCUMENT DE DÉMONSTRATION - NON VALABLE ⚠️
+						DOCUMENT DE DÉMONSTRATION - NON VALABLE
 					</div>
 					
 					{/* Filigrane central */}

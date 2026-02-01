@@ -314,8 +314,8 @@ export const ProfileSecuritySettings: React.FC = () => {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="bg-muted/50 p-4 rounded-lg space-y-2">
-						<p className="text-sm font-medium">
-							🔒 Stockage local sécurisé actif
+						<p className="text-sm font-medium flex items-center gap-2">
+							<Lock className="h-4 w-4" /> Stockage local sécurisé actif
 						</p>
 						<p className="text-sm text-muted-foreground">
 							Vos données de santé sont stockées localement de
