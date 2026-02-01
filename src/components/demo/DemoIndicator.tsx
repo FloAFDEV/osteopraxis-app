@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDemoSession } from "@/hooks/useDemoSession";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DemoIndicatorProps {
 	className?: string;
@@ -13,10 +14,12 @@ export const DemoIndicator = ({
 	className = "",
 	showCTA = true,
 }: DemoIndicatorProps) => {
-	const { session } = useDemoSession();
+	const { isDemoActive, remainingFormatted } = useDemoSession();
+	const { isDemoMode } = useAuth();
 	const navigate = useNavigate();
 
-	if (!session?.isActive) {
+	// Ne rien afficher si pas en mode démo
+	if (!isDemoActive && !isDemoMode) {
 		return null;
 	}
 
@@ -42,12 +45,7 @@ export const DemoIndicator = ({
 							Session limitée à 3 heures • Données non sauvegardées
 						</p>
 						<p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
-							{session.limits.patients.current}/
-							{session.limits.patients.max} patients •{" "}
-							{session.limits.appointments.current}/
-							{session.limits.appointments.max} RDV •{" "}
-							{session.limits.invoices.current}/
-							{session.limits.invoices.max} facture
+							Temps restant : {remainingFormatted}
 						</p>
 					</div>
 				</div>
@@ -57,14 +55,11 @@ export const DemoIndicator = ({
 						<Button
 							size="sm"
 							className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white border-0 whitespace-nowrap"
-							onClick={() => navigate("/pricing")}
+							onClick={() => navigate("/register")}
 						>
 							<Crown className="h-4 w-4 mr-2" />
-							Passer Pro
+							Créer mon compte
 						</Button>
-						<p className="text-sm text-purple-600 dark:text-purple-300 text-center">
-							49€/mois • Sans engagement
-						</p>
 					</div>
 				)}
 			</div>

@@ -2,70 +2,37 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Database, Trash2, Info } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDemoSession } from "@/hooks/useDemoSession";
 
 interface DemoBannerProps {
 	onClearDemo?: () => void;
 }
 
 export function DemoBanner({ onClearDemo }: DemoBannerProps) {
-	const [remainingTime, setRemainingTime] = useState<string>("");
 	const { logout } = useAuth();
-
-	useEffect(() => {
-		const updateRemainingTime = async () => {
-			try {
-				const { demoLocalStorage } =
-					await import("@/services/demo-local-storage");
-				const stats = demoLocalStorage.getSessionStats();
-
-				if (stats.timeRemaining > 0) {
-					const minutes = Math.floor(
-						stats.timeRemaining / (1000 * 60),
-					);
-					const seconds = Math.floor(
-						(stats.timeRemaining % (1000 * 60)) / 1000,
-					);
-					setRemainingTime(
-						`${minutes}:${seconds.toString().padStart(2, "0")}`,
-					);
-				} else {
-					setRemainingTime("Expiré");
-				}
-			} catch (error) {
-				setRemainingTime("--:--");
-			}
-		};
-
-		updateRemainingTime();
-		const interval = setInterval(updateRemainingTime, 1000);
-
-		return () => clearInterval(interval);
-	}, []);
+	const { remainingFormatted, endDemo } = useDemoSession();
 
 	const handleClearDemo = async () => {
 		try {
-			console.log("🗑️ Quitter le mode démo - Début du processus");
+			console.log("Quitter le mode démo - Début du processus");
 
-			// 1️⃣ Nettoyer la session démo locale
-			const { demoLocalStorage } =
-				await import("@/services/demo-local-storage");
-			demoLocalStorage.clearSession();
-			console.log("✅ Session démo locale nettoyée");
+			// 1. Nettoyer la session démo
+			endDemo();
+			console.log("Session démo nettoyée");
 
-			// 2️⃣ Appeler le callback si fourni (pour nettoyer les queries)
+			// 2. Appeler le callback si fourni (pour nettoyer les queries)
 			if (onClearDemo) {
 				onClearDemo();
-				console.log("✅ Callback onClearDemo exécuté");
+				console.log("Callback onClearDemo exécuté");
 			}
 
-			// 3️⃣ Déconnexion complète via le contexte d'authentification
-			console.log("🔓 Déconnexion utilisateur...");
+			// 3. Déconnexion complète via le contexte d'authentification
+			console.log("Déconnexion utilisateur...");
 			await logout();
 		} catch (error) {
 			console.error(
-				"❌ Erreur lors du nettoyage de la session démo:",
+				"Erreur lors du nettoyage de la session démo:",
 				error,
 			);
 			// En cas d'erreur, forcer la déconnexion et redirection
@@ -73,7 +40,7 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
 				await logout();
 			} catch (logoutError) {
 				console.error(
-					"❌ Erreur lors de la déconnexion forcée:",
+					"Erreur lors de la déconnexion forcée:",
 					logoutError,
 				);
 				// En dernier recours, redirection manuelle
@@ -100,7 +67,7 @@ export function DemoBanner({ onClearDemo }: DemoBannerProps) {
 					</span>
 					<div className="flex items-center gap-1 text-sm text-teal-700 dark:text-teal-300">
 						<Clock className="h-3 w-3" />
-						<span className="font-mono">{remainingTime}</span>
+						<span className="font-mono">{remainingFormatted}</span>
 					</div>
 				</div>
 				<Button

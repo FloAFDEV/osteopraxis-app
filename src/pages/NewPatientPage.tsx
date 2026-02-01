@@ -6,7 +6,7 @@ import { useHybridStorageContext } from "@/contexts/HybridStorageContext";
 import { Patient, Cabinet } from "@/types";
 import { useCabinetById } from "@/hooks/useCabinets";
 import { api } from "@/services/api";
-import { ArrowLeft, Loader2, UserPlus, Building } from "lucide-react";
+import { ArrowLeft, Loader2, UserPlus, Building, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";

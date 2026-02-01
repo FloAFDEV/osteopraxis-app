@@ -95,6 +95,7 @@ const PatientDetailPage = () => {
 
 	const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 	const [isExporting, setIsExporting] = useState(false);
+	const [activeTab, setActiveTab] = useState("medical-info");
 	const historyTabRef = useRef<HTMLElement | null>(null);
 
 	// Sticky swap for cards (must also be before return)
@@ -376,7 +377,7 @@ const PatientDetailPage = () => {
 				<section className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
 					{/* Left column - Tabs (principal content) - plus large */}
 					<div className="xl:col-span-3 order-2 xl:order-2">
-						<Tabs defaultValue="medical-info">
+						<Tabs value={activeTab} onValueChange={setActiveTab}>
 							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-9">
 								<TabsTrigger
 									value="medical-info"
