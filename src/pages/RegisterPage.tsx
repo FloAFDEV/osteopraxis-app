@@ -368,7 +368,7 @@ const RegisterPage = () => {
           <p>
             Logiciel professionnel pour cabinets d'ostéopathie.
             <br />
-            Données 100% locales - Conformité HDS/RGPD garantie.
+            Données 100% locales - Conforme RGPD.
           </p>
           <p className="mt-4">© 2026 OstéoPraxis. Tous droits réservés.</p>
         </div>

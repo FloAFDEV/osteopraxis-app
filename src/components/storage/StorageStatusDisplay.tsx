@@ -87,7 +87,7 @@ export const StorageStatusDisplay: React.FC = () => {
 						État du stockage hybride
 					</CardTitle>
 					<CardDescription>
-						Statut de votre stockage local sécurisé conforme HDS
+						Statut de votre stockage local sécurisé
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">

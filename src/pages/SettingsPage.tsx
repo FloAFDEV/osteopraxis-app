@@ -69,9 +69,9 @@ const SettingsPage = () => {
 			},
 			{
 				id: "storage",
-				title: "Stockage HDS Sécurisé",
+				title: "Stockage et sauvegarde",
 				description:
-					"Gérez votre stockage local chiffré et sauvegardes",
+					"Gérez votre stockage local chiffré et exportez vos données",
 				icon: Shield,
 				path: "/settings/storage",
 				color: "text-primary",

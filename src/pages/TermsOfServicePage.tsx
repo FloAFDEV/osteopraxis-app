@@ -69,20 +69,17 @@ const TermsOfServicePage = () => {
 									</h2>
 									<p>
 										AFDEV s'engage à assurer la protection
-										des données personnelles et médicales
-										conformément au Règlement Général sur la
-										Protection des Données (RGPD), à la loi
-										Informatique et Libertés, au Code de la santé 
-										publique français et aux exigences HDS 
-										(Hébergement de Données de Santé). Pour plus de
-										détails, veuillez consulter notre
-										Politique de Confidentialité.
+										des données personnelles conformément au
+										Règlement Général sur la Protection des
+										Données (RGPD) et à la loi Informatique
+										et Libertés. Pour plus de détails, veuillez
+										consulter notre Politique de Confidentialité.
 									</p>
 									<p className="mt-2">
-										Les données de santé sont protégées par un 
-										stockage local chiffré AES-256, garantissant 
-										leur sécurité conformément à l'article L.1111-8 
-										du Code de la santé publique.
+										Les données sont stockées exclusivement en
+										local sur l'appareil du praticien, protégées
+										par un chiffrement AES-256. Aucune donnée
+										n'est hébergée sur un serveur externe.
 									</p>
 									<p className="mt-2 text-sm">
 										Numéro de déclaration CNIL : [À compléter lors de la mise en production]

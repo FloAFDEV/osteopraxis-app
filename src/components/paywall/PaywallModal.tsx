@@ -140,7 +140,7 @@ export function PaywallModal({
 							<div className="flex justify-between text-sm">
 								<span className="text-gray-500">Durée</span>
 								<span className="font-medium">
-									1h → Illimitée
+									3h → Illimitée
 								</span>
 							</div>
 							<div className="flex justify-between text-sm">

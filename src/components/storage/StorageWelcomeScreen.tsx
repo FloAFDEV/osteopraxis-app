@@ -81,15 +81,11 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
 								<Lock className="h-4 w-4" /> Protection maximale de vos données médicales
 							</p>
 							<p className="text-sm">
-								OstéoPraxis respecte la réglementation{" "}
-								<strong>
-									HDS (Hébergeur de Données de Santé)
-								</strong>
-								. Vos données sensibles sont stockées{" "}
+								Vos données sensibles sont stockées{" "}
 								<strong>localement sur votre appareil</strong>{" "}
-								avec un <strong>chiffrement AES-256-GCM</strong>
-								, garantissant qu'aucune information médicale
-								n'est transmise vers le cloud.
+								avec un <strong>chiffrement AES-256-GCM</strong>.
+								Aucune donnée médicale n'est transmise vers
+								un serveur externe.
 							</p>
 						</AlertDescription>
 					</Alert>
@@ -168,8 +164,8 @@ export const StorageWelcomeScreen: React.FC<StorageWelcomeScreenProps> = ({
 								<div className="flex items-start gap-2">
 									<AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 shrink-0" />
 									<span>
-										<strong>Non conforme HDS</strong> pour
-										données médicales
+										<strong>Données temporaires</strong>,
+										non persistantes
 									</span>
 								</div>
 								<div className="flex items-start gap-2">

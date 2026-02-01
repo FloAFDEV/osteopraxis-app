@@ -863,10 +863,10 @@ const DaySchedule = ({
 						)}
 					>
 						{/* Time slot display */}
-						<div className="w-20 p-3 border-r bg-muted/20 flex items-center justify-center shrink-0">
+						<div className="w-14 p-2 border-r bg-muted/20 flex items-center justify-center shrink-0">
 							<span
 								className={cn(
-									"text-sm font-medium",
+									"text-xs font-medium",
 									isCurrentTime
 										? "text-primary"
 										: "text-muted-foreground",
@@ -877,79 +877,74 @@ const DaySchedule = ({
 						</div>
 
 						{/* Appointment details or Google event or link */}
-						<div className="flex-1 p-3 min-w-0">
+						<div className="flex-1 p-2 min-w-0">
 							{googleEvent ? (
-								<div className="flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 border-l-purple-500 bg-purple-100 dark:bg-purple-900/20 p-4 lg:p-5 xl:p-6 rounded">
+								<div className="flex flex-col sm:flex-row items-start justify-between gap-2 border-l-2 border-l-purple-500 bg-purple-50 dark:bg-purple-900/20 p-2 rounded-r">
 									<div className="flex-grow min-w-0">
-										<div className="flex items-center gap-2 mb-1">
-											<Badge className="bg-purple-800 text-white text-sm lg:text-base">
+										<div className="flex items-center gap-1.5 mb-0.5">
+											<Badge className="bg-purple-700 text-white text-xs px-1.5 py-0">
 												Google
 											</Badge>
 											{googleEvent.is_doctolib && (
-												<Badge className="bg-teal-600 text-white text-sm lg:text-base">
+												<Badge className="bg-teal-600 text-white text-xs px-1.5 py-0">
 													Doctolib
 												</Badge>
 											)}
-											<h3 className="font-semibold text-lg lg:text-xl xl:text-2xl text-purple-900 dark:text-purple-100 truncate">
+											<span className="font-medium text-sm text-purple-900 dark:text-purple-100 truncate">
 												{googleEvent.summary}
-											</h3>
+											</span>
 										</div>
 										{googleEvent.location && (
-											<p className="text-base lg:text-lg xl:text-xl text-purple-700 dark:text-purple-300 ml-2 truncate font-medium flex items-center gap-1">
-												<MapPin className="h-4 w-4 flex-shrink-0" /> {googleEvent.location}
+											<p className="text-xs text-purple-700 dark:text-purple-300 truncate flex items-center gap-1">
+												<MapPin className="h-3 w-3 flex-shrink-0" /> {googleEvent.location}
 											</p>
 										)}
 										{googleEvent.matched_patient_name && (
-											<div className="flex items-center gap-1 mt-1 ml-2">
-												<Users className="h-4 w-4 lg:h-5 lg:w-5 text-teal-600 dark:text-teal-400" />
-												<span className="text-sm lg:text-base text-teal-700 dark:text-teal-300 font-medium">
-													{
-														googleEvent.matched_patient_name
-													}
+											<div className="flex items-center gap-1 mt-0.5">
+												<Users className="h-3 w-3 text-teal-600 dark:text-teal-400" />
+												<span className="text-xs text-teal-700 dark:text-teal-300">
+													{googleEvent.matched_patient_name}
 												</span>
 												{googleEvent.matched_patient_id && (
 													<Link
 														to={`/patients/${googleEvent.matched_patient_id}`}
-														className="text-sm lg:text-base text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-1 ml-2"
+														className="text-xs text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-0.5 ml-1"
 													>
-														<ExternalLink className="h-4 w-4" />
-														Voir la fiche
+														<ExternalLink className="h-3 w-3" />
+														Fiche
 													</Link>
 												)}
 											</div>
 										)}
-										<p className="text-sm lg:text-sm text-purple-600 dark:text-purple-400 mt-1">
-											Événement externe (lecture seule)
-										</p>
 									</div>
 								</div>
 							) : appointment ? (
 								<div
 									className={cn(
-										"flex flex-col lg:flex-row items-start justify-between gap-2 border-l-4 p-4 lg:p-5 xl:p-6 rounded",
+										"flex flex-col sm:flex-row items-start justify-between gap-2 border-l-2 p-2 rounded-r",
 										isCompleted
-											? "border-l-green-500 bg-green-100 dark:bg-green-900/20"
-											: "border-l-blue-500 bg-blue-100 dark:bg-blue-900/20",
+											? "border-l-emerald-500 bg-emerald-50 dark:bg-emerald-900/20"
+											: "border-l-slate-400 bg-slate-50 dark:bg-slate-800/50",
 									)}
 								>
 									{/* Appointment Info */}
 									<div className="flex-grow min-w-0">
-										<div className="flex items-center gap-2 mb-1">
+										<div className="flex items-center gap-1.5 mb-0.5">
 											<User
 												className={cn(
-													"h-5 w-5 lg:h-6 lg:w-6 shrink-0",
+													"h-4 w-4 shrink-0",
 													isCompleted
-														? "text-green-700 dark:text-green-400"
-														: "text-blue-700 dark:text-blue-400",
+														? "text-emerald-600 dark:text-emerald-400"
+														: "text-slate-600 dark:text-slate-400",
 												)}
 											/>
 											<Link
 												to={`/patients/${appointment.patientId}`}
 												className={cn(
-													"font-semibold text-lg lg:text-xl xl:text-2xl hover:underline truncate",
+													"font-medium text-sm hover:underline truncate",
 													isCompleted
-														? "text-green-900 dark:text-green-100"
-														: "text-blue-900 dark:text-blue-100",
+														? "text-emerald-800 dark:text-emerald-200"
+														: "text-slate-800 dark:text-slate-200",
 												)}
 											>
 												{getPatientById(
@@ -961,57 +956,55 @@ const DaySchedule = ({
 													`Patient #${appointment.patientId}`}
 											</Link>
 											{isCompleted && (
-												<Badge className="bg-green-700 text-white dark:bg-green-600 text-sm lg:text-base">
-													Terminé
+												<Badge className="bg-emerald-600 text-white text-xs px-1.5 py-0">
+													OK
 												</Badge>
 											)}
 										</div>
 										<p
 											className={cn(
-												"text-base lg:text-lg xl:text-xl ml-6 truncate font-medium",
+												"text-xs ml-5 truncate",
 												isCompleted
-													? "text-green-700 dark:text-green-300"
-													: "text-blue-700 dark:text-blue-300",
+													? "text-emerald-600 dark:text-emerald-400"
+													: "text-slate-600 dark:text-slate-400",
 											)}
 										>
 											{appointment.reason}
 										</p>
 									</div>
-									{/* Action Buttons - Made responsive */}
-									<div className="flex flex-wrap gap-2 justify-end w-full lg:w-auto shrink-0">
-										{/* Link Buttons */}
+									{/* Action Buttons - Compact */}
+									<div className="flex flex-wrap gap-1 justify-end shrink-0">
 										<Button
 											variant="outline"
 											size="sm"
 											asChild
-											className="flex-grow lg:flex-grow-0"
+											className="h-7 text-xs px-2"
 										>
 											<Link
 												to={`/invoices/new?appointmentId=${appointment.id}`}
-												aria-label="Créer une Note d'honoraire pour ce Séance"
+												aria-label="Créer une Note d'honoraire"
 											>
-												<FileText className="h-4 w-4 mr-1" />{" "}
-												Note d'honoraire
+												<FileText className="h-3 w-3 mr-1" />
+												Facture
 											</Link>
 										</Button>
 										<Button
 											variant="outline"
 											size="sm"
 											asChild
-											className="flex-grow lg:flex-grow-0"
+											className="h-7 text-xs px-2"
 										>
 											<Link
 												to={`/appointments/${appointment.id}/edit`}
-												aria-label="Voir les détails de la séance"
+												aria-label="Voir les détails"
 											>
 												Détails
 											</Link>
 										</Button>
-										{/* Destructive Buttons */}
 										<Button
 											variant="ghost"
 											size="sm"
-											className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
+											className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
 											onClick={() =>
 												onCancelAppointment(
 													appointment.id,
@@ -1021,22 +1014,14 @@ const DaySchedule = ({
 												isProcessingAction ||
 												isCompleted
 											}
-											aria-label="Annuler cette séance"
+											aria-label="Annuler"
 										>
 											{isProcessingAction &&
 											actionInProgress?.action ===
 												"cancel" ? (
-												<span className="flex items-center">
-													<span className="animate-spin mr-1">
-														⏳
-													</span>
-													Annulation...
-												</span>
+												<span className="animate-spin">⏳</span>
 											) : (
-												<>
-													<X className="h-4 w-4 mr-1" />{" "}
-													Annuler{" "}
-												</>
+												<X className="h-3 w-3" />
 											)}
 										</Button>
 										<AlertDialog>
@@ -1044,24 +1029,21 @@ const DaySchedule = ({
 												<Button
 													variant="ghost"
 													size="sm"
-													className="text-destructive hover:bg-destructive/10 flex-grow lg:flex-grow-0"
-													disabled={
-														isProcessingAction
-													}
+													className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
+													disabled={isProcessingAction}
 												>
-													<Trash2 className="h-4 w-4 mr-1" />{" "}
-													Supprimer
+													<Trash2 className="h-3 w-3" />
 												</Button>
 											</AlertDialogTrigger>
 											<AlertDialogContent>
 												<AlertDialogHeader>
 													<AlertDialogTitle>
-														Supprimer le Séance
+														Supprimer la séance
 													</AlertDialogTitle>
 													<AlertDialogDescription>
 														Êtes-vous sûr de vouloir
 														supprimer définitivement
-														ce Séance ?
+														cette séance ?
 													</AlertDialogDescription>
 												</AlertDialogHeader>
 												<AlertDialogFooter>
@@ -1079,7 +1061,7 @@ const DaySchedule = ({
 														{isProcessingAction &&
 														actionInProgress?.action ===
 															"delete" ? (
-															<span className="animate-spin mr-2">
+															<span className="animate-spin mr-1">
 																⏳
 															</span>
 														) : null}
@@ -1093,8 +1075,8 @@ const DaySchedule = ({
 							) : (
 								<Link
 									to={`/appointments/new?date=${format(date, "yyyy-MM-dd")}&time=${timeSlot}`}
-									className="flex h-full items-center justify-center text-sm text-muted-foreground hover:text-primary"
-									aria-label={`Créer un Séance le ${format(
+									className="flex h-full items-center text-xs text-muted-foreground/50 hover:text-primary transition-colors"
+									aria-label={`Créer une séance le ${format(
 										date,
 										"d MMMM yyyy",
 										{
@@ -1102,9 +1084,7 @@ const DaySchedule = ({
 										},
 									)} à ${timeSlot}`}
 								>
-									<span className="text-center">
-										Disponible
-									</span>
+									<span>—</span>
 								</Link>
 							)}
 						</div>

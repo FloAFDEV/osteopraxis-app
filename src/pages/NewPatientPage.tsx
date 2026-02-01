@@ -15,23 +15,33 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const NewPatientPage = () => {
 	const [loading, setLoading] = useState(false);
-	const [selectedCabinetId, setSelectedCabinetId] = useState<number | null>(null);
+	const [selectedCabinetId, setSelectedCabinetId] = useState<number | string | null>(null);
 	const navigate = useNavigate();
-	const { user, isAuthenticated } = useAuth();
+	const { user, isDemoMode, demoCabinetId } = useAuth();
 	const queryClient = useQueryClient();
 
-	// Récupérer le cabinet sélectionné depuis localStorage
+	// Récupérer le cabinet sélectionné depuis localStorage ou mode démo
 	useEffect(() => {
-		const storedCabinetId = localStorage.getItem("selectedCabinetId");
-		if (storedCabinetId) {
-			setSelectedCabinetId(Number(storedCabinetId));
+		if (isDemoMode && demoCabinetId) {
+			// En mode démo, utiliser le cabinet démo
+			setSelectedCabinetId(demoCabinetId);
+		} else {
+			const storedCabinetId = localStorage.getItem("selectedCabinetId");
+			if (storedCabinetId) {
+				setSelectedCabinetId(Number(storedCabinetId));
+			}
 		}
-	}, []);
+	}, [isDemoMode, demoCabinetId]);
 
-	// Utiliser le hook pour récupérer le cabinet
-	const { data: selectedCabinet } = useCabinetById(selectedCabinetId || 0);
+	// Utiliser le hook pour récupérer le cabinet (seulement en mode connecté)
+	const { data: selectedCabinet } = useCabinetById(
+		typeof selectedCabinetId === 'number' ? selectedCabinetId : 0
+	);
 
-	if (!isAuthenticated || !user) {
+	// Vérifier l'accès : mode démo OU utilisateur connecté
+	const hasAccess = isDemoMode || !!user;
+
+	if (!hasAccess) {
 		toast.error("Vous devez être connecté pour ajouter un patient");
 		navigate("/login");
 		return null;
@@ -82,11 +92,14 @@ const NewPatientPage = () => {
 
 			console.log("Préparation création patient - cabinetId:", patientData.cabinetId || selectedCabinetId);
 
-			// Utiliser l'ID de l'ostéopathe connecté et le cabinet sélectionné
+			// Récupérer l'ID de l'ostéopathe (mode connecté ou démo)
+			const osteopathId = user?.osteopathId || user?.id || selectedCabinetId || 'demo-osteopath';
+
+			// Utiliser l'ID de l'ostéopathe et le cabinet sélectionné
 			const patientToCreate = {
 				...patientData,
-				osteopathId: user.osteopathId || user.id, // Utilise osteopathId ou id selon ce qui est disponible
-				cabinetId: patientData.cabinetId || selectedCabinetId || 1, // Utiliser le cabinetId du formulaire ou celui sélectionné dans la navbar
+				osteopathId,
+				cabinetId: patientData.cabinetId || selectedCabinetId || 1, // Utiliser le cabinetId du formulaire ou celui sélectionné
 				userId: null, // Requis par le type mais peut être null
 				occupation: patientData.job || patientData.occupation || null, // Mapper job vers occupation
 				// Champs existants requis
@@ -162,7 +175,9 @@ const NewPatientPage = () => {
 
 			// Invalider les queries pour mettre à jour la liste des patients
 			queryClient.invalidateQueries({ queryKey: ['patients'] });
-			queryClient.invalidateQueries({ queryKey: ['patients', user.osteopathId] });
+			if (user?.osteopathId) {
+				queryClient.invalidateQueries({ queryKey: ['patients', user.osteopathId] });
+			}
 
 			console.log("🔄 Navigation vers la fiche patient:", `/patients/${newPatient.id}`);
 			// Navigation immédiate sans délai pour éviter les problèmes de synchronisation

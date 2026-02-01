@@ -313,7 +313,7 @@ export function PatientPhotoUpload({
 									<p className="text-sm text-muted-foreground mt-1">
 										Max 5MB •{" "}
 										{isDemoMode
-											? "Stockage temporaire (1h)"
+											? "Stockage temporaire (3h)"
 											: "Stockage local sécurisé"}
 									</p>
 								</div>

@@ -21,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   isDemoMode: boolean;
+  isAuthenticated: boolean; // True si user connecté OU en mode démo
   startDemo: () => void;
   endDemo: () => void;
   remainingDemoTime: number;
@@ -80,11 +81,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleStartDemo = () => {
     if (!canStartDemo()) {
-      const remaining = getRemainingAttempts();
       toast.error(
-        `Limite de 5 démos par mois atteinte. ${remaining} essai(s) restant(s). Réessayez dans 30 jours.`,
+        "Vous avez atteint la limite de 5 sessions démo ce mois-ci.",
         {
-          duration: 5000
+          description: "Les compteurs se réinitialisent tous les 30 jours. Créez un compte pour un accès illimité.",
+          duration: 6000
         }
       );
       return;
@@ -93,17 +94,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const success = startDemoSession();
 
     if (success) {
+      const remaining = getRemainingAttempts();
+      if (remaining <= 2 && remaining > 0) {
+        toast.info(`Session démo démarrée`, {
+          description: `Il vous reste ${remaining} essai(s) gratuit(s) ce mois-ci.`,
+          duration: 4000
+        });
+      }
       navigate('/dashboard', { replace: true });
     } else {
       toast.error('Impossible de démarrer la démo. Veuillez réessayer.');
     }
   };
 
+  // isAuthenticated est true si l'utilisateur est connecté OU en mode démo actif
+  const isAuthenticated = isDemoActive || !!user;
+
   const value: AuthContextType = {
     user,
     loading,
     signOut: handleSignOut,
     isDemoMode: isDemoActive,
+    isAuthenticated,
     startDemo: handleStartDemo,
     endDemo: endDemoSession,
     remainingDemoTime: remainingMs,

@@ -4,9 +4,10 @@ import { seedDemoData } from '@/services/demo-seed-data';
 import { DemoStorage } from '@/services/demo-storage';
 import { toast } from 'sonner';
 
+// Configuration de la session démo
 const DEMO_DURATION_MS = 3 * 60 * 60 * 1000; // 3 heures
-const DEMO_MAX_ATTEMPTS = 5;
-const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
+const DEMO_MAX_ATTEMPTS = 5; // 5 essais maximum par période
+const DEMO_RESET_PERIOD_MS = 30 * 24 * 60 * 60 * 1000; // Réinitialisation tous les 30 jours (≈ 1 mois)
 const STORAGE_KEY = 'demo_session';
 const ATTEMPTS_KEY = 'demo_attempts_count';
 const LAST_RESET_KEY = 'demo_attempts_last_reset';
@@ -203,7 +204,7 @@ export function useDemoSession() {
 
       if (remaining <= 0) {
         toast.info("Votre session démo a expiré", {
-          description: "Merci d'avoir testé OsteoPraxis ! Les données de démonstration ont été effacées.",
+          description: "Merci d'avoir testé OsteoPraxis ! Les données de démonstration ont été effacées. Vous pouvez relancer une nouvelle démo si vous avez encore des essais disponibles.",
           duration: 8000
         });
         endDemo();

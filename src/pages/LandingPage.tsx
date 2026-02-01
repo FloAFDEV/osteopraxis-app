@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { FeaturePreview, FeatureBadge } from "@/components/landing";
 import {
 	Calendar,
 	Check,
@@ -97,7 +98,7 @@ export default function LandingPage() {
 								variant="default"
 								className="transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 							>
-								Tester la démo
+								Essayer gratuitement
 							</Button>
 						</nav>
 					</div>
@@ -115,11 +116,11 @@ export default function LandingPage() {
 							</div>
 
 							<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-foreground motion-safe:animate-fade-in">
-								Un outil simple pour gérer votre cabinet
+								Gérez votre cabinet d'ostéopathie
 							</h2>
 
 							<p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto motion-safe:animate-fade-in">
-								Patients, rendez-vous, facturation — tout au même endroit, sans complications.
+								Outil simple pour gérer vos patients, rendez-vous et factures.
 								<span className="block mt-2 text-primary font-semibold">
 									Sans abonnement • Données locales • Conforme RGPD
 								</span>
@@ -131,7 +132,7 @@ export default function LandingPage() {
 									size="lg"
 									className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 								>
-									Tester la démo
+									Essayer gratuitement
 								</Button>
 								<Button
 									asChild
@@ -147,135 +148,105 @@ export default function LandingPage() {
 							</div>
 
 							<p className="text-sm text-muted-foreground mt-4">
-								3 heures d'accès • Données de démonstration effacées après la session • Aucune inscription requise
+								Accès immédiat • 3 heures de test • Aucune inscription
 							</p>
-						</div>
-					</div>
-				</section>
-
-				{/* PAIN POINTS SECTION */}
-				<section className="py-16 bg-muted/30">
-					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-4">
-							Votre réalité de cabinet
-						</h3>
-						<p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
-							Si vous vous reconnaissez dans ces situations, OsteoPraxis est fait pour vous.
-						</p>
-						<div className="grid md:grid-cols-3 gap-6">
-							<div className="p-5 rounded-lg bg-background border border-border">
-								<p className="text-muted-foreground text-sm">
-									<span className="font-medium text-foreground">Des fiches patients éparpillées</span> entre plusieurs outils ou fichiers
-								</p>
-							</div>
-							<div className="p-5 rounded-lg bg-background border border-border">
-								<p className="text-muted-foreground text-sm">
-									<span className="font-medium text-foreground">Du temps perdu</span> à retrouver l'historique d'un patient
-								</p>
-							</div>
-							<div className="p-5 rounded-lg bg-background border border-border">
-								<p className="text-muted-foreground text-sm">
-									<span className="font-medium text-foreground">Une facturation fastidieuse</span> qui s'accumule en fin de journée
-								</p>
-							</div>
-						</div>
-					</div>
-				</section>
-
-				{/* HOW IT WORKS SECTION */}
-				<section className="py-20">
-					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-12">
-							Comment fonctionne OsteoPraxis
-						</h3>
-						<div className="grid md:grid-cols-3 gap-8">
-							<div className="flex flex-col items-center text-center p-6 rounded-lg bg-background hover:shadow-lg transition-shadow motion-safe:hover:scale-105">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Users className="h-6 w-6 text-primary" aria-hidden="true" />
-								</div>
-								<h4 className="font-semibold mb-2 text-lg">Dossiers patients centralisés</h4>
-								<p className="text-muted-foreground text-sm">
-									Toutes les informations au même endroit : antécédents, consultations, documents
-								</p>
-							</div>
-
-							<div className="flex flex-col items-center text-center p-6 rounded-lg bg-background hover:shadow-lg transition-shadow motion-safe:hover:scale-105">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<Calendar className="h-6 w-6 text-primary" aria-hidden="true" />
-								</div>
-								<h4 className="font-semibold mb-2 text-lg">Planning visuel</h4>
-								<p className="text-muted-foreground text-sm">
-									Vue jour, semaine ou mois — organisez vos consultations comme vous le souhaitez
-								</p>
-							</div>
-
-							<div className="flex flex-col items-center text-center p-6 rounded-lg bg-background hover:shadow-lg transition-shadow motion-safe:hover:scale-105">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-									<FileText className="h-6 w-6 text-primary" aria-hidden="true" />
-								</div>
-								<h4 className="font-semibold mb-2 text-lg">Facturation intégrée</h4>
-								<p className="text-muted-foreground text-sm">
-									Générez une facture en un clic à la fin de chaque consultation
-								</p>
-							</div>
 						</div>
 					</div>
 				</section>
 
 				{/* FEATURES SECTION */}
 				<section className="py-20 bg-muted/30">
-					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-12">
+					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-4">
 							Ce que vous pouvez tester
 						</h3>
-						<div className="grid md:grid-cols-2 gap-6">
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Users className="h-5 w-5 text-primary" aria-hidden="true" />
+						<p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+							Découvrez les fonctionnalités essentielles pour gérer votre cabinet en toute simplicité
+						</p>
+
+						<div className="grid md:grid-cols-3 gap-8">
+							{/* Gestion des rendez-vous */}
+							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+								{/* Preview */}
+								<div className="p-4 bg-muted/30">
+									<FeaturePreview type="calendar" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
 								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Créer et consulter des fiches patients</h4>
-									<p className="text-muted-foreground text-sm">
-										Antécédents, motifs de consultation, notes de séance
+								{/* Content */}
+								<div className="p-5 flex-1 flex flex-col">
+									<div className="flex items-center gap-2 mb-3">
+										<FeatureBadge type="simple" />
+										<FeatureBadge type="rapide" />
+									</div>
+									<div className="flex items-center gap-3 mb-2">
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+											<Calendar className="h-5 w-5 text-primary" aria-hidden="true" />
+										</div>
+										<h4 className="font-semibold text-lg">Gestion des rendez-vous</h4>
+									</div>
+									<p className="text-muted-foreground text-sm flex-1">
+										Planifiez et organisez vos consultations avec un calendrier intuitif. Visualisez votre planning en un coup d'œil.
 									</p>
 								</div>
 							</div>
 
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Calendar className="h-5 w-5 text-primary" aria-hidden="true" />
+							{/* Dossiers patients */}
+							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+								{/* Preview */}
+								<div className="p-4 bg-muted/30">
+									<FeaturePreview type="patient" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
 								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Planifier des rendez-vous</h4>
-									<p className="text-muted-foreground text-sm">
-										Vue jour, semaine, mois
+								{/* Content */}
+								<div className="p-5 flex-1 flex flex-col">
+									<div className="flex items-center gap-2 mb-3">
+										<FeatureBadge type="securise" />
+										<FeatureBadge type="intuitif" />
+									</div>
+									<div className="flex items-center gap-3 mb-2">
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+											<Users className="h-5 w-5 text-primary" aria-hidden="true" />
+										</div>
+										<h4 className="font-semibold text-lg">Dossiers patients</h4>
+									</div>
+									<p className="text-muted-foreground text-sm flex-1">
+										Créez et gérez les fiches de vos patients avec leurs informations médicales complètes, en toute sécurité.
 									</p>
 								</div>
 							</div>
 
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+							{/* Facturation */}
+							<div className="flex flex-col rounded-xl bg-background border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+								{/* Preview */}
+								<div className="p-4 bg-muted/30">
+									<FeaturePreview type="invoice" className="w-full h-48 group-hover:scale-[1.02] transition-transform" />
 								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Générer des factures</h4>
-									<p className="text-muted-foreground text-sm">
-										Suivi des paiements inclus
+								{/* Content */}
+								<div className="p-5 flex-1 flex flex-col">
+									<div className="flex items-center gap-2 mb-3">
+										<FeatureBadge type="rapide" />
+										<FeatureBadge type="simple" />
+									</div>
+									<div className="flex items-center gap-3 mb-2">
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+											<FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+										</div>
+										<h4 className="font-semibold text-lg">Facturation</h4>
+									</div>
+									<p className="text-muted-foreground text-sm flex-1">
+										Générez vos factures en quelques clics et suivez vos paiements. Export PDF automatique.
 									</p>
 								</div>
 							</div>
+						</div>
 
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Shield className="h-5 w-5 text-primary" aria-hidden="true" />
-								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Exporter vos données</h4>
-									<p className="text-muted-foreground text-sm">
-										Sauvegarde sécurisée de votre cabinet
-									</p>
-								</div>
-							</div>
+						{/* CTA vers démo */}
+						<div className="text-center mt-12">
+							<Button
+								onClick={startDemo}
+								size="lg"
+								className="text-lg px-8 py-6 transition-all hover:scale-105"
+							>
+								Tester gratuitement pendant 60 minutes
+							</Button>
 						</div>
 					</div>
 				</section>
@@ -382,59 +353,41 @@ export default function LandingPage() {
 					</div>
 				</section>
 
-				{/* WHY DIFFERENT SECTION */}
+				{/* WHY US SECTION */}
 				<section className="py-20 bg-muted/30">
 					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
 						<h3 className="text-2xl sm:text-3xl font-bold text-center mb-12">
-							Pourquoi c'est différent
+							Pourquoi choisir OstéoPraxis
 						</h3>
-						<div className="grid md:grid-cols-2 gap-6">
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Lock className="h-5 w-5 text-primary" aria-hidden="true" />
+						<div className="grid md:grid-cols-3 gap-8">
+							<div className="flex flex-col items-center text-center p-6">
+								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+									<Shield className="h-6 w-6 text-primary" aria-hidden="true" />
 								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Pas de connexion obligatoire pour tester</h4>
-									<p className="text-muted-foreground text-sm">
-										Explorez l'application sans créer de compte. Vos données de test restent sur votre navigateur.
-									</p>
-								</div>
+								<h4 className="font-semibold mb-2">Sécurité maximale</h4>
+								<p className="text-muted-foreground text-sm">
+									Données stockées localement sur votre ordinateur, conformité RGPD garantie
+								</p>
 							</div>
 
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Shield className="h-5 w-5 text-primary" aria-hidden="true" />
+							<div className="flex flex-col items-center text-center p-6">
+								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+									<Zap className="h-6 w-6 text-primary" aria-hidden="true" />
 								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Données 100% locales</h4>
-									<p className="text-muted-foreground text-sm">
-										Vos données patients restent sur votre appareil. Conformité RGPD native.
-									</p>
-								</div>
+								<h4 className="font-semibold mb-2">Ultra rapide</h4>
+								<p className="text-muted-foreground text-sm">
+									Interface simple et rapide, fonctionne sans connexion internet
+								</p>
 							</div>
 
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+							<div className="flex flex-col items-center text-center p-6">
+								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+									<Sparkles className="h-6 w-6 text-primary" aria-hidden="true" />
 								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Licence à vie, pas d'abonnement</h4>
-									<p className="text-muted-foreground text-sm">
-										Un seul paiement, mises à jour incluses. Pas de frais récurrents.
-									</p>
-								</div>
-							</div>
-
-							<div className="flex items-start gap-4 p-5 rounded-lg bg-background border border-border">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-									<Zap className="h-5 w-5 text-primary" aria-hidden="true" />
-								</div>
-								<div>
-									<h4 className="font-semibold mb-1">Interface pensée pour le soin</h4>
-									<p className="text-muted-foreground text-sm">
-										Conçu pour les ostéopathes libéraux, pas les hôpitaux ou les grandes structures.
-									</p>
-								</div>
+								<h4 className="font-semibold mb-2">Sans surprise</h4>
+								<p className="text-muted-foreground text-sm">
+									Licence à vie unique, aucun abonnement caché ou frais supplémentaires
+								</p>
 							</div>
 						</div>
 					</div>
@@ -444,10 +397,11 @@ export default function LandingPage() {
 				<section className="py-20 sm:py-32">
 					<div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center">
 						<h3 className="text-3xl sm:text-4xl font-bold mb-6">
-							Prêt à simplifier votre quotidien ?
+							Prêt à découvrir ?
 						</h3>
 						<p className="text-muted-foreground mb-8 text-lg max-w-2xl mx-auto">
-							Testez l'application complète pendant 3 heures, sans inscription.
+							Essayez toutes les fonctionnalités pendant 3 heures,
+							sans inscription et sans engagement
 						</p>
 						<div className="flex flex-col sm:flex-row items-center justify-center gap-4">
 							<Button
@@ -455,7 +409,7 @@ export default function LandingPage() {
 								size="lg"
 								className="text-lg px-8 py-6 w-full sm:w-auto transition-all hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-primary focus:ring-offset-2"
 							>
-								Tester la démo
+								Essayer la démo gratuite
 							</Button>
 							<Button
 								asChild
